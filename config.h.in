@@ -1,0 +1,2 @@
+#define Blocks_VERSION_MAJOR @Blocks_VERSION_MAJOR@
+#define Blocks_VERSION_MINOR @Blocks_VERSION_MINOR@
