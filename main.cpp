@@ -1,26 +1,31 @@
 #include <iostream>
 
+//#define GLFW_INCLUDE_NONE
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include "GLFW/glfw3.h"
+
 
 #include "config.h"
 
+const GLuint WIDTH = 800, HEIGHT = 600;
+
 int showWindow()
 {
-  if (!glfwInit())
+  glfwInit();
+  GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
+  if (window == nullptr)
   {
+    glfwTerminate();
     return -1;
   }
-
-  GLFWwindow* window = glfwCreateWindow(640, 480, "Title", NULL, NULL);
-  if (!window)
+  while (!glfwWindowShouldClose(window))
   {
-    return -1;
+    glfwPollEvents();
   }
-
-  glfwDestroyWindow(window);
 
   glfwTerminate();
-
   return 0;
 }
 

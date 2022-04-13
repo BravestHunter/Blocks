@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.23)
 project(Blocks VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -11,10 +11,21 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 configure_file(config.h.in "config/config.h")
 
 add_subdirectory(external)
+find_package(OpenGL REQUIRED)
+find_package(GLFW3 3.3 REQUIRED)
+find_package(GLEW REQUIRED)
 
 add_executable(Blocks main.cpp)
 target_include_directories(Blocks
 	PRIVATE 
 		"${PROJECT_BINARY_DIR}/config"
 )
-target_link_libraries(Blocks PRIVATE glfw3)
+target_link_libraries(Blocks PRIVATE OpenGL::GL OpenGL::GLU glew glfw3)
+
+
+add_custom_command(TARGET Blocks POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+		$<TARGET_RUNTIME_DLLS:Blocks>
+		$<TARGET_FILE_DIR:Blocks>
+        COMMAND_EXPAND_LISTS
+)

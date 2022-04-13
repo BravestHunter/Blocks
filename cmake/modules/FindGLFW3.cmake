@@ -52,3 +52,22 @@ FIND_LIBRARY(GLFW3_LIBRARY
 	PATHS
 		${_glfw3_LIB_SEARCH_DIRS}
 )
+
+# Search for the dll
+FIND_FILE(GLFW3_DLL "glfw3.dll"
+	PATHS
+		${_glfw3_LIB_SEARCH_DIRS}
+)
+
+# Add imported library
+add_library(glfw3 SHARED IMPORTED)
+set_property(TARGET glfw3 PROPERTY
+	IMPORTED_LOCATION ${GLFW3_DLL}
+)
+set_property(TARGET glfw3 PROPERTY
+	IMPORTED_IMPLIB ${GLFW3_LIBRARY}
+)
+target_include_directories(glfw3
+    INTERFACE
+        ${GLFW3_INCLUDE_DIR}
+)
