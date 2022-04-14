@@ -3,6 +3,11 @@ set(CORE_SOURCE_FILES
 
 	game.hpp
 	game.cpp
+
+	shader.hpp
+	shader.cpp
+	camera.hpp
+	camera.cpp
 )
 
 add_library(BlocksCore SHARED ${CORE_SOURCE_FILES})
@@ -19,4 +24,10 @@ target_link_libraries(BlocksCore
 		glfw3
 		glm
 		stb
+)
+
+
+target_include_directories(BlocksCore
+	PRIVATE 
+		"${PROJECT_BINARY_DIR}/configs"
 )

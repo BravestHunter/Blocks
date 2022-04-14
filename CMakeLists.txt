@@ -11,7 +11,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 set(BUILD_STATIC_LIBS OFF)
 set(BUILD_SHARED_LIBS ON)
 
-configure_file(config.h.in "config/config.h")
+
+set(RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources")
+set(SHADERS_DIR "${RESOURCE_DIR}/shaders")
+set(TEXTURES_DIR "${RESOURCE_DIR}/textures")
+
+set(CONFIGS_DIR "${PROJECT_BINARY_DIR}/configs")
+configure_file(config.h.in "configs/config.h")
+configure_file(resourceConfig.h.in "configs/resourceConfig.h")
 
 
 add_subdirectory(external)
@@ -20,12 +27,14 @@ find_package(GLFW3 3.3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLM REQUIRED)
 
+
 add_subdirectory(source)
+
 
 add_executable(Blocks "source/main.cpp")
 target_include_directories(Blocks
 	PRIVATE 
-		"${PROJECT_BINARY_DIR}/config"
+		"${PROJECT_BINARY_DIR}/configs"
 )
 target_link_libraries(Blocks PRIVATE BlocksCore)
 

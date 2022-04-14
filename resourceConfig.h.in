@@ -1,0 +1,9 @@
+#define SHADERS_DIR "@SHADERS_DIR@/"
+
+#define DEFAULT_VERTEX_SHADER "default.vert"
+#define DEFAULT_FRAGMENT_SHADER "default.frag"
+
+
+#define TEXTURES_DIR "@TEXTURES_DIR@/"
+
+#define BLOCK_TEXTURE "block.jpg"
