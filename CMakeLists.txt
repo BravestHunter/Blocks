@@ -10,17 +10,21 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 configure_file(config.h.in "config/config.h")
 
+
 add_subdirectory(external)
 find_package(OpenGL REQUIRED)
 find_package(GLFW3 3.3 REQUIRED)
 find_package(GLEW REQUIRED)
 
-add_executable(Blocks main.cpp)
+add_subdirectory(source)
+
+add_executable(Blocks "source/main.cpp")
 target_include_directories(Blocks
 	PRIVATE 
 		"${PROJECT_BINARY_DIR}/config"
 )
-target_link_libraries(Blocks PRIVATE OpenGL::GL OpenGL::GLU glew glfw3)
+#target_link_libraries(Blocks PRIVATE OpenGL::GL OpenGL::GLU glew glfw3)
+target_link_libraries(Blocks PRIVATE BlocksCore)
 
 
 add_custom_command(TARGET Blocks POST_BUILD
