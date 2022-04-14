@@ -1,6 +1,6 @@
 #pragma once
 
-#define DllExport   __declspec( dllexport )
+#include "export.h"
 
 
 class DllExport Game

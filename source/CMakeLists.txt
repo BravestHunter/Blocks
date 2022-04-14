@@ -1,4 +1,6 @@
 set(CORE_SOURCE_FILES
+	export.h
+
 	game.hpp
 	game.cpp
 )
@@ -10,9 +12,11 @@ target_include_directories(BlocksCore
 )
 
 target_link_libraries(BlocksCore
-	PUBLIC
+	PRIVATE
 		OpenGL::GL
 		OpenGL::GLU
 		glew
 		glfw3
+		glm
+		stb
 )

@@ -8,6 +8,9 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "target")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
+set(BUILD_STATIC_LIBS OFF)
+set(BUILD_SHARED_LIBS ON)
+
 configure_file(config.h.in "config/config.h")
 
 
@@ -15,6 +18,7 @@ add_subdirectory(external)
 find_package(OpenGL REQUIRED)
 find_package(GLFW3 3.3 REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(GLM REQUIRED)
 
 add_subdirectory(source)
 
@@ -23,7 +27,6 @@ target_include_directories(Blocks
 	PRIVATE 
 		"${PROJECT_BINARY_DIR}/config"
 )
-#target_link_libraries(Blocks PRIVATE OpenGL::GL OpenGL::GLU glew glfw3)
 target_link_libraries(Blocks PRIVATE BlocksCore)
 
 
