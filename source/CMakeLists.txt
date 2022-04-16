@@ -31,3 +31,14 @@ target_include_directories(BlocksCore
 	PRIVATE 
 		"${PROJECT_BINARY_DIR}/configs"
 )
+
+
+install(
+	IMPORTED_RUNTIME_ARTIFACTS
+		glew
+		glfw3
+
+		BlocksCore
+	DESTINATION
+		.
+)

@@ -86,7 +86,7 @@ int Game::Run()
     std::cout << "Failed to initialize GLEW" << std::endl;
     return -1;
   }
-
+    
   glEnable(GL_DEPTH_TEST);
 
   Shader ourShader(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER), PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
