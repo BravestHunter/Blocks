@@ -24,6 +24,7 @@ target_link_libraries(BlocksCore
 		glfw3
 		glm
 		stb
+		Freetype::Freetype
 )
 
 
