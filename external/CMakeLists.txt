@@ -9,3 +9,5 @@ set(GLM_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/glm" PARENT_SCOPE)
 add_subdirectory(stb)
 
 set(ENV{FREETYPE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/external/freetype")
+
+add_subdirectory(imgui)

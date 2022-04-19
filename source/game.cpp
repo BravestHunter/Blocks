@@ -16,6 +16,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+
 #include "shader.hpp"
 #include "camera.hpp"
 
@@ -74,6 +78,10 @@ int Game::Run()
     return -1;
   }
   glfwMakeContextCurrent(window);
+
+
+  IMGUI_CHECKVERSION();
+
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetCursorPosCallback(window, mouse_callback);
   glfwSetScrollCallback(window, scroll_callback);

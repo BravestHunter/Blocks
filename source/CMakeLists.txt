@@ -25,6 +25,7 @@ target_link_libraries(BlocksCore
 		glm
 		stb
 		Freetype::Freetype
+		imgui
 )
 
 
