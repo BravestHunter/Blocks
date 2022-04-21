@@ -25,7 +25,7 @@ GlfwWindow::GlfwWindow(GLFWwindow* window) : windowPtr_(window)
 GlfwWindow::~GlfwWindow()
 {
   // Glfw platform can be already terminated
-  // It kinda works fine
+  // But it kinda works fine
   glfwDestroyWindow(windowPtr_);
 }
 

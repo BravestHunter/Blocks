@@ -1,8 +1,11 @@
 set(CORE_SOURCE_FILES
 	export.h
-
+	compile_utils.hpp
+	
 	game.hpp
 	game.cpp
+	camera.hpp
+	camera.cpp
 
 	platform/glfw_headers.hpp
 	platform/glfw_platform.hpp
@@ -10,10 +13,11 @@ set(CORE_SOURCE_FILES
 	platform/glfw_window.hpp
 	platform/glfw_window.cpp
 
-	shader.hpp
-	shader.cpp
-	camera.hpp
-	camera.cpp
+	render/glew_headers.hpp
+	render/opengl_render_system.hpp
+	render/opengl_render_system.cpp
+	render/opengl_shader.hpp
+	render/opengl_shader.cpp
 )
 
 add_library(BlocksCore SHARED ${CORE_SOURCE_FILES})

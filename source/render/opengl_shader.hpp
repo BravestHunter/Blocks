@@ -2,14 +2,15 @@
 
 #include <string>
 
-#include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include "glew_headers.hpp"
 
-class Shader
+
+class OpenglShader
 {
 public:
-  Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+  OpenglShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
 
   void Use();
   void SetBool(const std::string& name, bool value) const;
