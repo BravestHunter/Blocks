@@ -4,6 +4,12 @@ set(CORE_SOURCE_FILES
 	game.hpp
 	game.cpp
 
+	platform/glfw_headers.hpp
+	platform/glfw_platform.hpp
+	platform/glfw_platform.cpp
+	platform/glfw_window.hpp
+	platform/glfw_window.cpp
+
 	shader.hpp
 	shader.cpp
 	camera.hpp
@@ -17,7 +23,7 @@ target_include_directories(BlocksCore
 )
 
 target_link_libraries(BlocksCore
-	PRIVATE
+	PUBLIC
 		OpenGL::GL
 		OpenGL::GLU
 		glew
@@ -44,3 +50,5 @@ install(
 	DESTINATION
 		.
 )
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${CORE_SOURCE_FILES})

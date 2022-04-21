@@ -32,61 +32,32 @@
 #include "resourceConfig.h"
 
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow* window);
-
-// settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-
-// camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
-bool firstMouse = true;
-
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 
-Game::Game()
+Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX(width / 2), lastY(height / 2)
 {
-
+  platform_ = std::make_unique<GlfwPlatform>();
+  camera_ = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
 }
 
 Game::~Game()
 {
-
+  
 }
 
 
 int Game::Run()
 {
-  glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  platform_->Init();
 
-  GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
-  if (window == NULL)
-  {
-    std::cout << "Failed to create GLFW window" << std::endl;
-    glfwTerminate();
-    return -1;
-  }
-  glfwMakeContextCurrent(window);
+  std::shared_ptr<GlfwWindow> window = platform_->CreateWindow(framebufferWidth_, framebufferHeight_, "Title");
 
+  window->MakeCurrentContext();
 
   IMGUI_CHECKVERSION();
-
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  glfwSetCursorPosCallback(window, mouse_callback);
-  glfwSetScrollCallback(window, scroll_callback);
-
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   glewExperimental = GL_TRUE;
   if (glewInit() != GLEW_OK)
@@ -185,7 +156,59 @@ int Game::Run()
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture);
 
-  while (!glfwWindowShouldClose(window))
+  // Set callbacks
+  window->SetFramebufferCallback(
+    [this](int width, int height)
+    {
+      framebufferWidth_ = width;
+      framebufferHeight_ = height;
+
+      glViewport(0, 0, width, height);
+    }
+  );
+  window->SetKeyCallback(
+    [window](int keycode, int scancode, int action, int mods) 
+    {
+      if (action != GLFW_PRESS || window == nullptr)
+        return;
+  
+      if (keycode == GLFW_KEY_ESCAPE)
+      {
+        window->SetWindowShouldClose(true);
+      }
+    }
+  );
+  window->SetCursorPositionCallback(
+    [this](double xpos, double ypos)
+    {
+      float xposF = static_cast<float>(xpos);
+      float yposF = static_cast<float>(ypos);
+
+      if (firstMouse)
+      {
+        lastX = xposF;
+        lastY = yposF;
+        firstMouse = false;
+      }
+
+      float xoffset = xposF - lastX;
+      float yoffset = lastY - yposF; // reversed since y-coordinates go from bottom to top
+
+      lastX = xposF;
+      lastY = yposF;
+
+      camera_->ProcessMouseMovement(xoffset, yoffset);
+    }
+  );
+  window->SetScrollCallback(
+    [this](double xoffset, double yoffset)
+    {
+      camera_->ProcessMouseScroll(static_cast<float>(yoffset));
+    }
+  );
+
+
+  while (!window->IsWindowShouldClose())
   {
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
@@ -196,69 +219,44 @@ int Game::Run()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera_->GetZoom()), (float)framebufferWidth_ / (float)framebufferHeight_, 0.1f, 100.0f);
     ourShader.SetMat4("projection", projection);
 
-    glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 view = camera_->GetViewMatrix();
     ourShader.SetMat4("view", view);
 
     glBindVertexArray(VAO);
     ourShader.SetMat4("model", glm::mat4(1.0f));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    glfwSwapBuffers(window);
+    window->SwapBuffers();
     glfwPollEvents();
   }
 
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
 
-  glfwTerminate();
+  platform_->Deinit();
+
   return 0;
 }
 
-void processInput(GLFWwindow* window)
+void Game::processInput(std::shared_ptr<GlfwWindow> window)
 {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, true);
-
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    camera.ProcessKeyboard(Camera::FORWARD, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    camera.ProcessKeyboard(Camera::BACKWARD, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    camera.ProcessKeyboard(Camera::LEFT, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    camera.ProcessKeyboard(Camera::RIGHT, deltaTime);
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-  glViewport(0, 0, width, height);
-}
-
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
-  float xpos = static_cast<float>(xposIn);
-  float ypos = static_cast<float>(yposIn);
-
-  if (firstMouse)
+  if (window->GetKeyState(GLFW_KEY_W) == GLFW_PRESS)
   {
-    lastX = xpos;
-    lastY = ypos;
-    firstMouse = false;
+    camera_->ProcessKeyboard(Camera::FORWARD, deltaTime);
   }
-
-  float xoffset = xpos - lastX;
-  float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-  lastX = xpos;
-  lastY = ypos;
-
-  camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-  camera.ProcessMouseScroll(static_cast<float>(yoffset));
+  if (window->GetKeyState(GLFW_KEY_S) == GLFW_PRESS)
+  {
+    camera_->ProcessKeyboard(Camera::BACKWARD, deltaTime);
+  }
+  if (window->GetKeyState(GLFW_KEY_A) == GLFW_PRESS)
+  {
+    camera_->ProcessKeyboard(Camera::LEFT, deltaTime);
+  }
+  if (window->GetKeyState(GLFW_KEY_D) == GLFW_PRESS)
+  {
+    camera_->ProcessKeyboard(Camera::RIGHT, deltaTime);
+  }
 }
