@@ -26,6 +26,9 @@ set(CORE_SOURCE_FILES
 	render/opengl_model.cpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp
+
+	model/block.hpp
+	model/chunk.hpp
 )
 
 add_library(BlocksCore SHARED ${CORE_SOURCE_FILES})
