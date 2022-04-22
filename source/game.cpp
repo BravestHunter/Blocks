@@ -1,5 +1,6 @@
 #include "game.hpp"
 
+#include <memory>
 #include <string>
 #include <iostream>
 
@@ -11,25 +12,31 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
+#include "render/opengl_model.hpp"
+
+#include "compile_utils.hpp"
 #include "resourceConfig.h"
+
+
+std::shared_ptr<OpenglModel> CreateBlockModel();
 
 
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
 {
   platform_ = std::make_unique<GlfwPlatform>();
   camera_ = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+
+  platform_->Init();
 }
 
 Game::~Game()
 {
-  
+  platform_->Deinit();
 }
 
 
 int Game::Run()
 {
-  platform_->Init();
-
   std::shared_ptr<GlfwWindow> window = platform_->CreateWindow(framebufferWidth_, framebufferHeight_, "Title");
   window->MakeCurrentContext();
 
@@ -87,7 +94,7 @@ int Game::Run()
     }
   );
 
-
+  std::shared_ptr<OpenglModel> blockModel = CreateBlockModel();
   while (!window->IsWindowShouldClose())
   {
     glfwPollEvents();
@@ -98,13 +105,29 @@ int Game::Run()
 
     processInput(window);
 
-    renderSystem.RenderScene(camera_.get(), (float)framebufferWidth_/(float)framebufferHeight_);
+    renderSystem.Clear();
+
+    float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
+    for (int i = 0; i < 5; i++)
+    {
+      glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3((float)i * 2, 0.0f, 0.0f));
+      renderSystem.RenderModel(blockModel, model, camera_.get(), (float)framebufferWidth_ / (float)framebufferHeight_);
+    }
+    for (int i = 1; i < 3; i++)
+    {
+      glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, (float)i * 2, 0.0f));
+      renderSystem.RenderModel(blockModel, model, camera_.get(), (float)framebufferWidth_ / (float)framebufferHeight_);
+    }
+    for (int i = 1; i < 2; i++)
+    {
+      glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, (float)i * 2));
+      renderSystem.RenderModel(blockModel, model, camera_.get(), (float)framebufferWidth_ / (float)framebufferHeight_);
+    }
 
     window->SwapBuffers();
   }
 
   renderSystem.Deinit();
-  platform_->Deinit();
 
   return 0;
 }
@@ -127,4 +150,68 @@ void Game::processInput(std::shared_ptr<GlfwWindow> window)
   {
     camera_->ProcessKeyboard(Camera::RIGHT, deltaTime_);
   }
+}
+
+
+std::shared_ptr<OpenglModel> CreateBlockModel()
+{
+  std::shared_ptr<OpenglBuffer> vbo = std::make_shared<OpenglBuffer>(GL_ARRAY_BUFFER);
+  std::shared_ptr<OpenglVertexArrayObject> vao = std::make_shared<OpenglVertexArrayObject>();
+  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, BLOCK_TEXTURE));
+
+  float vertices[] = {
+      -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+       0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+      -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+      -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+      -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+       0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+  };
+
+  vao->Bind();
+
+  vbo->Bind();
+  vbo->SetData(sizeof(vertices), vertices);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  return std::make_shared<OpenglModel>(vbo, vao, texture);
 }

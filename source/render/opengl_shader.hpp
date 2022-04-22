@@ -11,6 +11,7 @@ class OpenglShader
 {
 public:
   OpenglShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+  ~OpenglShader();
 
   void Use();
   void SetBool(const std::string& name, bool value) const;
@@ -27,7 +28,7 @@ public:
   void SetMat4(const std::string& name, const glm::mat4& mat) const;
 
 private:
-  unsigned int _id;
+  unsigned int id_;
 
   void CheckCompileErrors(GLuint shader, std::string type);
 };

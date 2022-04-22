@@ -1,7 +1,7 @@
 set(CORE_SOURCE_FILES
 	export.h
 	compile_utils.hpp
-	
+
 	game.hpp
 	game.cpp
 	camera.hpp
@@ -16,6 +16,14 @@ set(CORE_SOURCE_FILES
 	render/glew_headers.hpp
 	render/opengl_render_system.hpp
 	render/opengl_render_system.cpp
+	render/opengl_buffer.hpp
+	render/opengl_buffer.cpp
+	render/opengl_vertex_array_object.hpp
+	render/opengl_vertex_array_object.cpp
+	render/opengl_texture.hpp
+	render/opengl_texture.cpp
+	render/opengl_model.hpp
+	render/opengl_model.cpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp
 )
