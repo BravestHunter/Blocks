@@ -19,6 +19,7 @@ public:
 
   void SwapBuffers();
   void MakeCurrentContext();
+  void InitImgui();
 
   bool IsWindowShouldClose();
   void SetWindowShouldClose(bool value);

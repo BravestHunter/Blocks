@@ -43,6 +43,17 @@ int Game::Run()
   OpenglRenderSystem renderSystem;
   renderSystem.Init();
 
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+  ImGui::StyleColorsDark();
+
+  window->InitImgui();
+  // GL 3.0 + GLSL 130
+  const char* glsl_version = "#version 130";
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
   // Set callbacks
   window->SetFramebufferCallback(
     [this](int width, int height)
@@ -105,8 +116,17 @@ int Game::Run()
 
     processInput(window);
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Info");
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::End();
+
     renderSystem.Clear();
 
+    // Render blockModel in different positions
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
     for (int i = 0; i < 5; i++)
     {
@@ -123,6 +143,10 @@ int Game::Run()
       glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, (float)i * 2));
       renderSystem.RenderModel(blockModel, model, camera_.get(), (float)framebufferWidth_ / (float)framebufferHeight_);
     }
+
+    // Render imgui ui
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     window->SwapBuffers();
   }

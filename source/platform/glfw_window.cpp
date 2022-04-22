@@ -1,5 +1,7 @@
 #include "glfw_window.hpp"
 
+#include "backends/imgui_impl_glfw.h"
+
 
 GlfwWindow::GlfwWindow(GLFWwindow* window) : windowPtr_(window)
 {
@@ -38,6 +40,11 @@ void GlfwWindow::SwapBuffers()
 void GlfwWindow::MakeCurrentContext()
 {
   glfwMakeContextCurrent(windowPtr_);
+}
+
+void GlfwWindow::InitImgui()
+{
+  ImGui_ImplGlfw_InitForOpenGL(windowPtr_, false);
 }
 
 
