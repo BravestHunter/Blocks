@@ -40,6 +40,9 @@ void GlfwWindow::SwapBuffers()
 void GlfwWindow::MakeCurrentContext()
 {
   glfwMakeContextCurrent(windowPtr_);
+
+  // Disable vsync
+  glfwSwapInterval(0.0f);
 }
 
 void GlfwWindow::InitImgui()
