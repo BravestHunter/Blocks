@@ -2,7 +2,13 @@
 
 
 OpenglModel::OpenglModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, std::shared_ptr<OpenglTexture> texture) :
-  vbo_(vbo), vao_(vao), texture_(texture)
+  vbo_(vbo), vao_(vao), ebo_(nullptr), texture_(texture)
+{
+
+}
+
+OpenglModel::OpenglModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, std::shared_ptr<OpenglBuffer> ebo, std::shared_ptr<OpenglTexture> texture) : 
+  vbo_(vbo), vao_(vao), ebo_(ebo), texture_(texture)
 {
 
 }

@@ -32,6 +32,9 @@ void OpenglRenderSystem::Init()
 
   glEnable(GL_DEPTH_TEST);
 
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
+
   defaultShader_ = std::make_unique<OpenglShader>(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER), PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
 }
 
@@ -60,3 +63,16 @@ void OpenglRenderSystem::RenderModel(std::shared_ptr<OpenglModel> model, glm::ma
   glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
+void OpenglRenderSystem::RenderChunk(std::shared_ptr<OpenglChunkModel> chunk, Camera* camera, float ratio)
+{
+  defaultShader_->Use();
+  defaultShader_->SetInt("texture", 0);
+
+  glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), ratio, 0.1f, 100.0f);
+  glm::mat4 view = camera->GetViewMatrix();
+  glm::mat4 modelTransform(1.0f);
+  glm::mat4 mvp = projection * view * modelTransform;
+  defaultShader_->SetMat4("MVP", mvp);
+
+  glDrawArrays(GL_TRIANGLES, 0, chunk->verticesNumber_);
+}

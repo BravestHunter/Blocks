@@ -24,6 +24,8 @@ set(CORE_SOURCE_FILES
 	render/opengl_texture.cpp
 	render/opengl_model.hpp
 	render/opengl_model.cpp
+	render/opengl_chunk_model.hpp
+	render/opengl_chunk_model.cpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp
 

@@ -11,6 +11,7 @@ class OpenglModel
 {
 public:
   OpenglModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, std::shared_ptr<OpenglTexture> texture);
+  OpenglModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, std::shared_ptr<OpenglBuffer> ebo_, std::shared_ptr<OpenglTexture> texture);
   ~OpenglModel();
 
   std::shared_ptr<OpenglBuffer> GetVBO();
@@ -20,5 +21,6 @@ public:
 private:
   std::shared_ptr<OpenglBuffer> vbo_;
   std::shared_ptr<OpenglVertexArrayObject> vao_;
+  std::shared_ptr<OpenglBuffer> ebo_;
   std::shared_ptr<OpenglTexture> texture_;
 };
