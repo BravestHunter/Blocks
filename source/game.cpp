@@ -11,6 +11,7 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "imgui_internal.h"
 
 #include "render/opengl_model.hpp"
 #include "render/opengl_chunk_model.hpp"
@@ -28,7 +29,7 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
 {
   platform_ = std::make_unique<GlfwPlatform>();
-  camera_ = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+  camera_ = std::make_unique<Camera>(glm::vec3(-8.0f, -8.0f, 256.0f));
 
   platform_->Init();
 }
@@ -116,6 +117,8 @@ int Game::Run()
   std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, BLOCK_TEXTURE));
   texture->Bind(GL_TEXTURE0);
 
+  bool showImguiWindow = true;
+
   while (!window->IsWindowShouldClose())
   {
     glfwPollEvents();
@@ -130,8 +133,12 @@ int Game::Run()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(0, 0));
     ImGui::Begin("Info");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Camera position %.2f %.2f %.2f", camera_->GetPosition().x, camera_->GetPosition().y, camera_->GetPosition().z);
+    ImGui::Text("Camera direction %.2f %.2f %.2f", camera_->GetForward().x, camera_->GetForward().y, camera_->GetForward().z);
     ImGui::End();
 
     renderSystem.Clear();
@@ -139,23 +146,6 @@ int Game::Run()
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
 
     renderSystem.RenderChunk(chunkModel, camera_.get(), framebufferRatio);
-
-    // Render blockModel in different positions
-    //for (int i = 0; i < 5; i++)
-    //{
-    //  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3((float)i * 2, 0.0f, 0.0f));
-    //  renderSystem.RenderModel(blockModel, model, camera_.get(), (float)framebufferWidth_ / (float)framebufferHeight_);
-    //}
-    //for (int i = 1; i < 3; i++)
-    //{
-    //  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, (float)i * 2, 0.0f));
-    //  renderSystem.RenderModel(blockModel, model, camera_.get(), (float)framebufferWidth_ / (float)framebufferHeight_);
-    //}
-    //for (int i = 1; i < 2; i++)
-    //{
-    //  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, (float)i * 2));
-    //  renderSystem.RenderModel(blockModel, model, camera_.get(), (float)framebufferWidth_ / (float)framebufferHeight_);
-    //}
 
     // Render imgui ui
     ImGui::Render();
@@ -263,7 +253,7 @@ std::shared_ptr<Chunk> GenerateChunk()
     {
       for (int x = 0; x < Chunk::Length; x++)
       {
-        chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] = (rand() % 4) > 0;
+        chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] = (rand() % 8) > 0;
       }
     }
   }
