@@ -85,7 +85,7 @@ void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMapMoodel> map, Camera*
   glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), ratio, 0.1f, 1000.0f);
   glm::mat4 view = camera->GetViewMatrix();
 
-  for (auto pair : *map)
+  for (auto pair : map->chunks_)
   {
     std::pair<int, int> coords = pair.first;
     std::shared_ptr<OpenglChunkModel> chunk = pair.second;

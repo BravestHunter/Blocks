@@ -4,6 +4,7 @@
 
 #include "platform/glfw_platform.hpp"
 #include "render/opengl_render_system.hpp"
+#include "render/opengl_map_model.hpp"
 #include "camera.hpp"
 
 
@@ -17,6 +18,7 @@ public:
 
 private:
   std::unique_ptr<GlfwPlatform> platform_;
+  std::shared_ptr<OpenglMapMoodel> map_;
 
   int framebufferWidth_;
   int framebufferHeight_;
@@ -31,5 +33,6 @@ private:
   float lastY_;
   bool firstMouse_ = true;
 
+  void RunRenderCycle();
   void processInput(std::shared_ptr<GlfwWindow> window);
 };

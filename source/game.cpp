@@ -1,6 +1,7 @@
 #include "game.hpp"
 
 #include <memory>
+#include <thread>
 #include <string>
 #include <iostream>
 
@@ -16,7 +17,6 @@
 #include "model/chunk.hpp"
 #include "render/opengl_model.hpp"
 #include "render/opengl_chunk_model.hpp"
-#include "render/opengl_map_model.hpp"
 
 #include "compile_utils.hpp"
 #include "resourceConfig.h"
@@ -24,13 +24,15 @@
 
 std::shared_ptr<OpenglModel> CreateBlockModel();
 std::shared_ptr<Chunk> GenerateChunk();
+OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk);
 std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chunk);
 
 
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
 {
   platform_ = std::make_unique<GlfwPlatform>();
-  camera_ = std::make_unique<Camera>(glm::vec3(-8.0f, -8.0f, 260.0f));
+  map_ = std::make_shared<OpenglMapMoodel>();
+  camera_ = std::make_unique<Camera>(glm::vec3(-150.0f, -8.0f, 270.0f));
 
   platform_->Init();
 }
@@ -42,6 +44,29 @@ Game::~Game()
 
 
 int Game::Run()
+{
+  std::thread renderThread(&Game::RunRenderCycle, this);
+
+  // Generate map
+  int xRange = 6;
+  int yRange = 6;
+  for (int x = -xRange; x <= xRange; x++)
+  {
+    for (int y = -yRange; y <= yRange; y++)
+    {
+      std::shared_ptr<Chunk> chunk = GenerateChunk();
+      OpenglRawChunkData chunkData = GenerateChunkRawData(chunk);
+      map_->EnqueueChunk(chunkData, std::make_pair(x, y));
+    }
+  }
+
+  renderThread.join();
+
+  return 0;
+}
+
+
+void Game::RunRenderCycle()
 {
   std::shared_ptr<GlfwWindow> window = platform_->CreateWindow(framebufferWidth_, framebufferHeight_, "Title");
   window->MakeCurrentContext();
@@ -77,7 +102,7 @@ int Game::Run()
     {
       if (action != GLFW_PRESS || window == nullptr)
         return;
-  
+
       if (keycode == GLFW_KEY_ESCAPE)
       {
         window->SetWindowShouldClose(true);
@@ -121,22 +146,6 @@ int Game::Run()
 
   std::shared_ptr<OpenglModel> blockModel = CreateBlockModel();
 
-  std::shared_ptr<OpenglMapMoodel> map = std::make_shared<OpenglMapMoodel>();
-
-  // Generate map
-  int xRange = 2;
-  int yRange = 2;
-  for (int x = -xRange; x <= xRange; x++)
-  {
-    for (int y = -yRange; y <= yRange; y++)
-    {
-      std::shared_ptr<Chunk> chunk = GenerateChunk();
-      std::shared_ptr<OpenglChunkModel> chunkModel = GenerateChunkModel(chunk);
-
-      (*map)[std::make_pair(x, y)] = chunkModel;
-    }
-  }
-
   std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, URAN_TEXTURE));
   texture->Bind(GL_TEXTURE0);
 
@@ -168,7 +177,9 @@ int Game::Run()
 
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
 
-    renderSystem.RenderMap(map, camera_.get(), framebufferRatio);
+    map_->AddChunksFromQueue();
+
+    renderSystem.RenderMap(map_, camera_.get(), framebufferRatio);
 
     // Render imgui ui
     ImGui::Render();
@@ -178,8 +189,6 @@ int Game::Run()
   }
 
   renderSystem.Deinit();
-
-  return 0;
 }
 
 void Game::processInput(std::shared_ptr<GlfwWindow> window)
@@ -302,19 +311,15 @@ void AddVertex(Vertex& vertex, float* data, size_t& index)
   data[index++] = vertex.texV;
 }
 
-std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chunk)
+OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
 {
-  std::shared_ptr<OpenglBuffer> vbo = std::make_shared<OpenglBuffer>(GL_ARRAY_BUFFER);
-  std::shared_ptr<OpenglVertexArrayObject> vao = std::make_shared<OpenglVertexArrayObject>();
-  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, URAN_TEXTURE));
-
   static const size_t BlockVerticesNumber = 4 * 6;
   static const size_t VertexSize = sizeof(float) * 5;
   static const size_t verticesDataSize = Chunk::BlocksNumber * BlockVerticesNumber * VertexSize;
 
   float* verticesData = new float[verticesDataSize];
   size_t verticesDataIndex = 0;
-  size_t tringlesNumber = 0;
+  size_t verticesNumber = 0;
   for (int z = 0; z < Chunk::Height; z++)
   {
     for (int y = 0; y < Chunk::Width; y++)
@@ -347,7 +352,7 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
           AddVertex(v2, verticesData, verticesDataIndex);
           AddVertex(v4, verticesData, verticesDataIndex);
 
-          tringlesNumber += 6;
+          verticesNumber += 6;
         }
 
         // Check backward face
@@ -367,7 +372,7 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
           AddVertex(v2, verticesData, verticesDataIndex);
           AddVertex(v4, verticesData, verticesDataIndex);
 
-          tringlesNumber += 6;
+          verticesNumber += 6;
         }
 
         // Check right face
@@ -387,7 +392,7 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
           AddVertex(v2, verticesData, verticesDataIndex);
           AddVertex(v4, verticesData, verticesDataIndex);
 
-          tringlesNumber += 6;
+          verticesNumber += 6;
         }
 
         // Check left face
@@ -407,7 +412,7 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
           AddVertex(v2, verticesData, verticesDataIndex);
           AddVertex(v4, verticesData, verticesDataIndex);
 
-          tringlesNumber += 6;
+          verticesNumber += 6;
         }
 
         // Check upper face
@@ -427,7 +432,7 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
           AddVertex(v2, verticesData, verticesDataIndex);
           AddVertex(v4, verticesData, verticesDataIndex);
 
-          tringlesNumber += 6;
+          verticesNumber += 6;
         }
 
         // Check bottom face
@@ -447,21 +452,31 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
           AddVertex(v2, verticesData, verticesDataIndex);
           AddVertex(v4, verticesData, verticesDataIndex);
 
-          tringlesNumber += 6;
+          verticesNumber += 6;
         }
       }
     }
   }
 
+  return OpenglRawChunkData(verticesData, verticesDataIndex + 1, verticesNumber);
+}
+
+std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chunk)
+{
+  std::shared_ptr<OpenglBuffer> vbo = std::make_shared<OpenglBuffer>(GL_ARRAY_BUFFER);
+  std::shared_ptr<OpenglVertexArrayObject> vao = std::make_shared<OpenglVertexArrayObject>();
+
+  OpenglRawChunkData chunkData = GenerateChunkRawData(chunk);
+
   vao->Bind();
 
   vbo->Bind();
-  vbo->SetData(sizeof(float) * (verticesDataIndex + 1), verticesData);
+  vbo->SetData(sizeof(float) * chunkData.verticesDataLength, chunkData.verticesData);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  return std::make_shared<OpenglChunkModel>(vbo, vao, tringlesNumber);
+  return std::make_shared<OpenglChunkModel>(vbo, vao, chunkData.verticesNumber);
 }
