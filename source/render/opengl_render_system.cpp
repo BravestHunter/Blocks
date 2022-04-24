@@ -76,3 +76,38 @@ void OpenglRenderSystem::RenderChunk(std::shared_ptr<OpenglChunkModel> chunk, Ca
 
   glDrawArrays(GL_TRIANGLES, 0, chunk->verticesNumber_);
 }
+
+void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMapMoodel> map, Camera* camera, float ratio)
+{
+  defaultShader_->Use();
+  defaultShader_->SetInt("texture", 0);
+
+  glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), ratio, 0.1f, 1000.0f);
+  glm::mat4 view = camera->GetViewMatrix();
+
+  for (auto pair : *map)
+  {
+    std::pair<int, int> coords = pair.first;
+    std::shared_ptr<OpenglChunkModel> chunk = pair.second;
+
+    glm::vec3 chunkOffset(coords.first * ((int)Chunk::Length + 2), coords.second * ((int)Chunk::Width + 2), 0.0f);
+    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), chunkOffset);
+    glm::mat4 mvp = projection * view * modelTransform;
+    defaultShader_->SetMat4("MVP", mvp);
+
+    chunk->vao_->Bind();
+    glDrawArrays(GL_TRIANGLES, 0, chunk->verticesNumber_);
+  }
+}
+
+void OpenglRenderSystem::SetWireframeMode(bool value)
+{
+  if (value)
+  {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  }
+  else
+  {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
+}

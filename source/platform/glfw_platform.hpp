@@ -19,6 +19,7 @@ public:
   std::unique_ptr<GlfwWindow> CreateWindow(int width, int height, std::string title);
 
   int GetError();
+  double GetTime();
 
   bool IsInitialized();
   bool IsWriteErrors();

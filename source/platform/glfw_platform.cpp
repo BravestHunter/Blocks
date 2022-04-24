@@ -101,6 +101,11 @@ int GlfwPlatform::GetError()
   return code;
 }
 
+double GlfwPlatform::GetTime()
+{
+  return glfwGetTime();
+}
+
 
 bool GlfwPlatform::IsInitialized()
 {

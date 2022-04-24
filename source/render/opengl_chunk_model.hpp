@@ -13,8 +13,8 @@ public:
 
 
   int verticesNumber_;
+  std::shared_ptr<OpenglVertexArrayObject> vao_;
 
 private:
   std::shared_ptr<OpenglBuffer> vbo_;
-  std::shared_ptr<OpenglVertexArrayObject> vao_;
 };

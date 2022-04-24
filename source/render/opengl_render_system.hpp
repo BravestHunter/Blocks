@@ -8,6 +8,7 @@
 #include "opengl_vertex_array_object.hpp"
 #include "opengl_model.hpp"
 #include "opengl_chunk_model.hpp"
+#include "opengl_map_model.hpp"
 #include "opengl_texture.hpp"
 #include "opengl_shader.hpp"
 #include "camera.hpp"
@@ -26,6 +27,9 @@ public:
   void Clear(glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
   void RenderModel(std::shared_ptr<OpenglModel> model, glm::mat4 modelTransform, Camera* camera, float ratio);
   void RenderChunk(std::shared_ptr<OpenglChunkModel> chunk, Camera* camera, float ratio);
+  void RenderMap(std::shared_ptr<OpenglMapMoodel> map, Camera* camera, float ratio);
+
+  void SetWireframeMode(bool value);
 
 private:
   std::unique_ptr<OpenglShader> defaultShader_;

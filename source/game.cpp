@@ -13,9 +13,10 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "imgui_internal.h"
 
+#include "model/chunk.hpp"
 #include "render/opengl_model.hpp"
 #include "render/opengl_chunk_model.hpp"
-#include "model/chunk.hpp"
+#include "render/opengl_map_model.hpp"
 
 #include "compile_utils.hpp"
 #include "resourceConfig.h"
@@ -29,7 +30,7 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
 {
   platform_ = std::make_unique<GlfwPlatform>();
-  camera_ = std::make_unique<Camera>(glm::vec3(-8.0f, -8.0f, 256.0f));
+  camera_ = std::make_unique<Camera>(glm::vec3(-8.0f, -8.0f, 260.0f));
 
   platform_->Init();
 }
@@ -59,6 +60,8 @@ int Game::Run()
   const char* glsl_version = "#version 130";
   ImGui_ImplOpenGL3_Init(glsl_version);
 
+  bool wireframeMode = false;
+
   // Set callbacks
   window->SetFramebufferCallback(
     [this](int width, int height)
@@ -70,7 +73,7 @@ int Game::Run()
     }
   );
   window->SetKeyCallback(
-    [window](int keycode, int scancode, int action, int mods) 
+    [window, &renderSystem, &wireframeMode](int keycode, int scancode, int action, int mods)
     {
       if (action != GLFW_PRESS || window == nullptr)
         return;
@@ -78,6 +81,12 @@ int Game::Run()
       if (keycode == GLFW_KEY_ESCAPE)
       {
         window->SetWindowShouldClose(true);
+      }
+
+      if (keycode == GLFW_KEY_X)
+      {
+        wireframeMode = !wireframeMode;
+        renderSystem.SetWireframeMode(wireframeMode);
       }
     }
   );
@@ -112,9 +121,23 @@ int Game::Run()
 
   std::shared_ptr<OpenglModel> blockModel = CreateBlockModel();
 
-  std::shared_ptr<Chunk> chunk = GenerateChunk();
-  std::shared_ptr<OpenglChunkModel> chunkModel = GenerateChunkModel(chunk);
-  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, BLOCK_TEXTURE));
+  std::shared_ptr<OpenglMapMoodel> map = std::make_shared<OpenglMapMoodel>();
+
+  // Generate map
+  int xRange = 2;
+  int yRange = 2;
+  for (int x = -xRange; x <= xRange; x++)
+  {
+    for (int y = -yRange; y <= yRange; y++)
+    {
+      std::shared_ptr<Chunk> chunk = GenerateChunk();
+      std::shared_ptr<OpenglChunkModel> chunkModel = GenerateChunkModel(chunk);
+
+      (*map)[std::make_pair(x, y)] = chunkModel;
+    }
+  }
+
+  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, URAN_TEXTURE));
   texture->Bind(GL_TEXTURE0);
 
   bool showImguiWindow = true;
@@ -123,7 +146,7 @@ int Game::Run()
   {
     glfwPollEvents();
 
-    float currentFrame = static_cast<float>(glfwGetTime());
+    float currentFrame = static_cast<float>(platform_->GetTime());
     deltaTime_ = currentFrame - lastFrame_;
     lastFrame_ = currentFrame;
 
@@ -145,7 +168,7 @@ int Game::Run()
 
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
 
-    renderSystem.RenderChunk(chunkModel, camera_.get(), framebufferRatio);
+    renderSystem.RenderMap(map, camera_.get(), framebufferRatio);
 
     // Render imgui ui
     ImGui::Render();
@@ -253,7 +276,7 @@ std::shared_ptr<Chunk> GenerateChunk()
     {
       for (int x = 0; x < Chunk::Length; x++)
       {
-        chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] = (rand() % 8) > 0;
+        chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] = (rand() % 4) > 0;
       }
     }
   }
@@ -283,7 +306,7 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
 {
   std::shared_ptr<OpenglBuffer> vbo = std::make_shared<OpenglBuffer>(GL_ARRAY_BUFFER);
   std::shared_ptr<OpenglVertexArrayObject> vao = std::make_shared<OpenglVertexArrayObject>();
-  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, BLOCK_TEXTURE));
+  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, URAN_TEXTURE));
 
   static const size_t BlockVerticesNumber = 4 * 6;
   static const size_t VertexSize = sizeof(float) * 5;

@@ -12,4 +12,9 @@ struct Chunk
   static const size_t BlocksNumber = LayerBlocksNumber * Height;
 
   Block blocks[BlocksNumber];
+
+  static bool AreEqual(const Chunk& chunk1, const Chunk& chunk2)
+  {
+    return memcmp(&chunk1.blocks, &chunk2.blocks, sizeof(Block) * BlocksNumber) == 0;
+  }
 };

@@ -2,7 +2,7 @@
 
 const float Camera::defaultYaw = 90.0f;
 const float Camera::defaultPitch = 0.0f;
-const float Camera::defaultSpeed = 10.0f;
+const float Camera::defaultSpeed = 16.0f;
 const float Camera::defaultSensitivity = 0.1f;
 const float Camera::defaultZoom = 45.0f;
 
