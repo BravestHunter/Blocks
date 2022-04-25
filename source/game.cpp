@@ -48,8 +48,8 @@ int Game::Run()
   std::thread renderThread(&Game::RunRenderCycle, this);
 
   // Generate map
-  int xRange = 6;
-  int yRange = 6;
+  int xRange = 7;
+  int yRange = 7;
   for (int x = -xRange; x <= xRange; x++)
   {
     for (int y = -yRange; y <= yRange; y++)

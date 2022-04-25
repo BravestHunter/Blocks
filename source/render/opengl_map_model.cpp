@@ -53,5 +53,7 @@ void OpenglMapMoodel::AddChunk(ChunksQueueItem& item)
 
   std::shared_ptr<OpenglChunkModel> chunk = std::make_shared<OpenglChunkModel>(vbo, vao, item.chunkData.verticesNumber);
   chunks_[item.position] = chunk;
+
+  delete item.chunkData.verticesData;
 }
 
