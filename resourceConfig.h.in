@@ -8,3 +8,4 @@
 
 #define BLOCK_TEXTURE "block.jpg"
 #define URAN_TEXTURE "uran.jpg"
+#define ATLAS_TEXTURE "atlas.png"

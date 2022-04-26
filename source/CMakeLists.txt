@@ -29,6 +29,9 @@ set(CORE_SOURCE_FILES
 	render/opengl_map_model.hpp
 	render/opengl_map_model.cpp
 	render/opengl_raw_chunk_data.hpp
+	render/opengl_chunk_builder.hpp
+	render/opengl_chunk_builder.cpp
+	render/opengl_block_info.hpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp
 

@@ -17,6 +17,7 @@
 #include "model/chunk.hpp"
 #include "render/opengl_model.hpp"
 #include "render/opengl_chunk_model.hpp"
+#include "render/opengl_chunk_builder.hpp"
 
 #include "compile_utils.hpp"
 #include "resourceConfig.h"
@@ -26,6 +27,8 @@ std::shared_ptr<OpenglModel> CreateBlockModel();
 std::shared_ptr<Chunk> GenerateChunk();
 OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk);
 std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chunk);
+
+OpenglChunkBuilder chunkBuilder{};
 
 
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
@@ -146,7 +149,7 @@ void Game::RunRenderCycle()
 
   std::shared_ptr<OpenglModel> blockModel = CreateBlockModel();
 
-  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, URAN_TEXTURE));
+  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, ATLAS_TEXTURE));
   texture->Bind(GL_TEXTURE0);
 
   bool showImguiWindow = true;
@@ -285,7 +288,7 @@ std::shared_ptr<Chunk> GenerateChunk()
     {
       for (int x = 0; x < Chunk::Length; x++)
       {
-        chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] = (rand() % 4) > 0;
+        chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] = rand() % 4;
       }
     }
   }
@@ -334,16 +337,17 @@ OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
         }
 
         glm::vec3 position(x, y, z);
+        OpenglBlockInfo info = chunkBuilder.blocksIndex_[chunk->blocks[blockIndex]];
 
         // Check forward face
         if (x == Chunk::Length - 1 || chunk->blocks[blockIndex + 1] == 0)
         {
           // Add forward face
 
-          Vertex v1(x + 1, y + 1, z, 0.0f, 0.0f);
-          Vertex v2(x + 1, y, z, 1.0f, 0.0f);
-          Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f);
-          Vertex v4(x + 1, y, z + 1, 1.0f, 1.0f);
+          Vertex v1(x + 1, y + 1, z, info.texCoords[0].x, info.texCoords[0].y);
+          Vertex v2(x + 1, y, z, info.texCoords[1].x, info.texCoords[1].y);
+          Vertex v3(x + 1, y + 1, z + 1, info.texCoords[2].x, info.texCoords[2].y);
+          Vertex v4(x + 1, y, z + 1, info.texCoords[3].x, info.texCoords[3].y);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -360,10 +364,10 @@ OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
         {
           // Add backward face
 
-          Vertex v1(x, y, z, 0.0f, 0.0f);
-          Vertex v2(x, y + 1, z, 1.0f, 0.0f);
-          Vertex v3(x, y, z + 1, 0.0f, 1.0f);
-          Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f);
+          Vertex v1(x, y, z, info.texCoords[0].x, info.texCoords[0].y);
+          Vertex v2(x, y + 1, z, info.texCoords[1].x, info.texCoords[1].y);
+          Vertex v3(x, y, z + 1, info.texCoords[2].x, info.texCoords[2].y);
+          Vertex v4(x, y + 1, z + 1, info.texCoords[3].x, info.texCoords[3].y);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -380,10 +384,10 @@ OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
         {
           // Add right face
 
-          Vertex v1(x, y + 1, z, 0.0f, 0.0f);
-          Vertex v2(x + 1, y + 1, z, 1.0f, 0.0f);
-          Vertex v3(x, y + 1, z + 1, 0.0f, 1.0f);
-          Vertex v4(x + 1, y + 1, z + 1, 1.0f, 1.0f);
+          Vertex v1(x, y + 1, z, info.texCoords[0].x, info.texCoords[0].y);
+          Vertex v2(x + 1, y + 1, z, info.texCoords[1].x, info.texCoords[1].y);
+          Vertex v3(x, y + 1, z + 1, info.texCoords[2].x, info.texCoords[2].y);
+          Vertex v4(x + 1, y + 1, z + 1, info.texCoords[3].x, info.texCoords[3].y);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -400,10 +404,10 @@ OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
         {
           // Add left face
 
-          Vertex v1(x + 1, y, z, 0.0f, 0.0f);
-          Vertex v2(x, y, z, 1.0f, 0.0f);
-          Vertex v3(x + 1, y, z + 1, 0.0f, 1.0f);
-          Vertex v4(x, y, z + 1, 1.0f, 1.0f);
+          Vertex v1(x + 1, y, z, info.texCoords[0].x, info.texCoords[0].y);
+          Vertex v2(x, y, z, info.texCoords[1].x, info.texCoords[1].y);
+          Vertex v3(x + 1, y, z + 1, info.texCoords[2].x, info.texCoords[2].y);
+          Vertex v4(x, y, z + 1, info.texCoords[3].x, info.texCoords[3].y);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -420,10 +424,10 @@ OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
         {
           // Add upper face
 
-          Vertex v1(x + 1, y, z + 1, 0.0f, 0.0f);
-          Vertex v2(x, y, z + 1, 1.0f, 0.0f);
-          Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f);
-          Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f);
+          Vertex v1(x + 1, y, z + 1, info.texCoords[0].x, info.texCoords[0].y);
+          Vertex v2(x, y, z + 1, info.texCoords[1].x, info.texCoords[1].y);
+          Vertex v3(x + 1, y + 1, z + 1, info.texCoords[2].x, info.texCoords[2].y);
+          Vertex v4(x, y + 1, z + 1, info.texCoords[3].x, info.texCoords[3].y);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -440,10 +444,10 @@ OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
         {
           // Add bottom face
 
-          Vertex v1(x, y, z, 0.0f, 0.0f);
-          Vertex v2(x + 1, y, z, 1.0f, 0.0f);
-          Vertex v3(x, y + 1, z, 0.0f, 1.0f);
-          Vertex v4(x + 1, y + 1, z, 1.0f, 1.0f);
+          Vertex v1(x, y, z, info.texCoords[0].x, info.texCoords[0].y);
+          Vertex v2(x + 1, y, z, info.texCoords[1].x, info.texCoords[1].y);
+          Vertex v3(x, y + 1, z, info.texCoords[2].x, info.texCoords[2].y);
+          Vertex v4(x + 1, y + 1, z, info.texCoords[3].x, info.texCoords[3].y);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
