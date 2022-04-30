@@ -46,9 +46,9 @@ void OpenglMapMoodel::AddChunk(ChunksQueueItem& item)
   vbo->Bind();
   vbo->SetData(sizeof(float) * item.chunkData.verticesDataLength, item.chunkData.verticesData);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
   std::shared_ptr<OpenglChunkModel> chunk = std::make_shared<OpenglChunkModel>(vbo, vao, item.chunkData.verticesNumber);

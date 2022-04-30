@@ -13,6 +13,9 @@ set(CORE_SOURCE_FILES
 	platform/glfw_window.hpp
 	platform/glfw_window.cpp
 
+	io/stb_loader.hpp
+	io/stb_loader.cpp
+
 	render/glew_headers.hpp
 	render/opengl_render_system.hpp
 	render/opengl_render_system.cpp
@@ -22,6 +25,8 @@ set(CORE_SOURCE_FILES
 	render/opengl_vertex_array_object.cpp
 	render/opengl_texture.hpp
 	render/opengl_texture.cpp
+	render/opengl_texture_array.hpp
+	render/opengl_texture_array.cpp
 	render/opengl_model.hpp
 	render/opengl_model.cpp
 	render/opengl_chunk_model.hpp
@@ -29,9 +34,6 @@ set(CORE_SOURCE_FILES
 	render/opengl_map_model.hpp
 	render/opengl_map_model.cpp
 	render/opengl_raw_chunk_data.hpp
-	render/opengl_chunk_builder.hpp
-	render/opengl_chunk_builder.cpp
-	render/opengl_block_info.hpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp
 

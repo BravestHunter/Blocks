@@ -2,9 +2,6 @@
 
 #include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
-
 
 OpenglTexture::OpenglTexture(const char* path)
 {
@@ -15,8 +12,8 @@ OpenglTexture::OpenglTexture(const char* path)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   int width, height, nrChannels;
-  stbi_set_flip_vertically_on_load(true);
-  unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+  stbi_set_verticall_flip(true);
+  unsigned char* data = load_image(path, &width, &height, &nrChannels, 0);
 
   if (data)
   {
@@ -31,7 +28,7 @@ OpenglTexture::OpenglTexture(const char* path)
   {
     std::cout << "Failed to load texture" << std::endl;
   }
-  stbi_image_free(data);
+  free_image(data);
 }
 
 OpenglTexture::~OpenglTexture()
