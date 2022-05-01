@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "glew_headers.hpp"
-#include "io/stb_loader.hpp"
 
 
 class OpenglTextureArray

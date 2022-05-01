@@ -6,6 +6,7 @@ set(CORE_SOURCE_FILES
 	game.cpp
 	camera.hpp
 	camera.cpp
+	image.h
 
 	platform/glfw_headers.hpp
 	platform/glfw_platform.hpp
@@ -13,8 +14,8 @@ set(CORE_SOURCE_FILES
 	platform/glfw_window.hpp
 	platform/glfw_window.cpp
 
-	io/stb_loader.hpp
-	io/stb_loader.cpp
+	io/file_api.hpp
+	io/file_api.cpp
 
 	render/glew_headers.hpp
 	render/opengl_render_system.hpp

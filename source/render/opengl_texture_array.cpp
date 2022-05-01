@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "io/file_api.hpp"
+
 
 OpenglTextureArray::OpenglTextureArray(std::vector<const char*> paths, int resolutionX, int resolutionY)
 {
@@ -11,24 +13,20 @@ OpenglTextureArray::OpenglTextureArray(std::vector<const char*> paths, int resol
 
   for (int i = 0; i < paths.size(); i++)
   {
-    int width, height, nrChannels;
-    stbi_set_verticall_flip(true);
-    unsigned char* data = load_image(paths[i], &width, &height, &nrChannels, 0);
-
-    if (data)
+    Image image = readImage(paths[i]);
+    if (!image.data.empty())
     {
       GLuint channelsMode = GL_RGB;
-      if (nrChannels == 4)
+      if (image.channels == 4)
         channelsMode = GL_RGBA;
 
-      glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, resolutionX, resolutionY, 1, channelsMode, GL_UNSIGNED_BYTE, data);
+      glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, resolutionX, resolutionY, 1, channelsMode, GL_UNSIGNED_BYTE, &image.data[0]);
       glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
     {
       std::cout << "Failed to load texture" << std::endl;
     }
-    free_image(data);
   }
 
   glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

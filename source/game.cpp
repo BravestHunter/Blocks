@@ -22,6 +22,7 @@
 #include "compile_utils.hpp"
 #include "resourceConfig.h"
 
+#include "io/file_api.hpp"
 
 std::shared_ptr<OpenglModel> CreateBlockModel();
 std::shared_ptr<Chunk> GenerateChunk();
