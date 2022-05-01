@@ -9,6 +9,7 @@ set(CORE_SOURCE_FILES
 	image.h
 
 	platform/glfw_headers.hpp
+	platform/cursor_mode.hpp
 	platform/glfw_platform.hpp
 	platform/glfw_platform.cpp
 	platform/glfw_window.hpp

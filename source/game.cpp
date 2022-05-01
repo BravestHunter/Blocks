@@ -50,8 +50,8 @@ int Game::Run()
   std::thread renderThread(&Game::RunRenderCycle, this);
 
   // Generate map
-  int xRange = 5;
-  int yRange = 5;
+  int xRange = 3;
+  int yRange = 3;
   for (int x = -xRange; x <= xRange; x++)
   {
     for (int y = -yRange; y <= yRange; y++)
@@ -59,6 +59,11 @@ int Game::Run()
       std::shared_ptr<Chunk> chunk = GenerateChunk();
       OpenglRawChunkData chunkData = GenerateChunkRawData(chunk);
       map_->EnqueueChunk(chunkData, std::make_pair(x, y));
+
+      if (window_ && window_->IsWindowShouldClose())
+      {
+        break;
+      }
     }
   }
 
@@ -70,8 +75,8 @@ int Game::Run()
 
 void Game::RunRenderCycle()
 {
-  std::shared_ptr<GlfwWindow> window = platform_->CreateWindow(framebufferWidth_, framebufferHeight_, "Title");
-  window->MakeCurrentContext();
+  window_ = platform_->CreateWindow(framebufferWidth_, framebufferHeight_, "Title");
+  window_->MakeCurrentContext();
 
   OpenglRenderSystem renderSystem;
   renderSystem.Init();
@@ -82,7 +87,7 @@ void Game::RunRenderCycle()
 
   ImGui::StyleColorsDark();
 
-  window->InitImgui();
+  window_->InitImgui();
   // GL 3.0 + GLSL 130
   const char* glsl_version = "#version 130";
   ImGui_ImplOpenGL3_Init(glsl_version);
@@ -90,7 +95,7 @@ void Game::RunRenderCycle()
   bool wireframeMode = false;
 
   // Set callbacks
-  window->SetFramebufferCallback(
+  window_->SetFramebufferCallback(
     [this](int width, int height)
     {
       framebufferWidth_ = width;
@@ -99,15 +104,15 @@ void Game::RunRenderCycle()
       glViewport(0, 0, width, height);
     }
   );
-  window->SetKeyCallback(
-    [window, &renderSystem, &wireframeMode](int keycode, int scancode, int action, int mods)
+  window_->SetKeyCallback(
+    [this, &renderSystem, &wireframeMode](int keycode, int scancode, int action, int mods)
     {
-      if (action != GLFW_PRESS || window == nullptr)
+      if (action != GLFW_PRESS || window_ == nullptr)
         return;
 
       if (keycode == GLFW_KEY_ESCAPE)
       {
-        window->SetWindowShouldClose(true);
+        window_->SetWindowShouldClose(true);
       }
 
       if (keycode == GLFW_KEY_X)
@@ -115,9 +120,14 @@ void Game::RunRenderCycle()
         wireframeMode = !wireframeMode;
         renderSystem.SetWireframeMode(wireframeMode);
       }
+
+      if (keycode == GLFW_KEY_L)
+      {
+        SwitchCursorMode();
+      }
     }
   );
-  window->SetCursorPositionCallback(
+  window_->SetCursorPositionCallback(
     [this](double xpos, double ypos)
     {
       float xposF = static_cast<float>(xpos);
@@ -136,10 +146,13 @@ void Game::RunRenderCycle()
       lastX_ = xposF;
       lastY_ = yposF;
 
-      camera_->ProcessMouseMovement(xoffset, yoffset);
+      if (!isCursorEnabled_)
+      {
+        camera_->ProcessMouseMovement(xoffset, yoffset);
+      }
     }
   );
-  window->SetScrollCallback(
+  window_->SetScrollCallback(
     [this](double xoffset, double yoffset)
     {
       camera_->ProcessMouseScroll(static_cast<float>(yoffset));
@@ -156,7 +169,7 @@ void Game::RunRenderCycle()
 
   bool showImguiWindow = true;
 
-  while (!window->IsWindowShouldClose())
+  while (!window_->IsWindowShouldClose())
   {
     glfwPollEvents();
 
@@ -164,7 +177,7 @@ void Game::RunRenderCycle()
     deltaTime_ = currentFrame - lastFrame_;
     lastFrame_ = currentFrame;
 
-    processInput(window);
+    ProcessInput();
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -190,29 +203,43 @@ void Game::RunRenderCycle()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    window->SwapBuffers();
+    window_->SwapBuffers();
   }
 
   renderSystem.Deinit();
 }
 
-void Game::processInput(std::shared_ptr<GlfwWindow> window)
+void Game::ProcessInput()
 {
-  if (window->GetKeyState(GLFW_KEY_W) == GLFW_PRESS)
+  if (window_->GetKeyState(GLFW_KEY_W) == GLFW_PRESS)
   {
     camera_->ProcessKeyboard(Camera::FORWARD, deltaTime_);
   }
-  if (window->GetKeyState(GLFW_KEY_S) == GLFW_PRESS)
+  if (window_->GetKeyState(GLFW_KEY_S) == GLFW_PRESS)
   {
     camera_->ProcessKeyboard(Camera::BACKWARD, deltaTime_);
   }
-  if (window->GetKeyState(GLFW_KEY_A) == GLFW_PRESS)
+  if (window_->GetKeyState(GLFW_KEY_A) == GLFW_PRESS)
   {
     camera_->ProcessKeyboard(Camera::LEFT, deltaTime_);
   }
-  if (window->GetKeyState(GLFW_KEY_D) == GLFW_PRESS)
+  if (window_->GetKeyState(GLFW_KEY_D) == GLFW_PRESS)
   {
     camera_->ProcessKeyboard(Camera::RIGHT, deltaTime_);
+  }
+}
+
+void Game::SwitchCursorMode()
+{
+  isCursorEnabled_ = !isCursorEnabled_;
+
+  if (isCursorEnabled_)
+  {
+    window_->SetCursorMode(CursorMode::Normal);
+  }
+  else
+  {
+    window_->SetCursorMode(CursorMode::Disabled);
   }
 }
 

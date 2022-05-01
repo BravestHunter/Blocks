@@ -33,6 +33,11 @@ private:
   float lastY_;
   bool firstMouse_ = true;
 
+  // Window
+  std::unique_ptr<GlfwWindow> window_;
+  bool isCursorEnabled_ = false;
+
   void RunRenderCycle();
-  void processInput(std::shared_ptr<GlfwWindow> window);
+  void ProcessInput();
+  void SwitchCursorMode();
 };

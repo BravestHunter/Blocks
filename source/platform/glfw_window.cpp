@@ -1,5 +1,7 @@
 #include "glfw_window.hpp"
 
+#include <exception>
+
 #include "backends/imgui_impl_glfw.h"
 
 
@@ -65,6 +67,44 @@ void GlfwWindow::SetWindowShouldClose(bool value)
 int GlfwWindow::GetKeyState(int keycode)
 {
   return glfwGetKey(windowPtr_, keycode);
+}
+
+
+void GlfwWindow::SetCursorMode(CursorMode mode)
+{
+  switch (mode)
+  {
+  case CursorMode::Normal:
+    glfwSetInputMode(windowPtr_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    break;
+  case CursorMode::Disabled:
+    glfwSetInputMode(windowPtr_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    break;
+  case CursorMode::Hidden:
+    glfwSetInputMode(windowPtr_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    break;
+
+  default:
+    throw std::exception("Unknown cursor mode");
+  }
+}
+
+CursorMode GlfwWindow::GetCursorMode()
+{
+  int glfwMode = glfwGetInputMode(windowPtr_, GLFW_CURSOR);
+
+  switch (glfwMode)
+  {
+  case GLFW_CURSOR_NORMAL:
+    return CursorMode::Normal;
+  case GLFW_CURSOR_DISABLED:
+    return CursorMode::Disabled;
+  case GLFW_CURSOR_HIDDEN:
+    return CursorMode::Hidden;
+
+  default:
+    throw std::exception("Unknown cursor mode");
+  }
 }
 
 
@@ -189,6 +229,8 @@ void GlfwWindow::FocusCallback(GLFWwindow* window, int focused)
   {
     windowInstance->focusCallbackFunction_(focused);
   }
+
+  ImGui_ImplGlfw_WindowFocusCallback(window, focused);
 }
 
 void GlfwWindow::IconifyCallback(GLFWwindow* window, int iconified)
@@ -220,6 +262,8 @@ void GlfwWindow::KeyCallback(GLFWwindow* window, int keycode, int scancode, int 
   {
     windowInstance->keyCallbackFunction_(keycode, scancode, action, mods);
   }
+
+  ImGui_ImplGlfw_KeyCallback(window, keycode, scancode, action, mods);
 }
 
 void GlfwWindow::CharCallback(GLFWwindow* window, unsigned int codepoint)
@@ -230,6 +274,8 @@ void GlfwWindow::CharCallback(GLFWwindow* window, unsigned int codepoint)
   {
     windowInstance->charCallbackFunction_(codepoint);
   }
+
+  ImGui_ImplGlfw_CharCallback(window, codepoint);
 }
 
 void GlfwWindow::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -240,6 +286,8 @@ void GlfwWindow::MouseButtonCallback(GLFWwindow* window, int button, int action,
   {
     windowInstance->mouseButtonCallbackFunction_(button, action, mods);
   }
+
+  ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 }
 
 void GlfwWindow::CursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -250,6 +298,8 @@ void GlfwWindow::CursorPositionCallback(GLFWwindow* window, double xpos, double 
   {
     windowInstance->cursorPositionCallbackFunction_(xpos, ypos);
   }
+
+  ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 }
 
 void GlfwWindow::CursorEnterCallback(GLFWwindow* window, int entered)
@@ -260,6 +310,8 @@ void GlfwWindow::CursorEnterCallback(GLFWwindow* window, int entered)
   {
     windowInstance->cursorEnterCallbackFunction_(entered);
   }
+
+  ImGui_ImplGlfw_CursorEnterCallback(window, entered);
 }
 
 void GlfwWindow::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
@@ -270,6 +322,8 @@ void GlfwWindow::ScrollCallback(GLFWwindow* window, double xoffset, double yoffs
   {
     windowInstance->scrollCallbackFunction_(xoffset, yoffset);
   }
+
+  ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 }
 
 void GlfwWindow::DropCallback(GLFWwindow* window, int count, const char** paths)

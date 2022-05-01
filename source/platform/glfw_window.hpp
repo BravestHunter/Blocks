@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "glfw_headers.hpp"
+#include "cursor_mode.hpp"
 
 
 class GlfwPlatform;
@@ -25,6 +26,9 @@ public:
   void SetWindowShouldClose(bool value);
 
   int GetKeyState(int keycode);
+
+  void SetCursorMode(CursorMode mode);
+  CursorMode GetCursorMode();
 
   void SetPositionCallback(std::function<void(int, int)> func);
   void SetSizeCallback(std::function<void(int, int)> func);
