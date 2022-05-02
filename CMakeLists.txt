@@ -25,6 +25,7 @@ find_package(GLFW3 3.3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLM REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(FastNoise2 REQUIRED)
 
 
 add_subdirectory(source)

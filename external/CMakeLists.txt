@@ -11,3 +11,5 @@ add_subdirectory(stb)
 set(ENV{FREETYPE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/external/freetype")
 
 add_subdirectory(imgui)
+
+set(FastNoise2_DIR "${CMAKE_CURRENT_SOURCE_DIR}/fastNoise2/lib/cmake/FastNoise2" PARENT_SCOPE)

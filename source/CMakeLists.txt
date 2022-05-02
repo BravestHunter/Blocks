@@ -61,6 +61,7 @@ target_link_libraries(BlocksCore
 		stb
 		Freetype::Freetype
 		imgui
+		FastNoise2::FastNoise
 )
 
 

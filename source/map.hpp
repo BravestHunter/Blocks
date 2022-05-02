@@ -17,6 +17,7 @@ public:
 
 private:
   std::map<std::pair<int, int>, std::shared_ptr<Chunk>> chunks_;
+  int seed_;
 
-  std::shared_ptr<Chunk> GenerateChunk();
+  std::shared_ptr<Chunk> GenerateChunk(std::pair<int, int> coordinates);
 };
