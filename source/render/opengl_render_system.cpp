@@ -63,7 +63,7 @@ void OpenglRenderSystem::RenderModel(std::shared_ptr<OpenglModel> model, glm::ma
   glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void OpenglRenderSystem::RenderChunk(std::shared_ptr<OpenglChunkModel> chunk, Camera* camera, float ratio)
+void OpenglRenderSystem::RenderChunk(std::shared_ptr<OpenglChunk> chunk, Camera* camera, float ratio)
 {
   defaultShader_->Use();
   defaultShader_->SetInt("texture", 0);
@@ -77,7 +77,7 @@ void OpenglRenderSystem::RenderChunk(std::shared_ptr<OpenglChunkModel> chunk, Ca
   glDrawArrays(GL_TRIANGLES, 0, chunk->verticesNumber_);
 }
 
-void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMapMoodel> map, Camera* camera, float ratio)
+void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, Camera* camera, float ratio)
 {
   defaultShader_->Use();
   defaultShader_->SetInt("texture", 0);
@@ -88,9 +88,9 @@ void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMapMoodel> map, Camera*
   for (auto pair : map->chunks_)
   {
     std::pair<int, int> coords = pair.first;
-    std::shared_ptr<OpenglChunkModel> chunk = pair.second;
+    std::shared_ptr<OpenglChunk> chunk = pair.second;
 
-    glm::vec3 chunkOffset(coords.first * ((int)Chunk::Length + 2), coords.second * ((int)Chunk::Width + 2), 0.0f);
+    glm::vec3 chunkOffset(coords.first * (int)Chunk::Length, coords.second * (int)Chunk::Width, 0.0f);
     glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), chunkOffset);
     glm::mat4 mvp = projection * view * modelTransform;
     defaultShader_->SetMat4("MVP", mvp);

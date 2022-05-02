@@ -4,8 +4,9 @@
 
 #include "platform/glfw_platform.hpp"
 #include "render/opengl_render_system.hpp"
-#include "render/opengl_map_model.hpp"
+#include "render/opengl_map.hpp"
 #include "camera.hpp"
+#include "map.hpp"
 
 
 class DllExport Game
@@ -18,7 +19,11 @@ public:
 
 private:
   std::unique_ptr<GlfwPlatform> platform_;
-  std::shared_ptr<OpenglMapMoodel> map_;
+  std::unique_ptr<Map> map_;
+  std::shared_ptr<OpenglMap> openglMap_;
+
+  int renderRadius_ = 2;
+  glm::ivec2 lastCenterChunkCoords_;
 
   int framebufferWidth_;
   int framebufferHeight_;
@@ -37,6 +42,10 @@ private:
   std::unique_ptr<GlfwWindow> window_;
   bool isCursorEnabled_ = false;
 
+  glm::ivec2 CalculateChunkCenter();
+  void RunSimulationCycle();
+  void AddChunks(glm::ivec2 centerChunkCoords);
+  void RemoveChunks(glm::ivec2 centerChunkCoords, glm::ivec2 lastCenterChunkCoords);
   void RunRenderCycle();
   void ProcessInput();
   void SwitchCursorMode();

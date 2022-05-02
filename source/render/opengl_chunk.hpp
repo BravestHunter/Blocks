@@ -5,11 +5,11 @@
 #include "opengl_buffer.hpp"
 #include "opengl_vertex_array_object.hpp"
 
-class OpenglChunkModel
+class OpenglChunk
 {
 public:
-  OpenglChunkModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, int verticesNumber);
-  ~OpenglChunkModel();
+  OpenglChunk(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, int verticesNumber);
+  ~OpenglChunk();
 
 
   int verticesNumber_;

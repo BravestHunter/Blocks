@@ -6,7 +6,9 @@ set(CORE_SOURCE_FILES
 	game.cpp
 	camera.hpp
 	camera.cpp
-	image.h
+	image.hpp
+	map.hpp
+	map.cpp
 
 	platform/glfw_headers.hpp
 	platform/cursor_mode.hpp
@@ -31,10 +33,10 @@ set(CORE_SOURCE_FILES
 	render/opengl_texture_array.cpp
 	render/opengl_model.hpp
 	render/opengl_model.cpp
-	render/opengl_chunk_model.hpp
-	render/opengl_chunk_model.cpp
-	render/opengl_map_model.hpp
-	render/opengl_map_model.cpp
+	render/opengl_chunk.hpp
+	render/opengl_chunk.cpp
+	render/opengl_map.hpp
+	render/opengl_map.cpp
 	render/opengl_raw_chunk_data.hpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp

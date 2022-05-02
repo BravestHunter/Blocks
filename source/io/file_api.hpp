@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "image.h"
+#include "image.hpp"
 
 
 std::vector<unsigned char> readBinaryFile(std::string path);

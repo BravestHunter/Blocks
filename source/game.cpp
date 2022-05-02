@@ -16,7 +16,7 @@
 
 #include "model/chunk.hpp"
 #include "render/opengl_model.hpp"
-#include "render/opengl_chunk_model.hpp"
+#include "render/opengl_chunk.hpp"
 #include "render/opengl_texture_array.hpp"
 
 #include "compile_utils.hpp"
@@ -25,16 +25,16 @@
 #include "io/file_api.hpp"
 
 std::shared_ptr<OpenglModel> CreateBlockModel();
-std::shared_ptr<Chunk> GenerateChunk();
 OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk);
-std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chunk);
+std::shared_ptr<OpenglChunk> GenerateChunkModel(std::shared_ptr<Chunk> chunk);
 
 
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
 {
   platform_ = std::make_unique<GlfwPlatform>();
-  map_ = std::make_shared<OpenglMapMoodel>();
-  camera_ = std::make_unique<Camera>(glm::vec3(-150.0f, -8.0f, 270.0f));
+  map_ = std::make_unique<Map>();
+  openglMap_ = std::make_shared<OpenglMap>();
+  camera_ = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
 
   platform_->Init();
 }
@@ -49,29 +49,80 @@ int Game::Run()
 {
   std::thread renderThread(&Game::RunRenderCycle, this);
 
-  // Generate map
-  int xRange = 3;
-  int yRange = 3;
-  for (int x = -xRange; x <= xRange; x++)
-  {
-    for (int y = -yRange; y <= yRange; y++)
-    {
-      std::shared_ptr<Chunk> chunk = GenerateChunk();
-      OpenglRawChunkData chunkData = GenerateChunkRawData(chunk);
-      map_->EnqueueChunk(chunkData, std::make_pair(x, y));
+  lastCenterChunkCoords_ = CalculateChunkCenter();
+  AddChunks(lastCenterChunkCoords_);
 
-      if (window_ && window_->IsWindowShouldClose())
-      {
-        break;
-      }
-    }
-  }
+  RunSimulationCycle();
 
   renderThread.join();
 
   return 0;
 }
 
+
+glm::ivec2 Game::CalculateChunkCenter()
+{
+  glm::vec3 position = camera_->GetPosition();
+  return glm::ivec2((int)position.x / Chunk::Length, (int)position.y / Chunk::Width);
+}
+
+void Game::RunSimulationCycle()
+{
+  while (true)
+  {
+    glm::ivec2 centerChunk = CalculateChunkCenter();
+
+    if (centerChunk != lastCenterChunkCoords_)
+    {
+      RemoveChunks(centerChunk, lastCenterChunkCoords_);
+      AddChunks(centerChunk);
+
+      lastCenterChunkCoords_ = centerChunk;
+    }
+
+    if (window_ && window_->IsWindowShouldClose())
+    {
+      break;
+    }
+  }
+}
+
+void Game::AddChunks(glm::ivec2 centerChunkCoords)
+{
+  for (int x = centerChunkCoords.x - renderRadius_; x <= centerChunkCoords.x + renderRadius_; x++)
+  {
+    for (int y = centerChunkCoords.y - renderRadius_; y <= centerChunkCoords.y + renderRadius_; y++)
+    {
+      std::pair<int, int> coordinates = std::make_pair(x, y);
+
+      if (!openglMap_->ContainsChunk(coordinates))
+      {
+        std::shared_ptr<Chunk> chunk = map_->GetChunk(coordinates);
+        OpenglRawChunkData chunkData = GenerateChunkRawData(chunk);
+        openglMap_->EnqueueChunkAdd(chunkData, coordinates);
+      }
+    }
+  }
+}
+
+void Game::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunkCoords)
+{
+  glm::ivec2 xBorders = glm::ivec2(CenterChunkCoords.x - renderRadius_, CenterChunkCoords.x + renderRadius_);
+  glm::ivec2 yBorders = glm::ivec2(CenterChunkCoords.y - renderRadius_, CenterChunkCoords.y + renderRadius_);
+
+  for (int x = lastCenterChunkCoords.x - renderRadius_; x <= lastCenterChunkCoords.x + renderRadius_; x++)
+  {
+    for (int y = lastCenterChunkCoords.y - renderRadius_; y <= lastCenterChunkCoords.y + renderRadius_; y++)
+    {
+      if (x < xBorders.x || x > xBorders.y ||
+          y < yBorders.x || y > yBorders.y)
+      {
+        std::pair<int, int> coordinates = std::make_pair(x, y);
+        openglMap_->EnqueueChunkRemove(coordinates);
+      }
+    }
+  }
+}
 
 void Game::RunRenderCycle()
 {
@@ -195,9 +246,9 @@ void Game::RunRenderCycle()
 
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
 
-    map_->AddChunksFromQueue();
+    openglMap_->ProcessQueues();
 
-    renderSystem.RenderMap(map_, camera_.get(), framebufferRatio);
+    renderSystem.RenderMap(openglMap_, camera_.get(), framebufferRatio);
 
     // Render imgui ui
     ImGui::Render();
@@ -307,23 +358,6 @@ std::shared_ptr<OpenglModel> CreateBlockModel()
   return std::make_shared<OpenglModel>(vbo, vao, texture);
 }
 
-std::shared_ptr<Chunk> GenerateChunk()
-{
-  Chunk* chunk = new Chunk();
-
-  for (int z = 0; z < Chunk::Height; z++)
-  {
-    for (int y = 0; y < Chunk::Width; y++)
-    {
-      for (int x = 0; x < Chunk::Length; x++)
-      {
-        chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] = rand() % 4;
-      }
-    }
-  }
-
-  return std::shared_ptr<Chunk>(chunk);
-}
 
 struct Vertex
 {
@@ -497,7 +531,7 @@ OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
   return OpenglRawChunkData(verticesData, verticesDataIndex + 1, verticesNumber);
 }
 
-std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chunk)
+std::shared_ptr<OpenglChunk> GenerateChunkModel(std::shared_ptr<Chunk> chunk)
 {
   std::shared_ptr<OpenglBuffer> vbo = std::make_shared<OpenglBuffer>(GL_ARRAY_BUFFER);
   std::shared_ptr<OpenglVertexArrayObject> vao = std::make_shared<OpenglVertexArrayObject>();
@@ -514,5 +548,5 @@ std::shared_ptr<OpenglChunkModel> GenerateChunkModel(std::shared_ptr<Chunk> chun
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  return std::make_shared<OpenglChunkModel>(vbo, vao, chunkData.verticesNumber);
+  return std::make_shared<OpenglChunk>(vbo, vao, chunkData.verticesNumber);
 }
