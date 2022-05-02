@@ -75,6 +75,7 @@ install(
 	IMPORTED_RUNTIME_ARTIFACTS
 		glew
 		glfw3
+		FastNoise2::FastNoise
 
 		BlocksCore
 	DESTINATION

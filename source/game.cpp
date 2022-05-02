@@ -24,9 +24,8 @@
 
 #include "io/file_api.hpp"
 
-std::shared_ptr<OpenglModel> CreateBlockModel();
+
 OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk);
-std::shared_ptr<OpenglChunk> GenerateChunkModel(std::shared_ptr<Chunk> chunk);
 
 
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
@@ -210,12 +209,7 @@ void Game::RunRenderCycle()
     }
   );
 
-  std::shared_ptr<OpenglModel> blockModel = CreateBlockModel();
-
-  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, ATLAS_TEXTURE));
-  texture->Bind(GL_TEXTURE0);
-
-  std::vector<const char*> paths{ PPCAT(BLOCK_TEXTURES_DIR, "1.png"), PPCAT(BLOCK_TEXTURES_DIR, "2.png"), PPCAT(BLOCK_TEXTURES_DIR, "3.png") };
+  std::vector<const char*> paths{ PPCAT(BLOCK_TEXTURES_DIR, BRICK_TEXTURE), PPCAT(BLOCK_TEXTURES_DIR, DIRT_TEXTURE), PPCAT(BLOCK_TEXTURES_DIR, URAN_TEXTURE) };
   OpenglTextureArray texAr(paths, 64, 64);
 
   bool showImguiWindow = true;
@@ -292,70 +286,6 @@ void Game::SwitchCursorMode()
   {
     window_->SetCursorMode(CursorMode::Disabled);
   }
-}
-
-
-std::shared_ptr<OpenglModel> CreateBlockModel()
-{
-  std::shared_ptr<OpenglBuffer> vbo = std::make_shared<OpenglBuffer>(GL_ARRAY_BUFFER);
-  std::shared_ptr<OpenglVertexArrayObject> vao = std::make_shared<OpenglVertexArrayObject>();
-  std::shared_ptr<OpenglTexture> texture = std::make_shared<OpenglTexture>(PPCAT(TEXTURES_DIR, BLOCK_TEXTURE));
-
-  float vertices[] = {
-      -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-       0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-       0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-       0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-      -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-      -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-      -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-      -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-       0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-       0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-       0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-       0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-      -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-  };
-
-  vao->Bind();
-
-  vbo->Bind();
-  vbo->SetData(sizeof(vertices), vertices);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  return std::make_shared<OpenglModel>(vbo, vao, texture);
 }
 
 
@@ -529,24 +459,4 @@ OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
   }
 
   return OpenglRawChunkData(verticesData, verticesDataIndex + 1, verticesNumber);
-}
-
-std::shared_ptr<OpenglChunk> GenerateChunkModel(std::shared_ptr<Chunk> chunk)
-{
-  std::shared_ptr<OpenglBuffer> vbo = std::make_shared<OpenglBuffer>(GL_ARRAY_BUFFER);
-  std::shared_ptr<OpenglVertexArrayObject> vao = std::make_shared<OpenglVertexArrayObject>();
-
-  OpenglRawChunkData chunkData = GenerateChunkRawData(chunk);
-
-  vao->Bind();
-
-  vbo->Bind();
-  vbo->SetData(sizeof(float) * chunkData.verticesDataLength, chunkData.verticesData);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  return std::make_shared<OpenglChunk>(vbo, vao, chunkData.verticesNumber);
 }
