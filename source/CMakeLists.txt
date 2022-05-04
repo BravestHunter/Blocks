@@ -7,8 +7,6 @@ set(CORE_SOURCE_FILES
 	camera.hpp
 	camera.cpp
 	image.hpp
-	map.hpp
-	map.cpp
 
 	platform/glfw_headers.hpp
 	platform/cursor_mode.hpp
@@ -37,12 +35,19 @@ set(CORE_SOURCE_FILES
 	render/opengl_chunk.cpp
 	render/opengl_map.hpp
 	render/opengl_map.cpp
+	render/opengl_scene.hpp
+	render/opengl_scene.cpp
 	render/opengl_raw_chunk_data.hpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp
 
 	model/block.hpp
 	model/chunk.hpp
+
+	scene/map.hpp
+	scene/map.cpp
+	scene/scene.hpp
+	scene/scene.cpp
 )
 
 add_library(BlocksCore SHARED ${CORE_SOURCE_FILES})

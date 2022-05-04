@@ -4,9 +4,9 @@
 
 #include "platform/glfw_platform.hpp"
 #include "render/opengl_render_system.hpp"
-#include "render/opengl_map.hpp"
+#include "render/opengl_scene.hpp"
 #include "camera.hpp"
-#include "map.hpp"
+#include "scene/map.hpp"
 
 
 class DllExport Game
@@ -20,7 +20,7 @@ public:
 private:
   std::unique_ptr<GlfwPlatform> platform_;
   std::unique_ptr<Map> map_;
-  std::shared_ptr<OpenglMap> openglMap_;
+  std::shared_ptr<OpenglScene> openglScene_;
 
   int renderRadius_ = 3;
   glm::ivec2 lastCenterChunkCoords_;

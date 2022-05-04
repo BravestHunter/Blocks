@@ -25,17 +25,17 @@
 #include "io/file_api.hpp"
 
 
-OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk);
-
-
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
 {
   platform_ = std::make_unique<GlfwPlatform>();
   map_ = std::make_unique<Map>();
-  openglMap_ = std::make_shared<OpenglMap>();
+  openglScene_ = std::make_shared<OpenglScene>();
+
   camera_ = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
 
   platform_->Init();
+
+  openglScene_->InitMap();
 }
 
 Game::~Game()
@@ -88,17 +88,18 @@ void Game::RunSimulationCycle()
 
 void Game::AddChunks(glm::ivec2 centerChunkCoords)
 {
+  std::shared_ptr<OpenglMap> map = openglScene_->GetMap();
+
   for (int x = centerChunkCoords.x - renderRadius_; x <= centerChunkCoords.x + renderRadius_; x++)
   {
     for (int y = centerChunkCoords.y - renderRadius_; y <= centerChunkCoords.y + renderRadius_; y++)
     {
       std::pair<int, int> coordinates = std::make_pair(x, y);
 
-      if (!openglMap_->ContainsChunk(coordinates))
+      if (!map->ContainsChunk(coordinates))
       {
         std::shared_ptr<Chunk> chunk = map_->GetChunk(coordinates);
-        OpenglRawChunkData chunkData = GenerateChunkRawData(chunk);
-        openglMap_->EnqueueChunkAdd(chunkData, coordinates);
+        map->EnqueueChunkAdd(chunk, coordinates);
       }
     }
   }
@@ -106,6 +107,7 @@ void Game::AddChunks(glm::ivec2 centerChunkCoords)
 
 void Game::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunkCoords)
 {
+  std::shared_ptr<OpenglMap> map = openglScene_->GetMap();
   glm::ivec2 xBorders = glm::ivec2(CenterChunkCoords.x - renderRadius_, CenterChunkCoords.x + renderRadius_);
   glm::ivec2 yBorders = glm::ivec2(CenterChunkCoords.y - renderRadius_, CenterChunkCoords.y + renderRadius_);
 
@@ -117,7 +119,7 @@ void Game::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunk
           y < yBorders.x || y > yBorders.y)
       {
         std::pair<int, int> coordinates = std::make_pair(x, y);
-        openglMap_->EnqueueChunkRemove(coordinates);
+        map->EnqueueChunkRemove(coordinates);
       }
     }
   }
@@ -230,9 +232,9 @@ void Game::RunRenderCycle()
 
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
 
-    openglMap_->ProcessQueues();
+    openglScene_->GetMap()->ProcessQueues();
 
-    renderSystem.RenderMap(openglMap_, camera_.get(), framebufferRatio);
+    renderSystem.RenderMap(openglScene_->GetMap(), camera_.get(), framebufferRatio);
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -242,7 +244,7 @@ void Game::RunRenderCycle()
     ImGui::SetNextWindowSize(ImVec2(0, 0));
     ImGui::Begin("Info");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::Text("Rendered triangles number: %d", renderSystem.GetFrameTrianlgesNumber());
+    ImGui::Text("Rendered triangles: %d", renderSystem.GetFrameTrianlgesNumber());
     ImGui::Text("Camera position: %.2f %.2f %.2f", camera_->GetPosition().x, camera_->GetPosition().y, camera_->GetPosition().z);
     ImGui::Text("Camera direction: %.2f %.2f %.2f", camera_->GetForward().x, camera_->GetForward().y, camera_->GetForward().z);
     ImGui::End();
@@ -291,177 +293,4 @@ void Game::SwitchCursorMode()
   {
     window_->SetCursorMode(CursorMode::Disabled);
   }
-}
-
-
-struct Vertex
-{
-  float x;
-  float y;
-  float z;
-  float texU;
-  float texV;
-  float texI;
-};
-
-void AddVertex(Vertex& vertex, float* data, size_t& index)
-{
-  data[index++] = vertex.x;
-  data[index++] = vertex.y;
-  data[index++] = vertex.z;
-  data[index++] = vertex.texU;
-  data[index++] = vertex.texV;
-  data[index++] = vertex.texI;
-}
-
-OpenglRawChunkData GenerateChunkRawData(std::shared_ptr<Chunk> chunk)
-{
-  static const size_t BlockVerticesNumber = 4 * 6;
-  static const size_t VertexSize = sizeof(float) * 6;
-  static const size_t verticesDataSize = Chunk::BlocksNumber * BlockVerticesNumber * VertexSize;
-
-  float* verticesData = new float[verticesDataSize];
-  size_t verticesDataIndex = 0;
-  size_t verticesNumber = 0;
-  for (int z = 0; z < Chunk::Height; z++)
-  {
-    for (int y = 0; y < Chunk::Width; y++)
-    {
-      for (int x = 0; x < Chunk::Length; x++)
-      {
-        size_t blockIndex = x + y * Chunk::Width + z * Chunk::LayerBlocksNumber;
-
-        if (chunk->blocks[blockIndex] == 0)
-        {
-          continue;
-        }
-
-        float fBlock = (float)(chunk->blocks[blockIndex] - 1);
-
-        glm::vec3 position(x, y, z);
-
-        // Check forward face
-        if (x == Chunk::Length - 1 || chunk->blocks[blockIndex + 1] == 0)
-        {
-          // Add forward face
-
-          Vertex v1(x + 1, y + 1, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x + 1, y, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x + 1, y, z + 1, 1.0f, 1.0f, fBlock);
-
-          AddVertex(v1, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v4, verticesData, verticesDataIndex);
-
-          verticesNumber += 6;
-        }
-
-        // Check backward face
-        if (x == 0 || chunk->blocks[blockIndex - 1] == 0)
-        {
-          // Add backward face
-
-          Vertex v1(x, y, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x, y + 1, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x, y, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f, fBlock);
-
-          AddVertex(v1, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v4, verticesData, verticesDataIndex);
-
-          verticesNumber += 6;
-        }
-
-        // Check right face
-        if (y == Chunk::Width - 1 || chunk->blocks[blockIndex + Chunk::Length] == 0)
-        {
-          // Add right face
-
-          Vertex v1(x, y + 1, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x + 1, y + 1, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x, y + 1, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x + 1, y + 1, z + 1, 1.0f, 1.0f, fBlock);
-
-          AddVertex(v1, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v4, verticesData, verticesDataIndex);
-
-          verticesNumber += 6;
-        }
-
-        // Check left face
-        if (y == 0 || chunk->blocks[blockIndex - Chunk::Length] == 0)
-        {
-          // Add left face
-
-          Vertex v1(x + 1, y, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x, y, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x + 1, y, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x, y, z + 1, 1.0f, 1.0f, fBlock);
-
-          AddVertex(v1, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v4, verticesData, verticesDataIndex);
-
-          verticesNumber += 6;
-        }
-
-        // Check upper face
-        if (z == Chunk::Height - 1 || chunk->blocks[blockIndex + Chunk::LayerBlocksNumber] == 0)
-        {
-          // Add upper face
-
-          Vertex v1(x + 1, y, z + 1, 0.0f, 0.0f, fBlock);
-          Vertex v2(x, y, z + 1, 1.0f, 0.0f, fBlock);
-          Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f, fBlock);
-
-          AddVertex(v1, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v4, verticesData, verticesDataIndex);
-
-          verticesNumber += 6;
-        }
-
-        // Check bottom face
-        if (z == 0 || chunk->blocks[blockIndex - Chunk::LayerBlocksNumber] == 0)
-        {
-          // Add bottom face
-
-          Vertex v1(x, y, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x + 1, y, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x, y + 1, z, 0.0f, 1.0f, fBlock);
-          Vertex v4(x + 1, y + 1, z, 1.0f, 1.0f, fBlock);
-
-          AddVertex(v1, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v3, verticesData, verticesDataIndex);
-          AddVertex(v2, verticesData, verticesDataIndex);
-          AddVertex(v4, verticesData, verticesDataIndex);
-
-          verticesNumber += 6;
-        }
-      }
-    }
-  }
-
-  return OpenglRawChunkData(verticesData, verticesDataIndex + 1, verticesNumber);
 }
