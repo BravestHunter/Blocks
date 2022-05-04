@@ -22,7 +22,7 @@ private:
   std::unique_ptr<Map> map_;
   std::shared_ptr<OpenglMap> openglMap_;
 
-  int renderRadius_ = 2;
+  int renderRadius_ = 3;
   glm::ivec2 lastCenterChunkCoords_;
 
   int framebufferWidth_;

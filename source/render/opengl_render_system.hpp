@@ -24,13 +24,17 @@ public:
   void Init();
   void Deinit();
 
+  void StartFrame();
+  void FinishFrame();
   void Clear(glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-  void RenderModel(std::shared_ptr<OpenglModel> model, glm::mat4 modelTransform, Camera* camera, float ratio);
-  void RenderChunk(std::shared_ptr<OpenglChunk> chunk, Camera* camera, float ratio);
   void RenderMap(std::shared_ptr<OpenglMap> map, Camera* camera, float ratio);
+
+  int GetFrameTrianlgesNumber();
 
   void SetWireframeMode(bool value);
 
 private:
+  int frameTrianglesNumber_;
+
   std::unique_ptr<OpenglShader> defaultShader_;
 };

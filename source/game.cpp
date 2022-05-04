@@ -216,6 +216,8 @@ void Game::RunRenderCycle()
 
   while (!window_->IsWindowShouldClose())
   {
+    renderSystem.StartFrame();
+
     glfwPollEvents();
 
     float currentFrame = static_cast<float>(platform_->GetTime());
@@ -223,18 +225,6 @@ void Game::RunRenderCycle()
     lastFrame_ = currentFrame;
 
     ProcessInput();
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImVec2(0, 0));
-    ImGui::Begin("Info");
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::Text("Camera position %.2f %.2f %.2f", camera_->GetPosition().x, camera_->GetPosition().y, camera_->GetPosition().z);
-    ImGui::Text("Camera direction %.2f %.2f %.2f", camera_->GetForward().x, camera_->GetForward().y, camera_->GetForward().z);
-    ImGui::End();
 
     renderSystem.Clear();
 
@@ -244,9 +234,24 @@ void Game::RunRenderCycle()
 
     renderSystem.RenderMap(openglMap_, camera_.get(), framebufferRatio);
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(0, 0));
+    ImGui::Begin("Info");
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Rendered triangles number: %d", renderSystem.GetFrameTrianlgesNumber());
+    ImGui::Text("Camera position: %.2f %.2f %.2f", camera_->GetPosition().x, camera_->GetPosition().y, camera_->GetPosition().z);
+    ImGui::Text("Camera direction: %.2f %.2f %.2f", camera_->GetForward().x, camera_->GetForward().y, camera_->GetForward().z);
+    ImGui::End();
+
     // Render imgui ui
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    renderSystem.FinishFrame();
 
     window_->SwapBuffers();
   }
