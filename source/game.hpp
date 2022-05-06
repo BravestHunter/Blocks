@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <mutex>
+
 #include "export.h"
 
 #include "platform/glfw_platform.hpp"
@@ -7,6 +10,7 @@
 #include "render/opengl_scene.hpp"
 #include "camera.hpp"
 #include "scene/map.hpp"
+#include "scene/scene.hpp"
 
 
 class DllExport Game
@@ -20,7 +24,9 @@ public:
 private:
   std::unique_ptr<GlfwPlatform> platform_;
   std::unique_ptr<Map> map_;
-  std::shared_ptr<OpenglScene> openglScene_;
+
+  std::shared_ptr<Scene> currentScene_ = nullptr;
+  std::shared_ptr<OpenglScene> openglScene_ = nullptr;
 
   int renderRadius_ = 3;
   glm::ivec2 lastCenterChunkCoords_;
@@ -40,7 +46,7 @@ private:
 
   // Window
   std::unique_ptr<GlfwWindow> window_;
-  bool isCursorEnabled_ = false;
+  bool isCursorEnabled_ = true;
 
   glm::ivec2 CalculateChunkCenter();
   void RunSimulationCycle();
@@ -49,4 +55,10 @@ private:
   void RunRenderCycle();
   void ProcessInput();
   void SwitchCursorMode();
+
+  std::shared_ptr<Scene> requestedScene_ = nullptr;
+  void RequestScene(std::shared_ptr<Scene> scene);
+  void SetRequestedScene();
+  std::shared_ptr<Scene> CreateMainMenuScene();
+  std::shared_ptr<Scene> CreateWorldScene();
 };

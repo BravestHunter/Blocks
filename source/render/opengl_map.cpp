@@ -28,21 +28,19 @@ void OpenglMap::EnqueueChunkAdd(std::shared_ptr<Chunk> chunk, std::pair<int, int
   std::shared_ptr<OpenglRawChunkData> rawData = GenerateRawChunkData(chunk);
   ChunksQueueItem item(rawData, position);
 
-  mutex_.lock();
+  std::lock_guard<std::mutex> locker(mutex_);
   addQueue_.push(item);
-  mutex_.unlock();
 }
 
 void OpenglMap::EnqueueChunkRemove(std::pair<int, int> position)
 {
-  mutex_.lock();
+  std::lock_guard<std::mutex> locker(mutex_);
   removeQueue_.push(position);
-  mutex_.unlock();
 }
 
 void OpenglMap::ProcessQueues()
 {
-  mutex_.lock();
+  std::lock_guard<std::mutex> locker(mutex_);
 
   while (!addQueue_.empty())
   {
@@ -55,8 +53,6 @@ void OpenglMap::ProcessQueues()
     RemoveChunk(removeQueue_.front());
     removeQueue_.pop();
   }
-
-  mutex_.unlock();
 }
 
 

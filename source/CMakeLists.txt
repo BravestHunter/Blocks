@@ -48,6 +48,12 @@ set(CORE_SOURCE_FILES
 	scene/map.cpp
 	scene/scene.hpp
 	scene/scene.cpp
+
+	ui/i_imgui_element.hpp
+	ui/imgui_button.hpp
+	ui/imgui_button.cpp
+	ui/imgui_window.hpp
+	ui/imgui_window.cpp
 )
 
 add_library(BlocksCore SHARED ${CORE_SOURCE_FILES})
