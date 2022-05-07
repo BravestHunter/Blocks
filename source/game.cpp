@@ -45,7 +45,6 @@ std::string string_format(const std::string& format, Args ... args)
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
 {
   platform_ = std::make_unique<GlfwPlatform>();
-  map_ = std::make_unique<Map>();
   openglScene_ = std::make_shared<OpenglScene>();
 
   camera_ = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
@@ -111,7 +110,8 @@ void Game::RunSimulationCycle()
 
 void Game::AddChunks(glm::ivec2 centerChunkCoords)
 {
-  std::shared_ptr<OpenglMap> map = openglScene_->GetMap();
+  std::shared_ptr<Map> map = currentScene_->GetMap();
+  std::shared_ptr<OpenglMap> openglMap = openglScene_->GetMap();
 
   for (int x = centerChunkCoords.x - renderRadius_; x <= centerChunkCoords.x + renderRadius_; x++)
   {
@@ -119,10 +119,10 @@ void Game::AddChunks(glm::ivec2 centerChunkCoords)
     {
       std::pair<int, int> coordinates = std::make_pair(x, y);
 
-      if (!map->ContainsChunk(coordinates))
+      if (!openglMap->ContainsChunk(coordinates))
       {
-        std::shared_ptr<Chunk> chunk = map_->GetChunk(coordinates);
-        map->EnqueueChunkAdd(chunk, coordinates);
+        std::shared_ptr<Chunk> chunk = map->GetChunk(coordinates);
+        openglMap->EnqueueChunkAdd(chunk, coordinates);
       }
     }
   }
@@ -130,7 +130,7 @@ void Game::AddChunks(glm::ivec2 centerChunkCoords)
 
 void Game::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunkCoords)
 {
-  std::shared_ptr<OpenglMap> map = openglScene_->GetMap();
+  std::shared_ptr<OpenglMap> openglMap = openglScene_->GetMap();
   glm::ivec2 xBorders = glm::ivec2(CenterChunkCoords.x - renderRadius_, CenterChunkCoords.x + renderRadius_);
   glm::ivec2 yBorders = glm::ivec2(CenterChunkCoords.y - renderRadius_, CenterChunkCoords.y + renderRadius_);
 
@@ -142,7 +142,7 @@ void Game::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunk
           y < yBorders.x || y > yBorders.y)
       {
         std::pair<int, int> coordinates = std::make_pair(x, y);
-        map->EnqueueChunkRemove(coordinates);
+        openglMap->EnqueueChunkRemove(coordinates);
       }
     }
   }
@@ -357,21 +357,39 @@ std::shared_ptr<Scene> Game::CreateMainMenuScene()
     "Create new world",
     [this]()
     {
-      std::shared_ptr<Scene> worldScene_ = CreateWorldScene();
+      srand(time(0));
+      std::shared_ptr<Scene> worldScene_ = CreateWorldScene(std::make_shared<Map>(rand()));
       RequestScene(worldScene_);
       SwitchCursorMode();
     }
   );
   window->AddElement(createWorldButton);
 
+  std::shared_ptr<ImguiButton> loadWorldButton = std::make_shared<ImguiButton>(
+    "Load world",
+    [this]()
+    {
+      if (!isPathExist("map"))
+      {
+        return;
+      }
+
+      std::shared_ptr<Map> map = LoadMap();
+      std::shared_ptr<Scene> worldScene_ = CreateWorldScene(map);
+
+      RequestScene(worldScene_);
+      SwitchCursorMode();
+    }
+  );
+  window->AddElement(loadWorldButton);
+
   return scene;
 }
 
-std::shared_ptr<Scene> Game::CreateWorldScene()
+std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
 {
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-  std::shared_ptr<Map> map = std::make_shared<Map>();
   scene->SetMap(map);
 
   std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Statistics");
@@ -409,5 +427,84 @@ std::shared_ptr<Scene> Game::CreateWorldScene()
   );
   window->AddElement(cameraDirectionText);
 
+  std::shared_ptr<ImguiText> seedText = std::make_shared<ImguiText>(
+    [this]()
+    {
+      return string_format("Map seed: %d", currentScene_->GetMap()->GetSeed());
+    }
+  );
+  window->AddElement(seedText);
+
+  std::shared_ptr<ImguiButton> saveButton = std::make_shared<ImguiButton>(
+    "Save world",
+    [this]()
+    {
+      if (!isPathExist("map"))
+      {
+        createDirectory("map");
+      }
+      else
+      {
+        for (const std::string& path : getFilesInDirectory("map"))
+        {
+          removePath(path);
+        }
+      }
+
+      SaveMap(currentScene_->GetMap());
+    }
+  );
+  window->AddElement(saveButton);
+
   return scene;
+}
+
+std::shared_ptr<Map> Game::LoadMap()
+{
+  std::string seedStr = readTextFile("map/seed.txt");
+  int seed = std::stoi(seedStr);
+
+  std::shared_ptr<Map> map = std::make_shared<Map>(seed);
+
+  for (const std::string& path : getFilesInDirectory("map"))
+  {
+    if (path == "seed.txt")
+    {
+      continue;
+    }
+
+    std::vector<unsigned char> data = readBinaryFile("map/" + path);
+    std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>();
+    memcpy(chunk.get(), &data[0], sizeof(Chunk));
+
+    size_t underscorePosition = path.find("_");
+    size_t dotPosition = path.find(".");
+
+    std::string xStr = path.substr(0, underscorePosition);
+    int x = std::stoi(xStr);
+    std::string yStr = path.substr(underscorePosition + 1, dotPosition - underscorePosition - 1);
+    int y = std::stoi(yStr);
+    std::pair<int, int> position = std::make_pair(x, y);
+
+    map->AddChunk(position, chunk);
+  }
+
+  return map;
+}
+
+void Game::SaveMap(std::shared_ptr<Map> map)
+{
+  saveTextFile("map/seed.txt", std::to_string(map->GetSeed()));
+
+  auto chunksIterator = map->GetChunksIterator();
+  for (auto it = chunksIterator.first; it != chunksIterator.second; it++)
+  {
+    std::string path = string_format("map/%d_%d.chunk", it->first.first, it->first.second);
+
+    size_t a = sizeof(Chunk);
+    std::vector<unsigned char> data(sizeof(Chunk));
+    memcpy(&data[0], it->second.get(), sizeof(Chunk));
+
+    saveBinaryFile(path, data);
+  }
 }

@@ -24,7 +24,6 @@ public:
 private:
   std::shared_ptr<OpenglRenderSystem> renderSystem_;
   std::unique_ptr<GlfwPlatform> platform_;
-  std::unique_ptr<Map> map_;
 
   int renderRadius_ = 3;
   glm::ivec2 lastCenterChunkCoords_;
@@ -61,5 +60,7 @@ private:
   void RequestScene(std::shared_ptr<Scene> scene);
   void SetRequestedScene();
   std::shared_ptr<Scene> CreateMainMenuScene();
-  std::shared_ptr<Scene> CreateWorldScene();
+  std::shared_ptr<Scene> CreateWorldScene(std::shared_ptr<Map> map);
+  std::shared_ptr<Map> LoadMap();
+  void SaveMap(std::shared_ptr<Map> map);
 };
