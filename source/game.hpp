@@ -22,11 +22,9 @@ public:
   int Run();
 
 private:
+  std::shared_ptr<OpenglRenderSystem> renderSystem_;
   std::unique_ptr<GlfwPlatform> platform_;
   std::unique_ptr<Map> map_;
-
-  std::shared_ptr<Scene> currentScene_ = nullptr;
-  std::shared_ptr<OpenglScene> openglScene_ = nullptr;
 
   int renderRadius_ = 3;
   glm::ivec2 lastCenterChunkCoords_;
@@ -56,7 +54,10 @@ private:
   void ProcessInput();
   void SwitchCursorMode();
 
+  std::shared_ptr<Scene> currentScene_ = nullptr;
+  std::shared_ptr<OpenglScene> openglScene_ = nullptr;
   std::shared_ptr<Scene> requestedScene_ = nullptr;
+  std::mutex sceneMutex_;
   void RequestScene(std::shared_ptr<Scene> scene);
   void SetRequestedScene();
   std::shared_ptr<Scene> CreateMainMenuScene();

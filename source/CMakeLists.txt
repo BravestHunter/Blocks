@@ -50,6 +50,8 @@ set(CORE_SOURCE_FILES
 	scene/scene.cpp
 
 	ui/i_imgui_element.hpp
+	ui/imgui_text.hpp
+	ui/imgui_text.cpp
 	ui/imgui_button.hpp
 	ui/imgui_button.cpp
 	ui/imgui_window.hpp

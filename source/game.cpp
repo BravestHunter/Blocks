@@ -26,7 +26,20 @@
 
 #include "ui/i_imgui_element.hpp"
 #include "ui/imgui_button.hpp"
+#include "ui/imgui_text.hpp"
 #include "ui/imgui_window.hpp"
+
+
+template<typename ... Args>
+std::string string_format(const std::string& format, Args ... args)
+{
+  int size_s = std::snprintf(nullptr, 0, format.c_str(), args ...) + 1; // Extra space for '\0'
+  if (size_s <= 0) { throw std::runtime_error("Error during formatting."); }
+  auto size = static_cast<size_t>(size_s);
+  std::unique_ptr<char[]> buf(new char[size]);
+  std::snprintf(buf.get(), size, format.c_str(), args ...);
+  return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
+}
 
 
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
@@ -53,9 +66,6 @@ int Game::Run()
 {
   std::thread renderThread(&Game::RunRenderCycle, this);
 
-  lastCenterChunkCoords_ = CalculateChunkCenter();
-  AddChunks(lastCenterChunkCoords_);
-
   RunSimulationCycle();
 
   renderThread.join();
@@ -74,6 +84,11 @@ void Game::RunSimulationCycle()
 {
   while (true)
   {
+    if (requestedScene_ != nullptr)
+    {
+      SetRequestedScene();
+    }
+
     if (currentScene_->ContainsMap())
     {
       glm::ivec2 centerChunk = CalculateChunkCenter();
@@ -139,8 +154,8 @@ void Game::RunRenderCycle()
   window_->SetCursorMode(CursorMode::Normal);
   window_->MakeCurrentContext();
 
-  OpenglRenderSystem renderSystem;
-  renderSystem.Init();
+  renderSystem_ = std::make_shared<OpenglRenderSystem>();
+  renderSystem_->Init();
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -166,7 +181,7 @@ void Game::RunRenderCycle()
     }
   );
   window_->SetKeyCallback(
-    [this, &renderSystem, &wireframeMode](int keycode, int scancode, int action, int mods)
+    [this, &wireframeMode](int keycode, int scancode, int action, int mods)
     {
       if (action != GLFW_PRESS || window_ == nullptr)
         return;
@@ -179,7 +194,7 @@ void Game::RunRenderCycle()
       if (keycode == GLFW_KEY_X)
       {
         wireframeMode = !wireframeMode;
-        renderSystem.SetWireframeMode(wireframeMode);
+        renderSystem_->SetWireframeMode(wireframeMode);
       }
 
       if (keycode == GLFW_KEY_L)
@@ -227,28 +242,25 @@ void Game::RunRenderCycle()
 
   while (!window_->IsWindowShouldClose())
   {
-    if (requestedScene_ != nullptr)
-    {
-      SetRequestedScene();
-    }
-
     float currentFrame = static_cast<float>(platform_->GetTime());
     deltaTime_ = currentFrame - lastFrame_;
     lastFrame_ = currentFrame;
 
+    sceneMutex_.lock();
+
     glfwPollEvents();
     ProcessInput();
 
-    renderSystem.StartFrame();
+    renderSystem_->StartFrame();
 
-    renderSystem.Clear();
+    renderSystem_->Clear();
 
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
 
     if (openglScene_)
     {
       openglScene_->GetMap()->ProcessQueues();
-      renderSystem.RenderMap(openglScene_->GetMap(), camera_.get(), framebufferRatio);
+      renderSystem_->RenderMap(openglScene_->GetMap(), camera_.get(), framebufferRatio);
     }
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -265,12 +277,14 @@ void Game::RunRenderCycle()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    renderSystem.FinishFrame();
+    renderSystem_->FinishFrame();
 
     window_->SwapBuffers();
+
+    sceneMutex_.unlock();
   }
 
-  renderSystem.Deinit();
+  renderSystem_->Deinit();
 }
 
 void Game::ProcessInput()
@@ -315,6 +329,8 @@ void Game::RequestScene(std::shared_ptr<Scene> scene)
 
 void Game::SetRequestedScene()
 {
+  sceneMutex_.lock();
+
   currentScene_ = requestedScene_;
   requestedScene_ = nullptr;
 
@@ -322,7 +338,12 @@ void Game::SetRequestedScene()
   {
     openglScene_ = std::make_shared<OpenglScene>();
     openglScene_->InitMap();
+
+    lastCenterChunkCoords_ = CalculateChunkCenter();
+    AddChunks(lastCenterChunkCoords_);
   }
+
+  sceneMutex_.unlock();
 }
 
 std::shared_ptr<Scene> Game::CreateMainMenuScene()
@@ -352,6 +373,41 @@ std::shared_ptr<Scene> Game::CreateWorldScene()
 
   std::shared_ptr<Map> map = std::make_shared<Map>();
   scene->SetMap(map);
+
+  std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Statistics");
+  scene->AddImguiWindow(window);
+
+  std::shared_ptr<ImguiText> fpsText = std::make_shared<ImguiText>(
+    [this]()
+    {
+      return string_format("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    }
+  );
+  window->AddElement(fpsText);
+
+  std::shared_ptr<ImguiText> renderStatisticsText = std::make_shared<ImguiText>(
+    [this]()
+    {
+      return string_format("Rendered triangles: %d", renderSystem_->GetFrameTrianlgesNumber());
+    }
+  );
+  window->AddElement(renderStatisticsText);
+
+  std::shared_ptr<ImguiText> cameraPositionText = std::make_shared<ImguiText>(
+    [this]()
+    {
+      return string_format("Camera position: %.2f %.2f %.2f", camera_->GetPosition().x, camera_->GetPosition().y, camera_->GetPosition().z);
+    }
+  );
+  window->AddElement(cameraPositionText);
+
+  std::shared_ptr<ImguiText> cameraDirectionText = std::make_shared<ImguiText>(
+    [this]()
+    {
+      return string_format("Camera direction: %.2f %.2f %.2f", camera_->GetForward().x, camera_->GetForward().y, camera_->GetForward().z);
+    }
+  );
+  window->AddElement(cameraDirectionText);
 
   return scene;
 }
