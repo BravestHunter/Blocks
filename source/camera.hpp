@@ -35,6 +35,7 @@ public:
   void ProcessMouseScroll(float yoffset);
 
   glm::vec3 GetPosition();
+  void SetPosition(glm::vec3 position);
   glm::vec3 GetForward();
 
 private:

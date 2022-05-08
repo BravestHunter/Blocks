@@ -22,18 +22,22 @@ public:
   int Run();
 
 private:
-  std::shared_ptr<OpenglRenderSystem> renderSystem_;
+  bool running = true;
+
   std::unique_ptr<GlfwPlatform> platform_;
+  std::shared_ptr<OpenglRenderSystem> renderSystem_;
 
-  int renderRadius_ = 3;
-  glm::ivec2 lastCenterChunkCoords_;
-
+  // Window
+  std::unique_ptr<GlfwWindow> window_;
   int framebufferWidth_;
   int framebufferHeight_;
+  bool isCursorEnabled_ = true;
 
-  // Timing
-  float deltaTime_ = 0.0f;	// time between current frame and last frame
-  float lastFrame_ = 0.0f;
+  // Input
+  bool isWPressed_ = false;
+  bool isSPressed_ = false;
+  bool isAPressed_ = false;
+  bool isDPressed_ = false;
 
   // Camera
   std::unique_ptr<Camera> camera_;
@@ -41,9 +45,9 @@ private:
   float lastY_;
   bool firstMouse_ = true;
 
-  // Window
-  std::unique_ptr<GlfwWindow> window_;
-  bool isCursorEnabled_ = true;
+  //Chunks
+  int renderRadius_ = 3;
+  glm::ivec2 lastCenterChunkCoords_;
 
   glm::ivec2 CalculateChunkCenter();
   void RunSimulationCycle();
@@ -52,6 +56,7 @@ private:
   void RunRenderCycle();
   void ProcessInput();
   void SwitchCursorMode();
+  void RunFixedUpdateCycle();
 
   std::shared_ptr<Scene> currentScene_ = nullptr;
   std::shared_ptr<OpenglScene> openglScene_ = nullptr;

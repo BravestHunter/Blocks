@@ -4,6 +4,9 @@
 #include <thread>
 #include <string>
 #include <iostream>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -64,10 +67,12 @@ Game::~Game()
 int Game::Run()
 {
   std::thread renderThread(&Game::RunRenderCycle, this);
+  std::thread fixedUpdateThread(&Game::RunFixedUpdateCycle, this);
 
   RunSimulationCycle();
 
   renderThread.join();
+  fixedUpdateThread.join();
 
   return 0;
 }
@@ -81,7 +86,7 @@ glm::ivec2 Game::CalculateChunkCenter()
 
 void Game::RunSimulationCycle()
 {
-  while (true)
+  while (running)
   {
     if (requestedScene_ != nullptr)
     {
@@ -99,11 +104,6 @@ void Game::RunSimulationCycle()
       
         lastCenterChunkCoords_ = centerChunk;
       }
-    }
-
-    if (window_ && window_->IsWindowShouldClose())
-    {
-      break;
     }
   }
 }
@@ -238,14 +238,8 @@ void Game::RunRenderCycle()
   std::vector<const char*> paths{ PPCAT(BLOCK_TEXTURES_DIR, BRICK_TEXTURE), PPCAT(BLOCK_TEXTURES_DIR, DIRT_TEXTURE), PPCAT(BLOCK_TEXTURES_DIR, URAN_TEXTURE) };
   OpenglTextureArray texAr(paths, 64, 64);
 
-  bool showImguiWindow = true;
-
-  while (!window_->IsWindowShouldClose())
+  while (running)
   {
-    float currentFrame = static_cast<float>(platform_->GetTime());
-    deltaTime_ = currentFrame - lastFrame_;
-    lastFrame_ = currentFrame;
-
     sceneMutex_.lock();
 
     glfwPollEvents();
@@ -282,6 +276,11 @@ void Game::RunRenderCycle()
     window_->SwapBuffers();
 
     sceneMutex_.unlock();
+
+    if (window_->IsWindowShouldClose())
+    {
+      running = false;
+    }
   }
 
   renderSystem_->Deinit();
@@ -289,22 +288,10 @@ void Game::RunRenderCycle()
 
 void Game::ProcessInput()
 {
-  if (window_->GetKeyState(GLFW_KEY_W) == GLFW_PRESS)
-  {
-    camera_->ProcessKeyboard(Camera::FORWARD, deltaTime_);
-  }
-  if (window_->GetKeyState(GLFW_KEY_S) == GLFW_PRESS)
-  {
-    camera_->ProcessKeyboard(Camera::BACKWARD, deltaTime_);
-  }
-  if (window_->GetKeyState(GLFW_KEY_A) == GLFW_PRESS)
-  {
-    camera_->ProcessKeyboard(Camera::LEFT, deltaTime_);
-  }
-  if (window_->GetKeyState(GLFW_KEY_D) == GLFW_PRESS)
-  {
-    camera_->ProcessKeyboard(Camera::RIGHT, deltaTime_);
-  }
+  isWPressed_ = window_->GetKeyState(GLFW_KEY_W) == GLFW_PRESS;
+  isSPressed_ = window_->GetKeyState(GLFW_KEY_S) == GLFW_PRESS;
+  isAPressed_ = window_->GetKeyState(GLFW_KEY_A) == GLFW_PRESS;
+  isDPressed_ = window_->GetKeyState(GLFW_KEY_D) == GLFW_PRESS;
 }
 
 void Game::SwitchCursorMode()
@@ -318,6 +305,43 @@ void Game::SwitchCursorMode()
   else
   {
     window_->SetCursorMode(CursorMode::Disabled);
+  }
+}
+
+void Game::RunFixedUpdateCycle()
+{
+  std::condition_variable cv;
+  std::mutex mut;
+
+  using delta = std::chrono::duration<std::int64_t, std::ratio<1, 60>>;
+  auto next = std::chrono::steady_clock::now() + delta{ 1 };
+  std::unique_lock<std::mutex> lk(mut);
+
+  float fixedDelta = 0.016f;
+  while (running)
+  {
+    mut.unlock();
+
+    if (isWPressed_)
+    {
+      camera_->ProcessKeyboard(Camera::FORWARD, fixedDelta);
+    }
+    if (isSPressed_)
+    {
+      camera_->ProcessKeyboard(Camera::BACKWARD, fixedDelta);
+    }
+    if (isAPressed_)
+    {
+      camera_->ProcessKeyboard(Camera::LEFT, fixedDelta);
+    }
+    if (isDPressed_)
+    {
+      camera_->ProcessKeyboard(Camera::RIGHT, fixedDelta);
+    }
+
+    mut.lock();
+    cv.wait_until(lk, next, [] {return false; });
+    next += delta{ 1 };
   }
 }
 

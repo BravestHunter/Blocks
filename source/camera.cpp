@@ -83,6 +83,11 @@ glm::vec3 Camera::GetPosition()
   return position_;
 }
 
+void Camera::SetPosition(glm::vec3 position)
+{
+  position_ = position;
+}
+
 glm::vec3 Camera::GetForward()
 {
   return right_;
