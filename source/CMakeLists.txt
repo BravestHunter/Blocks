@@ -44,6 +44,7 @@ set(CORE_SOURCE_FILES
 	model/block.hpp
 	model/chunk.hpp
 
+	scene/block_look_at.hpp
 	scene/map.hpp
 	scene/map.cpp
 	scene/scene.hpp

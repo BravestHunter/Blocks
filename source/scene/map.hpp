@@ -5,6 +5,7 @@
 #include <memory>
 #include <mutex>
 
+#include "block_look_at.hpp"
 #include "model/chunk.hpp"
 #include "collision/collisions_api.hpp"
 
@@ -23,6 +24,7 @@ public:
   void AddChunk(std::pair<int, int> position, std::shared_ptr<Chunk> chunk);
 
   bool Collides(const AABB& bounds, glm::vec3 position);
+  BlockLookAt GetBlockLookAt(const Ray& ray);
 
 private:
   std::map<std::pair<int, int>, std::shared_ptr<Chunk>> chunks_;

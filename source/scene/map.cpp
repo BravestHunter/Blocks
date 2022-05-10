@@ -118,6 +118,101 @@ bool Map::Collides(const AABB& bounds, glm::vec3 position)
   return false;
 }
 
+BlockLookAt Map::GetBlockLookAt(const Ray& ray)
+{
+  std::pair<int, int> chunkPosition = std::make_pair(ray.origin.x / Chunk::Length, ray.origin.y / Chunk::Width);
+  glm::vec3 localPosition = glm::vec3(ray.origin.x - chunkPosition.first * (int)Chunk::Length, ray.origin.y - chunkPosition.second * (int)Chunk::Width, ray.origin.z);
+  if (localPosition.x < 0)
+  {
+    localPosition.x += Chunk::Length;
+    chunkPosition.first--;
+  }
+  if (localPosition.y < 0)
+  {
+    localPosition.y += Chunk::Width;
+    chunkPosition.second--;
+  }
+
+  std::shared_ptr<Chunk> chunk = GetChunk(chunkPosition);
+  Ray localRay(localPosition, ray.direction);
+
+  glm::ivec3 centralBlockPosition = glm::ivec3(localPosition);
+
+  RayIntersectionPoint closestIntersectionPoint;
+  glm::ivec3 intersectedBlock;
+  int radius = 3;
+  for (int x = centralBlockPosition.x - radius; x <= centralBlockPosition.x + radius; x++)
+  {
+    if (x < 0 || x >= Chunk::Length)
+    {
+      continue;
+    }
+
+    for (int y = centralBlockPosition.y - radius; y <= centralBlockPosition.y + radius; y++)
+    {
+      if (y < 0 || y >= Chunk::Width)
+      {
+        continue;
+      }
+
+      for (int z = centralBlockPosition.z - radius; z <= centralBlockPosition.z + radius; z++)
+      {
+        if (z < 0 || z >= Chunk::Height)
+        {
+          continue;
+        }
+
+        if (chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] == 0)
+        {
+          continue;
+        }
+
+        AABB blockBounds(glm::vec3(x, y, z), glm::vec3(x + 1, y + 1, z + 1));
+        RayIntersectionPoint intersectionPoint = CheckCollision(localRay, blockBounds);
+        if (intersectionPoint.distance != FLT_MAX && closestIntersectionPoint.distance > intersectionPoint.distance)
+        {
+          closestIntersectionPoint = intersectionPoint;
+          intersectedBlock = glm::ivec3(x, y, z);
+        }
+      }
+    }
+  }
+
+  BlockLookAt result;
+  result.chunkPosition = chunkPosition;
+  result.blockPosition = intersectedBlock;
+  if (closestIntersectionPoint.distance != FLT_MAX)
+  {
+    result.hit = true;
+    if (closestIntersectionPoint.point.x == (float)intersectedBlock.x)
+    {
+      result.loockFromDirection = Direction::Back;
+    }
+    else if (closestIntersectionPoint.point.x == (float)(intersectedBlock.x + 1))
+    {
+      result.loockFromDirection = Direction::Forward;
+    }
+    else if (closestIntersectionPoint.point.y == (float)intersectedBlock.y)
+    {
+      result.loockFromDirection = Direction::Left;
+    }
+    else if (closestIntersectionPoint.point.y == (float)(intersectedBlock.y + 1))
+    {
+      result.loockFromDirection = Direction::Right;
+    }
+    else if (closestIntersectionPoint.point.z == (float)intersectedBlock.z)
+    {
+      result.loockFromDirection = Direction::Down;
+    }
+    else if (closestIntersectionPoint.point.z == (float)(intersectedBlock.z + 1))
+    {
+      result.loockFromDirection = Direction::Up;
+    }
+  }
+
+  return result;
+}
+
 
 std::shared_ptr<Chunk> Map::GenerateChunk(std::pair<int, int> position)
 {

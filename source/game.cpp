@@ -234,6 +234,122 @@ void Game::RunRenderCycle()
       camera_->ProcessMouseScroll(static_cast<float>(yoffset));
     }
   );
+  window_->SetMouseButtonCallback(
+    [this](int button, int action, int mods)
+    {
+      if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS) // Place block
+      {
+        if (currentScene_->ContainsMap() && !isCursorEnabled_)
+        {
+          BlockLookAt blockLookAt = currentScene_->GetMap()->GetBlockLookAt(Ray(camera_->GetPosition(), camera_->GetForward()));
+          if (!blockLookAt.hit)
+          {
+            return;
+          }
+
+          std::pair<int, int> placeChunkPosition = blockLookAt.chunkPosition;
+          glm::ivec3 placeBlockPosition = blockLookAt.blockPosition;
+          switch (blockLookAt.loockFromDirection)
+          {
+          case Direction::Forward:
+            if (blockLookAt.blockPosition.x == Chunk::Length - 1)
+            {
+              placeChunkPosition.first += 1;
+              placeBlockPosition.x = 0;
+            }
+            else
+            {
+              placeBlockPosition.x++;
+            }
+            break;
+          case Direction::Back:
+            if (blockLookAt.blockPosition.x == 0)
+            {
+              placeChunkPosition.first -= 1;
+              placeBlockPosition.x = 15;
+            }
+            else
+            {
+              placeBlockPosition.x--;
+            }
+            break;
+
+          case Direction::Right:
+            if (blockLookAt.blockPosition.y == Chunk::Width - 1)
+            {
+              placeChunkPosition.second += 1;
+              placeBlockPosition.y = 0;
+            }
+            else
+            {
+              placeBlockPosition.y++;
+            }
+            break;
+          case Direction::Left:
+            if (blockLookAt.blockPosition.y == 0)
+            {
+              placeChunkPosition.second -= 1;
+              placeBlockPosition.y = 15;
+            }
+            else
+            {
+              placeBlockPosition.y--;
+            }
+            break;
+
+          case Direction::Up:
+            if (blockLookAt.blockPosition.z == Chunk::Height - 1)
+            {
+              return;
+            }
+            else
+            {
+              placeBlockPosition.z++;
+            }
+            break;
+          case Direction::Down:
+            if (blockLookAt.blockPosition.z == 0)
+            {
+              return;
+            }
+            else
+            {
+              placeBlockPosition.z--;
+            }
+            break;
+          }
+
+          // Check collision
+          glm::vec3 worldBlockPosition(placeBlockPosition.x + placeChunkPosition.first * Chunk::Length, placeBlockPosition.y + placeChunkPosition.second * Chunk::Width, placeBlockPosition.z);
+          const AABB blockBounds(glm::vec3(worldBlockPosition.x, worldBlockPosition.y, worldBlockPosition.z), glm::vec3(worldBlockPosition.x + 1, worldBlockPosition.y + 1, worldBlockPosition.z + 1));
+          const AABB playerBounds(playerBounds_.low + camera_->GetPosition(), playerBounds_.high + camera_->GetPosition());
+          if (CheckCollision(blockBounds, playerBounds))
+          {
+            return;
+          }
+
+          std::shared_ptr<Chunk> chunk = currentScene_->GetMap()->GetChunk(placeChunkPosition);
+          chunk->blocks[placeBlockPosition.x + placeBlockPosition.y * Chunk::Width + placeBlockPosition.z * Chunk::LayerBlocksNumber] = 1;
+          openglScene_->AddChunk(chunk, placeChunkPosition);
+        }
+      }
+      else if (button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS) // Remove block
+      {
+        if (currentScene_->ContainsMap() && !isCursorEnabled_)
+        {
+          BlockLookAt blockLookAt = currentScene_->GetMap()->GetBlockLookAt(Ray(camera_->GetPosition(), camera_->GetForward()));
+          if (!blockLookAt.hit)
+          {
+            return;
+          }
+
+          std::shared_ptr<Chunk> chunk = currentScene_->GetMap()->GetChunk(blockLookAt.chunkPosition);
+          chunk->blocks[blockLookAt.blockPosition.x + blockLookAt.blockPosition.y * Chunk::Width + blockLookAt.blockPosition.z * Chunk::LayerBlocksNumber] = 0;
+          openglScene_->AddChunk(chunk, blockLookAt.chunkPosition);
+        }
+      }
+    }
+  );
 
   std::vector<const char*> paths{ PPCAT(BLOCK_TEXTURES_DIR, BRICK_TEXTURE), PPCAT(BLOCK_TEXTURES_DIR, DIRT_TEXTURE), PPCAT(BLOCK_TEXTURES_DIR, URAN_TEXTURE) };
   OpenglTextureArray texAr(paths, 64, 64);
