@@ -36,19 +36,6 @@ float Camera::GetZoom()
   return Zoom;
 }
 
-void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
-{
-  float velocity = MovementSpeed * deltaTime;
-  if (direction == FORWARD)
-    position_ += forward_ * velocity;
-  if (direction == BACKWARD)
-    position_ -= forward_ * velocity;
-  if (direction == LEFT)
-    position_ -= right_ * velocity;
-  if (direction == RIGHT)
-    position_ += right_ * velocity;
-}
-
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch)
 {
   xoffset *= MouseSensitivity;
@@ -89,6 +76,11 @@ void Camera::SetPosition(glm::vec3 position)
 }
 
 glm::vec3 Camera::GetForward()
+{
+  return forward_;
+}
+
+glm::vec3 Camera::GetRight()
 {
   return right_;
 }

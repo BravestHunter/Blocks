@@ -317,31 +317,50 @@ void Game::RunFixedUpdateCycle()
   auto next = std::chrono::steady_clock::now() + delta{ 1 };
   std::unique_lock<std::mutex> lk(mut);
 
-  float fixedDelta = 0.016f;
   while (running)
   {
     mut.unlock();
 
-    if (isWPressed_)
+    if (currentScene_->ContainsMap())
     {
-      camera_->ProcessKeyboard(Camera::FORWARD, fixedDelta);
-    }
-    if (isSPressed_)
-    {
-      camera_->ProcessKeyboard(Camera::BACKWARD, fixedDelta);
-    }
-    if (isAPressed_)
-    {
-      camera_->ProcessKeyboard(Camera::LEFT, fixedDelta);
-    }
-    if (isDPressed_)
-    {
-      camera_->ProcessKeyboard(Camera::RIGHT, fixedDelta);
+      MovePlayer();
     }
 
     mut.lock();
     cv.wait_until(lk, next, [] {return false; });
     next += delta{ 1 };
+  }
+}
+
+void Game::MovePlayer()
+{
+  float fixedDelta = 0.016f;
+  float velocity = 32.0f * fixedDelta;
+
+  glm::vec3 position = camera_->GetPosition();
+  glm::vec3 shift = glm::vec3(0.0f);
+
+  if (isWPressed_)
+  {
+    shift += camera_->GetForward() * velocity;
+  }
+  if (isSPressed_)
+  {
+    shift -= camera_->GetForward() * velocity;
+  }
+  if (isAPressed_)
+  {
+    shift -= camera_->GetRight() * velocity;
+  }
+  if (isDPressed_)
+  {
+    shift += camera_->GetRight() * velocity;
+  }
+
+  position += shift;
+  if (!currentScene_->GetMap()->Collides(playerBounds_, position))
+  {
+    camera_->SetPosition(position);
   }
 }
 

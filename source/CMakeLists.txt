@@ -49,6 +49,12 @@ set(CORE_SOURCE_FILES
 	scene/scene.hpp
 	scene/scene.cpp
 
+	collision/aabb.hpp
+	collision/ray.hpp
+	collision/ray_intersection_point.hpp
+	collision/collisions_api.hpp
+	collision/collisions_api.cpp
+
 	ui/i_imgui_element.hpp
 	ui/imgui_text.hpp
 	ui/imgui_text.cpp

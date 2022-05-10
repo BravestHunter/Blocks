@@ -28,13 +28,15 @@ int Map::GetSeed()
 
 std::shared_ptr<Chunk> Map::GetChunk(std::pair<int, int> position)
 {
+  std::lock_guard<std::mutex> locker(mutex_);
+
   std::shared_ptr<Chunk> chunk;
 
   auto it = chunks_.find(position);
   if (it == chunks_.end())
   {
     chunk = GenerateChunk(position);
-    chunks_.emplace(position, chunk);
+    chunks_[position] = chunk;
   }
   else
   {
@@ -51,7 +53,69 @@ std::pair<std::map<std::pair<int, int>, std::shared_ptr<Chunk>>::iterator, std::
 
 void Map::AddChunk(std::pair<int, int> position, std::shared_ptr<Chunk> chunk)
 {
+  std::lock_guard<std::mutex> locker(mutex_);
+
   chunks_[position] = chunk;
+}
+
+
+bool Map::Collides(const AABB& bounds, glm::vec3 position)
+{
+  std::pair<int, int> chunkPosition = std::make_pair(position.x / Chunk::Length, position.y / Chunk::Width);
+  glm::vec3 localPosition = glm::vec3(position.x - chunkPosition.first * (int)Chunk::Length, position.y - chunkPosition.second * (int)Chunk::Width, position.z);
+  if (localPosition.x < 0)
+  {
+    localPosition.x += Chunk::Length;
+    chunkPosition.first--;
+  }
+  if (localPosition.y < 0)
+  {
+    localPosition.y += Chunk::Width;
+    chunkPosition.second--;
+  }
+  std::shared_ptr<Chunk> chunk = GetChunk(chunkPosition);
+
+  AABB localBounds(bounds.low + localPosition, bounds.high + localPosition);
+
+  glm::ivec3 centralBlockPosition = glm::ivec3(localPosition);
+
+  int radius = 2;
+  for (int x = centralBlockPosition.x - radius; x <= centralBlockPosition.x + radius; x++)
+  {
+    if (x < 0 || x >= Chunk::Length)
+    {
+      continue;
+    }
+
+    for (int y = centralBlockPosition.y - radius; y <= centralBlockPosition.y + radius; y++)
+    {
+      if (y < 0 || y >= Chunk::Width)
+      {
+        continue;
+      }
+
+      for (int z = centralBlockPosition.z - radius; z <= centralBlockPosition.z + radius; z++)
+      {
+        if (z < 0 || z >= Chunk::Height)
+        {
+          continue;
+        }
+
+        if (chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] == 0)
+        {
+          continue;
+        }
+
+        AABB blockBounds(glm::vec3(x, y, z), glm::vec3(x + 1, y + 1, z + 1));
+        if (CheckCollision(blockBounds, localBounds))
+        {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 

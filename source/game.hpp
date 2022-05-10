@@ -11,6 +11,7 @@
 #include "camera.hpp"
 #include "scene/map.hpp"
 #include "scene/scene.hpp"
+#include "collision/aabb.hpp"
 
 
 class DllExport Game
@@ -39,6 +40,9 @@ private:
   bool isAPressed_ = false;
   bool isDPressed_ = false;
 
+  // Collision
+  AABB playerBounds_ = AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
+
   // Camera
   std::unique_ptr<Camera> camera_;
   float lastX_;
@@ -57,6 +61,7 @@ private:
   void ProcessInput();
   void SwitchCursorMode();
   void RunFixedUpdateCycle();
+  void MovePlayer();
 
   std::shared_ptr<Scene> currentScene_ = nullptr;
   std::shared_ptr<OpenglScene> openglScene_ = nullptr;
