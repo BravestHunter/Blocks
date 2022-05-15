@@ -1,4 +1,6 @@
-﻿using ResourceTool.ViewModel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ResourceTool.Service;
+using ResourceTool.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -15,13 +17,19 @@ namespace ResourceTool
     /// </summary>
     public partial class App : Application
     {
-        protected override void OnStartup(StartupEventArgs e)
+        private ServiceProvider _serviceProvider;
+        public static IServiceProvider ServiceProvider { get { return ((App)Current)._serviceProvider; } }
+
+        public App()
         {
-            base.OnStartup(e);
+            ServiceCollection services = new ServiceCollection();
+            ConfigureServices(services);
+            _serviceProvider = services.BuildServiceProvider();
+        }
 
-            Resources.Add("MainViewModel", new MainViewModel());
-
-            //MainWindow.DataContext = new MainViewModel();
+        private void ConfigureServices(ServiceCollection services)
+        {
+            services.AddSingleton<IDialogService, DialogService>();
         }
     }
 }
