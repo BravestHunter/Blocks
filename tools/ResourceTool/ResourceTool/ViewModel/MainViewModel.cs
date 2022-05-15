@@ -1,10 +1,12 @@
-﻿using ResourceTool.Model;
+﻿using Newtonsoft.Json;
+using ResourceTool.Model;
 using ResourceTool.Service;
 using ResourceTool.Utils;
 using ResourceTool.View.Dialog;
 using ResourceTool.ViewModel.Dialog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +18,6 @@ namespace ResourceTool.ViewModel
     public class MainViewModel : BaseViewModel
     {
         private ResourceBaseViewModel? _currentResourceBaseVM = null;
-
         public ResourceBaseViewModel? CurrentResourceBaseVM
         { 
             get { return _currentResourceBaseVM; }
@@ -63,20 +64,33 @@ namespace ResourceTool.ViewModel
             }
 
             var dialogVM = new CreateResourceBaseDialogViewModel();
-            dialogService.ShowDialog(dialogVM);
 
-            _currentResourceBaseVM = new ResourceBaseViewModel(dialogVM.Name, dialogVM.Path);
-            OnPropertyChanged(nameof(CurrentResourceBaseVM));
+            bool? dialogResult = dialogService.ShowDialog(dialogVM);
+            if (dialogResult.HasValue && dialogResult.Value)
+            {
+                CurrentResourceBaseVM = new ResourceBaseViewModel(dialogVM.Name, dialogVM.Path);
+            }
         }
 
         private void OpenResourceBaseCommandExecute(object parameter)
         {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "Resource base files (*.rb)|*.rb|All files (*.*)|*.*";
 
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                string resourceBaseStr = File.ReadAllText(dialog.FileName);
+                ResourceBase resourceBase = JsonConvert.DeserializeObject<ResourceBase>(resourceBaseStr);
+                CurrentResourceBaseVM = new ResourceBaseViewModel(resourceBase.Name, dialog.FileName);
+            }
         }
 
         private void SaveResourceBaseCommandExecute(object parameter)
         {
+            ResourceBase resourceBase = CurrentResourceBaseVM.GetModel();
+            string resourceBaseStr = JsonConvert.SerializeObject(resourceBase, Formatting.Indented);
 
+            File.WriteAllText($"{CurrentResourceBaseVM.Path}/{CurrentResourceBaseVM.Name}.rb", resourceBaseStr);
         }
 
         private bool SaveResourceBaseCommandCanExecute(object parameter)

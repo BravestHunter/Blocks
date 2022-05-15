@@ -9,12 +9,15 @@ namespace ResourceTool.Model
 {
     public class ResourceBase
     {
-        public string Path;
         public string Name;
 
-        public ResourceBase([NotNull] string path, [NotNull] string name)
+        public ResourceBase(string name)
         {
-            Path = path;
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             Name = name;
         }
     }

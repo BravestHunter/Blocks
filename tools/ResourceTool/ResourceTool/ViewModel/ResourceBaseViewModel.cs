@@ -17,21 +17,24 @@ namespace ResourceTool.ViewModel
         private string _path;
         public string Path { get { return _path; } }
 
-
-        public ResourceBaseViewModel([NotNull] string path, [NotNull] string name)
+        public ResourceBaseViewModel(string name, string path)
         {
-            _path = path;
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
             _name = name;
-        }
-
-        public ResourceBaseViewModel(ResourceBase resourceBase)
-        {
-            _path = resourceBase.Path;
+            _path = path;
         }
 
         public ResourceBase GetModel()
         {
-            ResourceBase resourceBase = new ResourceBase(_path, _name);
+            ResourceBase resourceBase = new ResourceBase(_name);
 
             return resourceBase;
         }

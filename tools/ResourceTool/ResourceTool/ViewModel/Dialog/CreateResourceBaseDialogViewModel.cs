@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace ResourceTool.ViewModel.Dialog
@@ -47,17 +48,29 @@ namespace ResourceTool.ViewModel.Dialog
             }
         }
 
-        public CreateResourceBaseDialogViewModel()
-        {
+        private ICommand _selectFileDirectoryCommand;
+        public ICommand SelectFileDirectoryCommand { get { return _selectFileDirectoryCommand; } }
 
+        public CreateResourceBaseDialogViewModel() : base()
+        {
+            _selectFileDirectoryCommand = new RelayCommand(SelectFileDirectoryCommandExecute);
         }
 
         protected override bool OkCommandCanExecute(object parameter)
         {
             return
                 base.OkCommandCanExecute(parameter) &&
-                !string.IsNullOrEmpty(Name) &&
+                !string.IsNullOrEmpty(Name) && Name.Length > 3 &&
                 Directory.Exists(Path);
+        }
+
+        private void SelectFileDirectoryCommandExecute(object parameter)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                Path = dialog.SelectedPath;
+            }
         }
     }
 }
