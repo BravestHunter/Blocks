@@ -27,7 +27,7 @@ namespace ResourceTool.Service
             };
             Action handleCancelAction = () =>
             {
-                dialogWindow.DialogResult = true;
+                dialogWindow.DialogResult = false;
                 dialogWindow.Close();
             };
 

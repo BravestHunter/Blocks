@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace ResourceTool.View
 {
     /// <summary>
-    /// Interaction logic for TextureView.xaml
+    /// Interaction logic for ResourceProperties.xaml
     /// </summary>
-    public partial class TextureView : UserControl
+    public partial class ResourceProperties : UserControl
     {
-        public TextureView()
+        public ResourceProperties()
         {
             InitializeComponent();
         }

@@ -17,36 +17,32 @@ namespace ResourceTool.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
-        private ResourceBaseViewModel? _currentResourceBaseVM = null;
-        public ResourceBaseViewModel? CurrentResourceBaseVM
+        private ResourceBaseViewModel? _resourceBaseVM = null;
+        public ResourceBaseViewModel? ResourceBaseVM
         { 
-            get { return _currentResourceBaseVM; }
+            get { return _resourceBaseVM; }
             set
             {
-                if (value == _currentResourceBaseVM)
+                if (value == _resourceBaseVM)
                 {
                     return;
                 }
 
-                _currentResourceBaseVM = value;
-                OnPropertyChanged(nameof(CurrentResourceBaseVM));
+                _resourceBaseVM = value;
+                OnPropertyChanged();
             }
         }
 
-        private ICommand _createResourceBaseCommand;
-        private ICommand _openResourceBaseCommand;
-        private ICommand _saveResourceBaseCommand;
-
-        public ICommand CreateResourceBaseCommand { get { return _createResourceBaseCommand; } }
-        public ICommand OpenResourceBaseCommand { get { return _openResourceBaseCommand; } }
-        public ICommand SaveResourceBaseCommand { get { return _saveResourceBaseCommand; } }
+        public ICommand CreateResourceBaseCommand { get; private init; }
+        public ICommand OpenResourceBaseCommand { get; private init; }
+        public ICommand SaveResourceBaseCommand { get; private init; }
 
 
         public MainViewModel()
         {
-            _createResourceBaseCommand = new RelayCommand(CreateResourceBaseCommandExecute);
-            _openResourceBaseCommand = new RelayCommand(OpenResourceBaseCommandExecute);
-            _saveResourceBaseCommand = new RelayCommand(SaveResourceBaseCommandExecute, SaveResourceBaseCommandCanExecute);
+            CreateResourceBaseCommand = new RelayCommand(CreateResourceBaseCommandExecute);
+            OpenResourceBaseCommand = new RelayCommand(OpenResourceBaseCommandExecute);
+            SaveResourceBaseCommand = new RelayCommand(SaveResourceBaseCommandExecute, SaveResourceBaseCommandCanExecute);
         }
 
 
@@ -58,7 +54,7 @@ namespace ResourceTool.ViewModel
                 throw new NullReferenceException("Dialog service wasn't found");
             }
 
-            if (_currentResourceBaseVM != null)
+            if (_resourceBaseVM != null)
             {
                 // Do some things
             }
@@ -68,7 +64,9 @@ namespace ResourceTool.ViewModel
             bool? dialogResult = dialogService.ShowDialog(dialogVM);
             if (dialogResult.HasValue && dialogResult.Value)
             {
-                CurrentResourceBaseVM = new ResourceBaseViewModel(dialogVM.Name, dialogVM.Path);
+                ResourceBaseVM = new ResourceBaseViewModel(dialogVM.Path, dialogVM.Name);
+
+                Directory.CreateDirectory(Path.Combine(dialogVM.Path, "Textures"));
             }
         }
 
@@ -80,22 +78,23 @@ namespace ResourceTool.ViewModel
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 string resourceBaseStr = File.ReadAllText(dialog.FileName);
-                ResourceBase resourceBase = JsonConvert.DeserializeObject<ResourceBase>(resourceBaseStr);
-                CurrentResourceBaseVM = new ResourceBaseViewModel(resourceBase.Name, dialog.FileName);
+                ResourceBase resourceBase = JsonConvert.DeserializeObject<ResourceBase>(resourceBaseStr)!;
+                string rootPath = Path.GetDirectoryName(dialog.FileName)!;
+                ResourceBaseVM = new ResourceBaseViewModel(rootPath, resourceBase);
             }
         }
 
         private void SaveResourceBaseCommandExecute(object parameter)
         {
-            ResourceBase resourceBase = CurrentResourceBaseVM.GetModel();
+            ResourceBase resourceBase = ResourceBaseVM.GetModel();
             string resourceBaseStr = JsonConvert.SerializeObject(resourceBase, Formatting.Indented);
 
-            File.WriteAllText($"{CurrentResourceBaseVM.Path}/{CurrentResourceBaseVM.Name}.rb", resourceBaseStr);
+            File.WriteAllText($"{ResourceBaseVM.RootPath}/{ResourceBaseVM.Name}.rb", resourceBaseStr);
         }
 
         private bool SaveResourceBaseCommandCanExecute(object parameter)
         {
-            return _currentResourceBaseVM != null;
+            return ResourceBaseVM != null;
         }
     }
 }

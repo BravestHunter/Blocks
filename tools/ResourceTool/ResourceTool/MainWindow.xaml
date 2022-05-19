@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ResourceTool"
+        xmlns:v="clr-namespace:ResourceTool.View"
         xmlns:vm="clr-namespace:ResourceTool.ViewModel"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
@@ -30,10 +31,34 @@
                 </MenuItem>
             </Menu>
 
-            <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="{Binding CurrentResourceBaseVM.Name}"/>
-
+            <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="{Binding ResourceBaseVM.Name}"/>
         </Grid>
 
+        <StackPanel DockPanel.Dock="Top" 
+                    Orientation="Horizontal"
+                    Height="40">
+            <Button Content="Create Texture" Command="{Binding ResourceBaseVM.CreateTextureCommand}"/>
+            <Button Content="Create Block"/>
+            <Button Content="Create Block Set"/>
+        </StackPanel>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition MinWidth="300"/>
+            </Grid.ColumnDefinitions>
+
+            <v:ResourceList DataContext="{Binding ResourceBaseVM}"/>
+
+            <GridSplitter Grid.Column="1" 
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Stretch"
+                          Width="3"/>
+
+            <v:ResourceProperties Grid.Column="2" DataContext="{Binding ResourceBaseVM}"/>
+        </Grid>
+        
     </DockPanel>
     
 </Window>

@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ResourceTool.View
+namespace ResourceTool.View.Dialog
 {
     /// <summary>
-    /// Interaction logic for BlockSetEditorView.xaml
+    /// Interaction logic for CreateTextureDialog.xaml
     /// </summary>
-    public partial class BlockSetEditorView : UserControl
+    public partial class CreateTextureDialog : UserControl
     {
-        public BlockSetEditorView()
+        public CreateTextureDialog()
         {
             InitializeComponent();
         }

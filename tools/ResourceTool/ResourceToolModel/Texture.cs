@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace ResourceTool.Model
 {
-    public class Texture
+    public class Texture : Resource
     {
-        public int Id = -1;
-        public string Path = string.Empty;
-
-        public Texture()
+        public Texture(Guid id, string path, string name) : base(id, path, name)
         {
         }
     }

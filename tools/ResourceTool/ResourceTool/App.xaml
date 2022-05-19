@@ -11,17 +11,14 @@
     <Application.Resources>
         <vm:MainViewModel x:Key="MainVM"/>
 
-        <DataTemplate DataType="{x:Type vm:TextureViewModel}">
-            <v:TextureView/>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:TextureListViewModel}">
-            <v:TextureListView/>
-        </DataTemplate>
-
         <DataTemplate DataType="{x:Type vmd:CreateResourceBaseDialogViewModel}">
             <vd:CreateResourceBaseDialogView/>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vmd:CreateTextureDialogViewModel}">
+            <vd:CreateTextureDialog/>
+        </DataTemplate>
+
 
     </Application.Resources>
     
