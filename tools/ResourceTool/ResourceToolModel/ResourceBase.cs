@@ -10,23 +10,26 @@ namespace ResourceTool.Model
     public class ResourceBase
     {
         public string Name;
-        public List<Texture> Textures;
-        public List<Block> Blocks;
+        public Texture[] Textures;
+        public Block[] Blocks;
+        public BlockSet[] BlockSets;
 
         public ResourceBase(
             string name, 
             IEnumerable<Texture>? textures = null, 
-            IEnumerable<Block>? blocks = null
+            IEnumerable<Block>? blocks = null,
+            IEnumerable<BlockSet>? blockSets = null
             )
         {
-            if (name == null)
+            if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException(nameof(name));
             }
 
             Name = name;
-            Textures = textures?.ToList() ?? new List<Texture>();
-            Blocks = blocks?.ToList() ?? new List<Block>();
+            Textures = textures?.ToArray() ?? new Texture[0];
+            Blocks = blocks?.ToArray() ?? new Block[0];
+            BlockSets = blockSets?.ToArray() ?? new BlockSet[0];
         }
     }
 }
