@@ -33,7 +33,7 @@
                     Orientation="Horizontal"
                     Height="40">
             <Button Content="Create Texture" Command="{Binding ResourceBaseVM.CreateTextureCommand}"/>
-            <Button Content="Create Block"/>
+            <Button Content="Create Block" Command="{Binding ResourceBaseVM.CreateBlockCommand}"/>
             <Button Content="Create Block Set"/>
         </StackPanel>
 

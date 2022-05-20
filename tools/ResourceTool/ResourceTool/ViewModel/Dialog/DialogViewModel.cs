@@ -13,19 +13,17 @@ namespace ResourceTool.ViewModel.Dialog
     {
         public virtual string Title { get { return "Dialog"; } }
 
-        private readonly ICommand _okCommand;
-        public ICommand OkCommand { get { return _okCommand; } }
+        public ICommand OkCommand { get; private init; }
 
-        private readonly ICommand _cancelCommand;
-        public ICommand CancelCommand { get { return _cancelCommand; } }
+        public ICommand CancelCommand { get; private init; }
 
         public event Action OkAction;
         public event Action CancelAction;
 
         public DialogViewModel()
         {
-            _okCommand = new RelayCommand(OkCommandExecute, OkCommandCanExecute);
-            _cancelCommand = new RelayCommand(CancelCommandExecute);
+            OkCommand = new RelayCommand(OkCommandExecute, OkCommandCanExecute);
+            CancelCommand = new RelayCommand(CancelCommandExecute);
         }
 
         private void OkCommandExecute(object parameter)

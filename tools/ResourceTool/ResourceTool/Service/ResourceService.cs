@@ -30,5 +30,15 @@ namespace ResourceTool.Service
 
             return _mainVM.ResourceBaseVM.Resources.OfType<T>().FirstOrDefault(r => r.Id == id);
         }
+
+        public IEnumerable<T> GetAllResources<T>() where T : ResourceViewModel
+        {
+            if (_mainVM.ResourceBaseVM == null)
+            {
+                return null;
+            }
+
+            return _mainVM.ResourceBaseVM.Resources.OfType<T>();
+        }
     }
 }

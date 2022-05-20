@@ -14,12 +14,6 @@
         <DataTemplate DataType="{x:Type vmd:CreateResourceBaseDialogViewModel}">
             <vd:CreateResourceBaseDialogView/>
         </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vmd:CreateTextureDialogViewModel}">
-            <vd:CreateTextureDialog/>
-        </DataTemplate>
-
-
     </Application.Resources>
     
 </Application>

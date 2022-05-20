@@ -69,6 +69,7 @@ namespace ResourceTool.ViewModel
         private string TextureDirectory { get { return Path.Combine(RootPath, "Textures"); } }
 
         public ICommand CreateTextureCommand { get; private init; }
+        public ICommand CreateBlockCommand { get; private init; }
 
 
         public ResourceBaseViewModel(string rootPath)
@@ -83,6 +84,7 @@ namespace ResourceTool.ViewModel
             Resources = new ObservableCollection<ResourceViewModel>();
 
             CreateTextureCommand = new RelayCommand(CreateTextureCommandExecute);
+            CreateBlockCommand = new RelayCommand(CreateBlockCommandExecute);
         }
 
         public ResourceBaseViewModel(string rootPath, string name) : this(rootPath)
@@ -131,6 +133,23 @@ namespace ResourceTool.ViewModel
             
                 TextureViewModel textureVM = new TextureViewModel(Guid.NewGuid(), targetPath, dialogVM.Name);
                 Resources.Add(textureVM);
+            }
+        }
+
+        private void CreateBlockCommandExecute(object parameter)
+        {
+            var dialogService = App.ServiceProvider.GetService(typeof(IDialogService)) as IDialogService;
+            if (dialogService == null)
+            {
+                throw new NullReferenceException("Dialog service wasn't found");
+            }
+
+            CreateBlockDialogViewModel dialogVM = new CreateBlockDialogViewModel();
+            bool? dialogResult = dialogService.ShowDialog(dialogVM);
+            if (dialogResult.HasValue && dialogResult.Value)
+            {
+                BlockViewModel blockVM = dialogVM.GetBlockViewModel();
+                Resources.Add(blockVM);
             }
         }
     }

@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace ResourceTool.View.Dialog
 {
     /// <summary>
-    /// Interaction logic for CreateTextureDialog.xaml
+    /// Interaction logic for CreateBlockDialogView.xaml
     /// </summary>
-    public partial class CreateTextureDialogView : UserControl
+    public partial class CreateBlockDialogView : UserControl
     {
-        public CreateTextureDialogView()
+        public CreateBlockDialogView()
         {
             InitializeComponent();
         }

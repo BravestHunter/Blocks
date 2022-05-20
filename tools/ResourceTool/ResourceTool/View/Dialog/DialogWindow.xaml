@@ -11,6 +11,20 @@
         Height="200" Width="350"
         MinHeight="100" MinWidth="200">
     
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vmd:CreateTextureDialogViewModel}">
+            <local:CreateTextureDialogView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vmd:CreateBlockDialogViewModel}">
+            <local:CreateBlockDialogView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vmd:SelectTextureDialogViewModel}">
+            <local:SelectTextureDialogView/>
+        </DataTemplate>
+    </Window.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
