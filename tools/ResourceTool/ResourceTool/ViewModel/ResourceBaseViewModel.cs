@@ -105,10 +105,7 @@ namespace ResourceTool.ViewModel
         public ResourceBase GetModel()
         {
             List<Texture> textures = new List<Texture>(Resources.OfType<TextureViewModel>().Select(t => t.GetModel()));
-            ResourceBase resourceBase = new ResourceBase(
-                _name,
-                textures
-                );
+            ResourceBase resourceBase = new ResourceBase(_name);
 
             return resourceBase;
         }

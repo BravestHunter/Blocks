@@ -8,8 +8,16 @@ namespace ResourceTool.Model
 {
     public class Texture : Resource
     {
-        public Texture(Guid id, string path, string name) : base(id, path, name)
+        public string Path = string.Empty;
+
+        public Texture(Guid id, string path, string name) : base(id, name)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            Path = path;
         }
     }
 }

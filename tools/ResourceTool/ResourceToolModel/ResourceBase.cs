@@ -11,20 +11,22 @@ namespace ResourceTool.Model
     {
         public string Name;
         public List<Texture> Textures;
+        public List<Block> Blocks;
 
-        public ResourceBase(string name, IEnumerable<Texture> textures)
+        public ResourceBase(
+            string name, 
+            IEnumerable<Texture>? textures = null, 
+            IEnumerable<Block>? blocks = null
+            )
         {
             if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));
             }
-            if (textures == null)
-            {
-                throw new ArgumentNullException();
-            }
 
             Name = name;
-            Textures = textures.ToList();
+            Textures = textures?.ToList() ?? new List<Texture>();
+            Blocks = blocks?.ToList() ?? new List<Block>();
         }
     }
 }
