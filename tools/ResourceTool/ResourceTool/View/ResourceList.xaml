@@ -13,6 +13,10 @@
         <DataTemplate DataType="{x:Type vm:TextureViewModel}">
             <local:TexturePreview/>
         </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type vm:BlockViewModel}">
+            <local:BlockPreview/>
+        </DataTemplate>
     </UserControl.Resources>
     
     <Grid>
@@ -28,7 +32,7 @@
 
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <ContentControl Content="{Binding}"/>
+                    <ContentControl Height="300" Content="{Binding}"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
