@@ -15,6 +15,22 @@ namespace ResourceTool.ViewModel
 {
     public class TextureViewModel : ResourceViewModel
     {
+        private string? _path = null;
+        public string? Path
+        {
+            get { return _path; }
+            set
+            {
+                if (value == _path)
+                {
+                    return;
+                }
+
+                _path = value;
+                OnPropertyChanged();
+            }
+        }
+
         private Image? _image;
         public BitmapSource? BitmapSource 
         { 
@@ -34,13 +50,16 @@ namespace ResourceTool.ViewModel
         {
         }
 
-        public TextureViewModel(Guid id, string path, string name) : base(id, path, name)
+        public TextureViewModel(Guid id, string path, string name) : base(id, name)
         {
+            Path = path;
+
             UpdateImage();
         }
 
-        public TextureViewModel(Texture texture) : base(texture.Id, texture.Path, texture.Name)
+        public TextureViewModel(Texture texture) : base(texture.Id, texture.Name)
         {
+            Path = texture.Path;
 
             UpdateImage();
         }

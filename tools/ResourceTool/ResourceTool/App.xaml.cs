@@ -20,6 +20,8 @@ namespace ResourceTool
         private ServiceProvider _serviceProvider;
         public static IServiceProvider ServiceProvider { get { return ((App)Current)._serviceProvider; } }
 
+        MainViewModel _mainVM = new MainViewModel();
+
         public App()
         {
             ServiceCollection services = new ServiceCollection();
@@ -30,6 +32,17 @@ namespace ResourceTool
         private void ConfigureServices(ServiceCollection services)
         {
             services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<IResourceService>(serviceProvider => new ResourceService(_mainVM));
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+
+            if (MainWindow.DataContext != _mainVM)
+            {
+                MainWindow.DataContext = _mainVM;
+            }
         }
     }
 }

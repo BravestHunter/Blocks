@@ -25,22 +25,6 @@ namespace ResourceTool.ViewModel
             }
         }
 
-        private string? _path = null;
-        public string? Path
-        {
-            get { return _path; }
-            set
-            {
-                if (value == _path)
-                {
-                    return;
-                }
-
-                _path = value;
-                OnPropertyChanged();
-            }
-        }
-
         private string? _name = null;
         public string? Name
         {
@@ -62,10 +46,9 @@ namespace ResourceTool.ViewModel
             Id = Guid.NewGuid();
         }
 
-        public ResourceViewModel(Guid id, string path, string name)
+        public ResourceViewModel(Guid id, string name)
         {
             Id = id;
-            Path = path;
             Name = name;
         }
     }
