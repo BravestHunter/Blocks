@@ -20,6 +20,10 @@
             <local:CreateBlockDialogView/>
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type vmd:CreateBlockSetDialogViewModel}">
+            <local:CreateBlockSetDialogView/>
+        </DataTemplate>
+        
         <DataTemplate DataType="{x:Type vmd:SelectTextureDialogViewModel}">
             <local:SelectTextureDialogView/>
         </DataTemplate>

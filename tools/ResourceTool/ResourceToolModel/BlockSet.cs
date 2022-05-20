@@ -8,9 +8,9 @@ namespace ResourceTool.Model
 {
     public class BlockSet : Resource
     {
-        public Block[] Blocks;
+        public Guid[] Blocks;
 
-        public BlockSet(Guid id, string name, IEnumerable<Block> blocks) : base(id, name)
+        public BlockSet(Guid id, string name, IEnumerable<Guid> blocks) : base(id, name)
         {
             if (blocks == null)
             {

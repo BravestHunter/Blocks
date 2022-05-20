@@ -40,5 +40,12 @@
       "Id": "064bd468-4024-46cb-a2e1-65885b272f9c",
       "Name": "Dirt"
     }
+  ],
+  "BlockSets": [
+    {
+      "Blocks": [],
+      "Id": "666b023b-eb05-4ee8-a723-193240506595",
+      "Name": "MainBlockSet"
+    }
   ]
 }

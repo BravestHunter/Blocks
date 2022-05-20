@@ -70,6 +70,7 @@ namespace ResourceTool.ViewModel
 
         public ICommand CreateTextureCommand { get; private init; }
         public ICommand CreateBlockCommand { get; private init; }
+        public ICommand CreateBlockSetCommand { get; private init; }
 
 
         public ResourceBaseViewModel(string rootPath)
@@ -85,6 +86,7 @@ namespace ResourceTool.ViewModel
 
             CreateTextureCommand = new RelayCommand(CreateTextureCommandExecute);
             CreateBlockCommand = new RelayCommand(CreateBlockCommandExecute);
+            CreateBlockSetCommand = new RelayCommand(CreateBlockSetCommandExecute);
         }
 
         public ResourceBaseViewModel(string rootPath, string name) : this(rootPath)
@@ -101,9 +103,10 @@ namespace ResourceTool.ViewModel
         {
             Name = resourceBase.Name;
 
-            var resources = 
+            var resources =
                 resourceBase.Textures.Select(t => new TextureViewModel(t)).Cast<ResourceViewModel>()
-                .Concat(resourceBase.Blocks.Select(b => new BlockViewModel(b)).Cast<ResourceViewModel>());
+                .Concat(resourceBase.Blocks.Select(b => new BlockViewModel(b)).Cast<ResourceViewModel>())
+                .Concat(resourceBase.BlockSets.Select(bs => new BlockSetViewModel(bs)).Cast<ResourceViewModel>());
 
             Resources = new ObservableCollection<ResourceViewModel>(resources);
         }
@@ -114,7 +117,8 @@ namespace ResourceTool.ViewModel
             ResourceBase resourceBase = new ResourceBase(
                 _name,
                 Resources.OfType<TextureViewModel>().Select(t => t.GetModel()),
-                Resources.OfType<BlockViewModel>().Select(t => t.GetModel())
+                Resources.OfType<BlockViewModel>().Select(t => t.GetModel()),
+                Resources.OfType<BlockSetViewModel>().Select(bs => bs.GetModel())
                 );
 
             return resourceBase;
@@ -158,6 +162,23 @@ namespace ResourceTool.ViewModel
             {
                 BlockViewModel blockVM = dialogVM.GetBlockViewModel();
                 Resources.Add(blockVM);
+            }
+        }
+
+        private void CreateBlockSetCommandExecute(object parameter)
+        {
+            var dialogService = App.ServiceProvider.GetService(typeof(IDialogService)) as IDialogService;
+            if (dialogService == null)
+            {
+                throw new NullReferenceException("Dialog service wasn't found");
+            }
+
+            CreateBlockSetDialogViewModel dialogVM = new CreateBlockSetDialogViewModel();
+            bool? dialogResult = dialogService.ShowDialog(dialogVM);
+            if (dialogResult.HasValue && dialogResult.Value)
+            {
+                BlockSetViewModel blockSetVM = dialogVM.GetBlockSetViewModel();
+                Resources.Add(blockSetVM);
             }
         }
     }
