@@ -15,6 +15,16 @@
       "Path": "E:\\WorkDirectory\\MyProjects\\Blocks\\Blocks\\resources\\CommonResourceBase\\Textures\\uran.jpg",
       "Id": "78d1e71e-0e00-41de-8142-82a892691123",
       "Name": "Uran"
+    },
+    {
+      "Path": "E:\\WorkDirectory\\MyProjects\\Blocks\\Blocks\\resources\\CommonResourceBase\\Textures\\wood_side.png",
+      "Id": "2426f182-95a0-4db9-8e61-32eb6a1089e7",
+      "Name": "Wood Side"
+    },
+    {
+      "Path": "E:\\WorkDirectory\\MyProjects\\Blocks\\Blocks\\resources\\CommonResourceBase\\Textures\\wood_vertical.png",
+      "Id": "b91a6b86-9ab2-478e-838d-762d1a6ff96f",
+      "Name": "Wood Top"
     }
   ],
   "Blocks": [
