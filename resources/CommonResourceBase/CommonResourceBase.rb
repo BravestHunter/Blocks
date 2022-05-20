@@ -17,5 +17,18 @@
       "Name": "Uran"
     }
   ],
-  "Blocks": []
+  "Blocks": [
+    {
+      "Textures": [
+        "70c8917f-fd28-4212-8f39-8a6eb8eae8a6",
+        "70c8917f-fd28-4212-8f39-8a6eb8eae8a6",
+        "70c8917f-fd28-4212-8f39-8a6eb8eae8a6",
+        "70c8917f-fd28-4212-8f39-8a6eb8eae8a6",
+        "70c8917f-fd28-4212-8f39-8a6eb8eae8a6",
+        "70c8917f-fd28-4212-8f39-8a6eb8eae8a6"
+      ],
+      "Id": "064bd468-4024-46cb-a2e1-65885b272f9c",
+      "Name": "Dirt"
+    }
+  ]
 }

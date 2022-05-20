@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ResourceTool.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,20 @@ namespace ResourceTool.ViewModel
             }
 
             _textures = textures;
+        }
+
+        public BlockViewModel(Block block) : base(block.Id, block.Name)
+        {
+            _textures = block.Textures;
+        }
+
+        public Block GetModel()
+        {
+            return new Block(
+                Id,
+                Name,
+                _textures
+                );
         }
     }
 }

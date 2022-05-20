@@ -100,14 +100,22 @@ namespace ResourceTool.ViewModel
         public ResourceBaseViewModel(string rootPath, ResourceBase resourceBase) : this(rootPath)
         {
             Name = resourceBase.Name;
-            Resources = new ObservableCollection<ResourceViewModel>(resourceBase.Textures.Select(t => new TextureViewModel(t)));
+
+            var resources = 
+                resourceBase.Textures.Select(t => new TextureViewModel(t)).Cast<ResourceViewModel>()
+                .Concat(resourceBase.Blocks.Select(b => new BlockViewModel(b)).Cast<ResourceViewModel>());
+
+            Resources = new ObservableCollection<ResourceViewModel>(resources);
         }
 
 
         public ResourceBase GetModel()
         {
-            List<Texture> textures = new List<Texture>(Resources.OfType<TextureViewModel>().Select(t => t.GetModel()));
-            ResourceBase resourceBase = new ResourceBase(_name, textures);
+            ResourceBase resourceBase = new ResourceBase(
+                _name,
+                Resources.OfType<TextureViewModel>().Select(t => t.GetModel()),
+                Resources.OfType<BlockViewModel>().Select(t => t.GetModel())
+                );
 
             return resourceBase;
         }
