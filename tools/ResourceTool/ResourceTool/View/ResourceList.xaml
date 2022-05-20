@@ -17,6 +17,10 @@
         <DataTemplate DataType="{x:Type vm:BlockViewModel}">
             <local:BlockPreview/>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:BlockSetViewModel}">
+            <local:BlockSetPreview/>
+        </DataTemplate>
     </UserControl.Resources>
     
     <Grid>
