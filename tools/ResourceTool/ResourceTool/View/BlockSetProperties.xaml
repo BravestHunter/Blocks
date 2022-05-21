@@ -18,6 +18,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Id"/>
@@ -43,5 +44,7 @@
             <Button Content="Up" Command="{Binding UpBlockCommand}"/>
             <Button Content="Down" Command="{Binding DownBlockCommand}"/>
         </StackPanel>
+
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="Generate block set" Command="{Binding GenerateBlockSetCommand}"/>
     </Grid>
 </UserControl>

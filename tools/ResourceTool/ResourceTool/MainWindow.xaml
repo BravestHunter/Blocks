@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         
-        Title="Resource tool" 
+        Title="Resource tool"
         Height="450" Width="800">
     <DockPanel>
         <Grid DockPanel.Dock="Top">

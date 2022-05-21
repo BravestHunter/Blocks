@@ -1,6 +1,7 @@
 ﻿using ResourceTool.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,16 @@ namespace ResourceTool.Service
             }
 
             _mainVM = mainVM;
+        }
+
+        public string? GetBlockSetPath()
+        {
+            if (_mainVM.ResourceBaseVM == null)
+            {
+                return null;
+            }
+
+            return Path.Combine(_mainVM.ResourceBaseVM.RootPath, "BlockSets");
         }
 
         public T? GetResource<T>(Guid id) where T : ResourceViewModel

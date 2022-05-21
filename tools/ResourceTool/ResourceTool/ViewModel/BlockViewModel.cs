@@ -14,6 +14,8 @@ namespace ResourceTool.ViewModel
     public class BlockViewModel : ResourceViewModel
     {
         private Guid[] _textures;
+        public Guid[] Textures { get { return _textures; } }
+
         public Guid FrontTextureId
         {
             get { return _textures[(int)BlockSide.Front]; }

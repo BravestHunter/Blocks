@@ -1,0 +1,49 @@
+{
+  "Name": "MainBlockSet",
+  "Blocks": [
+    {
+      "Name": "Dirt",
+      "Textures": [
+        "0.png",
+        "0.png",
+        "0.png",
+        "0.png",
+        "0.png",
+        "0.png"
+      ]
+    },
+    {
+      "Name": "Wood",
+      "Textures": [
+        "1.png",
+        "1.png",
+        "1.png",
+        "1.png",
+        "2.png",
+        "2.png"
+      ]
+    },
+    {
+      "Name": "Brick",
+      "Textures": [
+        "3.png",
+        "3.png",
+        "3.png",
+        "3.png",
+        "3.png",
+        "3.png"
+      ]
+    },
+    {
+      "Name": "Uran",
+      "Textures": [
+        "4.png",
+        "4.png",
+        "4.png",
+        "4.png",
+        "4.png",
+        "4.png"
+      ]
+    }
+  ]
+}

@@ -1,10 +1,14 @@
-﻿using ResourceTool.Model;
+﻿using Newtonsoft.Json;
+using ResourceTool.Model;
 using ResourceTool.Service;
 using ResourceTool.Utils;
 using ResourceTool.ViewModel.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -54,6 +58,7 @@ namespace ResourceTool.ViewModel
         public ICommand RemoveBlockCommand { get; private init; }
         public ICommand UpBlockCommand { get; private init; }
         public ICommand DownBlockCommand { get; private init; }
+        public ICommand GenerateBlockSetCommand { get; private init; }
 
 
         public BlockSetViewModel(Guid id, string name, int resolution) : base(id, name)
@@ -65,6 +70,7 @@ namespace ResourceTool.ViewModel
             RemoveBlockCommand = new RelayCommand(RemoveBlockCommandExecute, RemoveBlockCommandCanExecute);
             UpBlockCommand = new RelayCommand(UpBlockCommandExecute, UpBlockCommandCanExecute);
             DownBlockCommand = new RelayCommand(DownBlockCommandExecute, DownBlockCommandCanExecute);
+            GenerateBlockSetCommand = new RelayCommand(GenerateBlockSetCommandExecute, GenerateBlockSetCommandCanExecute);
 
             _initialBlocks = new Guid[0];
         }
@@ -152,6 +158,65 @@ namespace ResourceTool.ViewModel
                 Blocks.Count > 1 && 
                 SelectedBlock != null &&
                 Blocks.IndexOf(SelectedBlock) < Blocks.Count - 1;
+        }
+
+        private void GenerateBlockSetCommandExecute(object parameter)
+        {
+            var resourceService = App.ServiceProvider.GetService(typeof(IResourceService)) as IResourceService;
+            if (resourceService == null)
+            {
+                throw new NullReferenceException("Resource service wasn't found");
+            }
+
+            string commonBlockSetsDirectory = resourceService.GetBlockSetPath()!;
+            if (!Directory.Exists(commonBlockSetsDirectory))
+            {
+                Directory.CreateDirectory(commonBlockSetsDirectory);
+            }
+
+            string blockSetDirectory = Path.Combine(commonBlockSetsDirectory, Name!);
+            if (Directory.Exists(blockSetDirectory))
+            {
+                Directory.Delete(blockSetDirectory, true);
+            }
+            Directory.CreateDirectory(blockSetDirectory);
+
+            Dictionary<Guid, string> textureMap = new Dictionary<Guid, string>();
+            int counter = 0;
+            foreach (TextureViewModel textureVM in Blocks.SelectMany(b => b.Textures.Select(t => resourceService.GetResource<TextureViewModel>(t))))
+            {
+                if (!textureMap.ContainsKey(textureVM.Id))
+                {
+                    string fileName = $"{counter++}.png";
+
+                    textureMap.Add(textureVM.Id, fileName);
+
+                    using (Image image = Image.FromFile(textureVM.Path!))
+                    using (Bitmap bm = TextureViewModel.ResizeImage(image, Resolution, Resolution))
+                    {
+                        bm.Save(Path.Combine(blockSetDirectory, fileName), ImageFormat.Png);
+                    }
+                }
+            }
+
+            List<RawBlock> rawBlocks = new List<RawBlock>(Blocks.Count);
+            foreach (BlockViewModel blockVM in Blocks)
+            {
+                RawBlock rawBlock = new RawBlock(
+                    blockVM.Name!,
+                    blockVM.Textures.Select(t => textureMap[t]).ToArray()
+                    );
+                rawBlocks.Add(rawBlock);
+            }
+
+            RawBlockSet rawBlockSet = new RawBlockSet(Name!, rawBlocks);
+            string rawBlockSetStr = JsonConvert.SerializeObject(rawBlockSet, Formatting.Indented);
+            File.WriteAllText(Path.Combine(blockSetDirectory, $"{Name}.bs"), rawBlockSetStr);
+        }
+
+        private bool GenerateBlockSetCommandCanExecute(object parameter)
+        {
+            return Blocks.Count > 0;
         }
     }
 }
