@@ -223,7 +223,7 @@ std::shared_ptr<Chunk> Map::GenerateChunk(std::pair<int, int> position)
   auto perlinNoise = FastNoise::New<FastNoise::Perlin>();
   auto minMax = perlinNoise->GenUniformGrid2D(highMap, position.first * Chunk::Length, position.second * Chunk::Width, Chunk::Length, Chunk::Width, 0.01f, seed_);
 
-  Block blockType = (rand() % 3) + 1;
+  Block blockType = (rand() % 4) + 1;
   for (int x = 0; x < Chunk::Length; x++)
   {
     for (int y = 0; y < Chunk::Width; y++)

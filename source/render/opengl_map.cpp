@@ -18,6 +18,26 @@ OpenglMap::~OpenglMap()
 }
 
 
+void OpenglMap::SetBlockSet(std::shared_ptr<BlockSet> blockSet)
+{
+  blockSet_ = blockSet;
+
+  std::vector<std::string> paths;
+  for (int i = 0; i < blockSet->GetTexturesNumber(); i++)
+  {
+    paths.push_back(blockSet->GetTexture(i));
+  }
+
+  int resolution = blockSet->GetResolution();
+  OpenglTextureArray texAr(paths, resolution, resolution);
+}
+
+bool OpenglMap::HasBlockSet()
+{
+  return blockSet_ != nullptr;
+}
+
+
 bool OpenglMap::ContainsChunk(std::pair<int, int> position)
 {
   return chunks_.contains(position);
@@ -99,7 +119,7 @@ std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_
           continue;
         }
 
-        float fBlock = (float)(chunk->blocks[blockIndex] - 1);
+        BlockInfo fBlock = blockSet_->GetBlockInfo(chunk->blocks[blockIndex] - 1);
 
         glm::vec3 position(x, y, z);
 
@@ -108,10 +128,10 @@ std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_
         {
           // Add forward face
 
-          Vertex v1(x + 1, y + 1, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x + 1, y, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x + 1, y, z + 1, 1.0f, 1.0f, fBlock);
+          Vertex v1(x + 1, y + 1, z, 0.0f, 0.0f, fBlock.textures[0]);
+          Vertex v2(x + 1, y, z, 1.0f, 0.0f, fBlock.textures[0]);
+          Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f, fBlock.textures[0]);
+          Vertex v4(x + 1, y, z + 1, 1.0f, 1.0f, fBlock.textures[0]);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -128,10 +148,10 @@ std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_
         {
           // Add backward face
 
-          Vertex v1(x, y, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x, y + 1, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x, y, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f, fBlock);
+          Vertex v1(x, y, z, 0.0f, 0.0f, fBlock.textures[1]);
+          Vertex v2(x, y + 1, z, 1.0f, 0.0f, fBlock.textures[1]);
+          Vertex v3(x, y, z + 1, 0.0f, 1.0f, fBlock.textures[1]);
+          Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f, fBlock.textures[1]);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -148,10 +168,10 @@ std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_
         {
           // Add right face
 
-          Vertex v1(x, y + 1, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x + 1, y + 1, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x, y + 1, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x + 1, y + 1, z + 1, 1.0f, 1.0f, fBlock);
+          Vertex v1(x, y + 1, z, 0.0f, 0.0f, fBlock.textures[2]);
+          Vertex v2(x + 1, y + 1, z, 1.0f, 0.0f, fBlock.textures[2]);
+          Vertex v3(x, y + 1, z + 1, 0.0f, 1.0f, fBlock.textures[2]);
+          Vertex v4(x + 1, y + 1, z + 1, 1.0f, 1.0f, fBlock.textures[2]);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -168,10 +188,10 @@ std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_
         {
           // Add left face
 
-          Vertex v1(x + 1, y, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x, y, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x + 1, y, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x, y, z + 1, 1.0f, 1.0f, fBlock);
+          Vertex v1(x + 1, y, z, 0.0f, 0.0f, fBlock.textures[3]);
+          Vertex v2(x, y, z, 1.0f, 0.0f, fBlock.textures[3]);
+          Vertex v3(x + 1, y, z + 1, 0.0f, 1.0f, fBlock.textures[3]);
+          Vertex v4(x, y, z + 1, 1.0f, 1.0f, fBlock.textures[3]);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -188,10 +208,10 @@ std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_
         {
           // Add upper face
 
-          Vertex v1(x + 1, y, z + 1, 0.0f, 0.0f, fBlock);
-          Vertex v2(x, y, z + 1, 1.0f, 0.0f, fBlock);
-          Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f, fBlock);
-          Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f, fBlock);
+          Vertex v1(x + 1, y, z + 1, 0.0f, 0.0f, fBlock.textures[4]);
+          Vertex v2(x, y, z + 1, 1.0f, 0.0f, fBlock.textures[4]);
+          Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f, fBlock.textures[4]);
+          Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f, fBlock.textures[4]);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);
@@ -208,10 +228,10 @@ std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_
         {
           // Add bottom face
 
-          Vertex v1(x, y, z, 0.0f, 0.0f, fBlock);
-          Vertex v2(x + 1, y, z, 1.0f, 0.0f, fBlock);
-          Vertex v3(x, y + 1, z, 0.0f, 1.0f, fBlock);
-          Vertex v4(x + 1, y + 1, z, 1.0f, 1.0f, fBlock);
+          Vertex v1(x, y, z, 0.0f, 0.0f, fBlock.textures[5]);
+          Vertex v2(x + 1, y, z, 1.0f, 0.0f, fBlock.textures[5]);
+          Vertex v3(x, y + 1, z, 0.0f, 1.0f, fBlock.textures[5]);
+          Vertex v4(x + 1, y + 1, z, 1.0f, 1.0f, fBlock.textures[5]);
 
           AddVertex(v1, verticesData, verticesDataIndex);
           AddVertex(v2, verticesData, verticesDataIndex);

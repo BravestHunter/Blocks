@@ -9,9 +9,9 @@ namespace ResourceTool.Model
     public class RawBlock
     {
         public string Name;
-        public string[] Textures;
+        public int[] Textures;
 
-        public RawBlock(string name, string[] textures)
+        public RawBlock(string name, int[] textures)
         {
             if (string.IsNullOrEmpty(name))
             {

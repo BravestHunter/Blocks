@@ -6,6 +6,7 @@
 #include "export.h"
 
 #include "platform/glfw_platform.hpp"
+#include "resource/resource_base.hpp"
 #include "render/opengl_render_system.hpp"
 #include "render/opengl_scene.hpp"
 #include "camera.hpp"
@@ -26,6 +27,7 @@ private:
   bool running = true;
 
   std::unique_ptr<GlfwPlatform> platform_;
+  std::unique_ptr<ResourceBase> resourceBase_;
   std::shared_ptr<OpenglRenderSystem> renderSystem_;
 
   // Window

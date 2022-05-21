@@ -9,13 +9,23 @@ namespace ResourceTool.Model
     public class RawBlockSet
     {
         public string Name;
+        public int Resolution;
+        public int TexturesNumber;
         public RawBlock[] Blocks;
 
-        public RawBlockSet(string name, IEnumerable<RawBlock> blocks)
+        public RawBlockSet(string name, int resolution, int texturesNumber, IEnumerable<RawBlock> blocks)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException(nameof(name));
+            }
+            if (resolution <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(resolution));
+            }
+            if (texturesNumber < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(texturesNumber));
             }
             if (blocks == null)
             {
@@ -23,6 +33,8 @@ namespace ResourceTool.Model
             }
 
             Name = name;
+            Resolution = resolution;
+            TexturesNumber = texturesNumber;
             Blocks = blocks.ToArray();
         }
     }

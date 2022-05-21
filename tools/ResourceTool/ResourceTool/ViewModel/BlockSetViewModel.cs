@@ -181,21 +181,22 @@ namespace ResourceTool.ViewModel
             }
             Directory.CreateDirectory(blockSetDirectory);
 
-            Dictionary<Guid, string> textureMap = new Dictionary<Guid, string>();
+            Dictionary<Guid, int> textureMap = new Dictionary<Guid, int>();
             int counter = 0;
             foreach (TextureViewModel textureVM in Blocks.SelectMany(b => b.Textures.Select(t => resourceService.GetResource<TextureViewModel>(t))))
             {
                 if (!textureMap.ContainsKey(textureVM.Id))
                 {
-                    string fileName = $"{counter++}.png";
+                    textureMap.Add(textureVM.Id, counter);
 
-                    textureMap.Add(textureVM.Id, fileName);
-
+                    string fileName = $"{counter}.png";
                     using (Image image = Image.FromFile(textureVM.Path!))
                     using (Bitmap bm = TextureViewModel.ResizeImage(image, Resolution, Resolution))
                     {
                         bm.Save(Path.Combine(blockSetDirectory, fileName), ImageFormat.Png);
                     }
+
+                    counter++;
                 }
             }
 
@@ -209,7 +210,7 @@ namespace ResourceTool.ViewModel
                 rawBlocks.Add(rawBlock);
             }
 
-            RawBlockSet rawBlockSet = new RawBlockSet(Name!, rawBlocks);
+            RawBlockSet rawBlockSet = new RawBlockSet(Name!, Resolution, textureMap.Count, rawBlocks);
             string rawBlockSetStr = JsonConvert.SerializeObject(rawBlockSet, Formatting.Indented);
             File.WriteAllText(Path.Combine(blockSetDirectory, $"{Name}.bs"), rawBlockSetStr);
         }

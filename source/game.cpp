@@ -48,12 +48,15 @@ std::string string_format(const std::string& format, Args ... args)
 Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
 {
   platform_ = std::make_unique<GlfwPlatform>();
+  resourceBase_ = std::make_unique<ResourceBase>();
   openglScene_ = std::make_shared<OpenglScene>();
 
   camera_ = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
 
   platform_->Init();
   openglScene_->InitMap();
+
+  resourceBase_->SetUp(RESOURCE_BASE_PATH);
 
   currentScene_ = CreateMainMenuScene();
 }
@@ -351,8 +354,8 @@ void Game::RunRenderCycle()
     }
   );
 
-  std::vector<const char*> paths{ PPCAT(BLOCK_TEXTURES_DIR, BRICK_TEXTURE), PPCAT(BLOCK_TEXTURES_DIR, DIRT_TEXTURE), PPCAT(BLOCK_TEXTURES_DIR, URAN_TEXTURE) };
-  OpenglTextureArray texAr(paths, 64, 64);
+  std::shared_ptr<BlockSet> blockSet = resourceBase_->LoadBlockSet(resourceBase_->GetBlockSetNames()->front());
+  openglScene_->GetMap()->SetBlockSet(blockSet);
 
   while (running)
   {
@@ -495,9 +498,6 @@ void Game::SetRequestedScene()
 
   if (currentScene_->ContainsMap())
   {
-    openglScene_ = std::make_shared<OpenglScene>();
-    openglScene_->InitMap();
-
     lastCenterChunkCoords_ = CalculateChunkCenter();
     AddChunks(lastCenterChunkCoords_);
   }
