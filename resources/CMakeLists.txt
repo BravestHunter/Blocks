@@ -1,6 +1,5 @@
 set(RESOURCE_DIR "resources")
 set(SHADERS_DIR "${RESOURCE_DIR}/shaders" PARENT_SCOPE)
-set(TEXTURES_DIR "${RESOURCE_DIR}/textures" PARENT_SCOPE)
 
 install(
 	DIRECTORY 

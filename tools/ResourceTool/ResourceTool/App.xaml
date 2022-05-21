@@ -1,0 +1,19 @@
+﻿<Application x:Class="ResourceTool.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ResourceTool"
+             xmlns:v="clr-namespace:ResourceTool.View"
+             xmlns:vd="clr-namespace:ResourceTool.View.Dialog"
+             xmlns:vm="clr-namespace:ResourceTool.ViewModel"
+             xmlns:vmd="clr-namespace:ResourceTool.ViewModel.Dialog"
+             StartupUri="MainWindow.xaml">
+    
+    <Application.Resources>
+        <vm:MainViewModel x:Key="MainVM"/>
+
+        <DataTemplate DataType="{x:Type vmd:CreateResourceBaseDialogViewModel}">
+            <vd:CreateResourceBaseDialogView/>
+        </DataTemplate>
+    </Application.Resources>
+    
+</Application>

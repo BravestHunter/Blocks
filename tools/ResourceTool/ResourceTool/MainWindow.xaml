@@ -1,0 +1,58 @@
+﻿<Window x:Class="ResourceTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ResourceTool"
+        xmlns:v="clr-namespace:ResourceTool.View"
+        xmlns:vm="clr-namespace:ResourceTool.ViewModel"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        
+        Title="Resource tool"
+        Height="450" Width="800">
+    <DockPanel>
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Menu Grid.Column="0">
+                <MenuItem Header="File">
+                    <MenuItem Header="New" Command="{Binding CreateResourceBaseCommand}"/>
+                    <MenuItem Header="Open" Command="{Binding OpenResourceBaseCommand}"/>
+                    <MenuItem Header="Save" Command="{Binding SaveResourceBaseCommand}"/>
+                </MenuItem>
+            </Menu>
+
+            <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="{Binding ResourceBaseVM.Name}"/>
+        </Grid>
+
+        <StackPanel DockPanel.Dock="Top" 
+                    Orientation="Horizontal"
+                    Height="40">
+            <Button Content="Create Texture" Command="{Binding ResourceBaseVM.CreateTextureCommand}"/>
+            <Button Content="Create Block" Command="{Binding ResourceBaseVM.CreateBlockCommand}"/>
+            <Button Content="Create Block Set" Command="{Binding ResourceBaseVM.CreateBlockSetCommand}"/>
+        </StackPanel>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition MinWidth="300"/>
+            </Grid.ColumnDefinitions>
+
+            <v:ResourceList DataContext="{Binding ResourceBaseVM}"/>
+
+            <GridSplitter Grid.Column="1" 
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Stretch"
+                          Width="3"/>
+
+            <v:ResourceProperties Grid.Column="2" DataContext="{Binding ResourceBaseVM}"/>
+        </Grid>
+        
+    </DockPanel>
+</Window>

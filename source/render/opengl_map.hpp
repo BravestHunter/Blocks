@@ -7,7 +7,9 @@
 
 #include "opengl_chunk.hpp"
 #include "opengl_raw_chunk_data.hpp"
+#include "opengl_texture_array.hpp"
 #include "model/chunk.hpp"
+#include "resource/block_set.hpp"
 
 
 class OpenglRenderSystem;
@@ -26,6 +28,9 @@ public:
   OpenglMap();
   ~OpenglMap();
 
+  void SetBlockSet(std::shared_ptr<BlockSet> blockSet);
+  bool HasBlockSet();
+
   bool ContainsChunk(std::pair<int, int> position);
   void EnqueueChunkAdd(std::shared_ptr<Chunk> chunk, std::pair<int, int> position);
   void EnqueueChunkRemove(std::pair<int, int> position);
@@ -36,6 +41,7 @@ private:
   std::queue<ChunksQueueItem> addQueue_;
   std::queue<std::pair<int, int>> removeQueue_;
   std::mutex mutex_;
+  std::shared_ptr<BlockSet> blockSet_;
 
   std::shared_ptr<OpenglRawChunkData> GenerateRawChunkData(std::shared_ptr<Chunk> chunk);
   void AddChunk(ChunksQueueItem& item);

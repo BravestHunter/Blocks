@@ -5,7 +5,7 @@
 #include "io/file_api.hpp"
 
 
-OpenglTextureArray::OpenglTextureArray(std::vector<const char*> paths, int resolutionX, int resolutionY)
+OpenglTextureArray::OpenglTextureArray(std::vector<std::string> paths, int resolutionX, int resolutionY)
 {
   glGenTextures(1, &id_);
   glBindTexture(GL_TEXTURE_2D_ARRAY, id_);

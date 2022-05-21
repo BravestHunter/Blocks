@@ -7,6 +7,7 @@ set(CORE_SOURCE_FILES
 	camera.hpp
 	camera.cpp
 	image.hpp
+	block_side.hpp
 
 	platform/glfw_headers.hpp
 	platform/cursor_mode.hpp
@@ -17,6 +18,12 @@ set(CORE_SOURCE_FILES
 
 	io/file_api.hpp
 	io/file_api.cpp
+
+	resource/resource_base.hpp
+	resource/resource_base.cpp
+	resource/block_set.hpp
+	resource/block_set.cpp
+	resource/block_info.hpp
 
 	render/glew_headers.hpp
 	render/opengl_render_system.hpp
@@ -82,6 +89,7 @@ target_link_libraries(BlocksCore
 		Freetype::Freetype
 		imgui
 		FastNoise2::FastNoise
+		nlohmann_json
 )
 
 

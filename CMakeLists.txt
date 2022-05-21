@@ -27,7 +27,6 @@ find_package(GLM REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(FastNoise2 REQUIRED)
 
-
 add_subdirectory(source)
 
 
