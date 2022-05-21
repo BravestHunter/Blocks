@@ -96,11 +96,16 @@ namespace ResourceTool.ViewModel
             _textures = block.Textures;
         }
 
+        public override void RestoreLinks()
+        {
+            // Nothing to do here
+        }
+
         public Block GetModel()
         {
             return new Block(
                 Id,
-                Name,
+                Name!,
                 _textures
                 );
         }

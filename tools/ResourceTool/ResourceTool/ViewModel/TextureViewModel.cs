@@ -46,10 +46,6 @@ namespace ResourceTool.ViewModel
         }
 
 
-        public TextureViewModel() : base()
-        {
-        }
-
         public TextureViewModel(Guid id, string path, string name) : base(id, name)
         {
             Path = path;
@@ -62,6 +58,11 @@ namespace ResourceTool.ViewModel
             Path = texture.Path;
 
             UpdateImage();
+        }
+
+        public override void RestoreLinks()
+        {
+            // Nothing to do here
         }
 
 

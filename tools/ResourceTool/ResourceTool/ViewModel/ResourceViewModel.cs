@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ResourceTool.ViewModel
 {
-    public class ResourceViewModel : BaseViewModel
+    public abstract class ResourceViewModel : BaseViewModel
     {
         private Guid _id;
         public Guid Id
@@ -41,15 +41,12 @@ namespace ResourceTool.ViewModel
             }
         }
 
-        public ResourceViewModel()
-        {
-            Id = Guid.NewGuid();
-        }
-
         public ResourceViewModel(Guid id, string name)
         {
             Id = id;
             Name = name;
         }
+
+        public abstract void RestoreLinks();
     }
 }

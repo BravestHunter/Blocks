@@ -8,15 +8,17 @@ namespace ResourceTool.Model
 {
     public class BlockSet : Resource
     {
+        public int Resoulution;
         public Guid[] Blocks;
 
-        public BlockSet(Guid id, string name, IEnumerable<Guid> blocks) : base(id, name)
+        public BlockSet(Guid id, string name, int resolution, IEnumerable<Guid> blocks) : base(id, name)
         {
             if (blocks == null)
             {
                 throw new ArgumentNullException(nameof(blocks));
             }
 
+            Resoulution = resolution;
             Blocks = blocks.ToArray();
         }
     }

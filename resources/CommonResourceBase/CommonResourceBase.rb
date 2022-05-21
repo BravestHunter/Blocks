@@ -79,6 +79,7 @@
   ],
   "BlockSets": [
     {
+      "Resoulution": 64,
       "Blocks": [
         "064bd468-4024-46cb-a2e1-65885b272f9c",
         "9cebfbe6-bf30-4de5-9a6c-00dc2a46da06",

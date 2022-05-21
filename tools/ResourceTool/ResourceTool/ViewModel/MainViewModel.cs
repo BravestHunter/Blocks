@@ -81,6 +81,7 @@ namespace ResourceTool.ViewModel
                 ResourceBase resourceBase = JsonConvert.DeserializeObject<ResourceBase>(resourceBaseStr)!;
                 string rootPath = Path.GetDirectoryName(dialog.FileName)!;
                 ResourceBaseVM = new ResourceBaseViewModel(rootPath, resourceBase);
+                ResourceBaseVM.RestoreLinks();
             }
         }
 

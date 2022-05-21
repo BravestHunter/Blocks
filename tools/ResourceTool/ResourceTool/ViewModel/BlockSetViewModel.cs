@@ -14,6 +14,24 @@ namespace ResourceTool.ViewModel
 {
     public class BlockSetViewModel : ResourceViewModel
     {
+        private readonly Guid[] _initialBlocks;
+
+        private int _resolution;
+        public int Resolution
+        {
+            get { return _resolution; }
+            set
+            {
+                if (value == _resolution)
+                {
+                    return;
+                }
+
+                _resolution = value;
+                OnPropertyChanged(nameof(Resolution));
+            }
+        }
+
         public ObservableCollection<BlockViewModel> Blocks { get; private init; }
 
         private BlockViewModel? _selectedBlock;
@@ -38,17 +56,25 @@ namespace ResourceTool.ViewModel
         public ICommand DownBlockCommand { get; private init; }
 
 
-        public BlockSetViewModel(Guid id, string name) : base(id, name)
+        public BlockSetViewModel(Guid id, string name, int resolution) : base(id, name)
         {
+            Resolution = resolution;
             Blocks = new ObservableCollection<BlockViewModel>();
 
             AddBlockCommand = new RelayCommand(AddBlockCommandExecute);
             RemoveBlockCommand = new RelayCommand(RemoveBlockCommandExecute, RemoveBlockCommandCanExecute);
             UpBlockCommand = new RelayCommand(UpBlockCommandExecute, UpBlockCommandCanExecute);
             DownBlockCommand = new RelayCommand(DownBlockCommandExecute, DownBlockCommandCanExecute);
+
+            _initialBlocks = new Guid[0];
         }
 
-        public BlockSetViewModel(BlockSet blockSet) : this(blockSet.Id, blockSet.Name)
+        public BlockSetViewModel(BlockSet blockSet) : this(blockSet.Id, blockSet.Name, blockSet.Resoulution)
+        {
+            _initialBlocks = blockSet.Blocks;
+        }
+
+        public override void RestoreLinks()
         {
             var resourceService = App.ServiceProvider.GetService(typeof(IResourceService)) as IResourceService;
             if (resourceService == null)
@@ -56,9 +82,11 @@ namespace ResourceTool.ViewModel
                 throw new NullReferenceException("Resource service wasn't found");
             }
 
-            Blocks = new ObservableCollection<BlockViewModel>(
-                blockSet.Blocks.Select(id => resourceService.GetResource<BlockViewModel>(id)!)
-                );
+            Blocks.Clear();
+            foreach (Guid blockId in _initialBlocks)
+            {
+                Blocks.Add(resourceService.GetResource<BlockViewModel>(blockId)!);
+            }
         }
 
         public BlockSet GetModel()
@@ -66,6 +94,7 @@ namespace ResourceTool.ViewModel
             return new BlockSet(
                 Id,
                 Name!,
+                Resolution,
                 Blocks.Select(b => b.Id)
                 );
         }

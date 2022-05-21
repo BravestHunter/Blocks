@@ -103,14 +103,29 @@ namespace ResourceTool.ViewModel
         {
             Name = resourceBase.Name;
 
-            var resources =
-                resourceBase.Textures.Select(t => new TextureViewModel(t)).Cast<ResourceViewModel>()
-                .Concat(resourceBase.Blocks.Select(b => new BlockViewModel(b)).Cast<ResourceViewModel>())
-                .Concat(resourceBase.BlockSets.Select(bs => new BlockSetViewModel(bs)).Cast<ResourceViewModel>());
-
-            Resources = new ObservableCollection<ResourceViewModel>(resources);
+            Resources = new ObservableCollection<ResourceViewModel>();
+            foreach (Texture texture in resourceBase.Textures)
+            {
+                Resources.Add(new TextureViewModel(texture));
+            }
+            foreach (Block block in resourceBase.Blocks)
+            {
+                Resources.Add(new BlockViewModel(block));
+            }
+            foreach (BlockSet blockSet in resourceBase.BlockSets)
+            {
+                Resources.Add(new BlockSetViewModel(blockSet));
+            }
         }
 
+
+        public void RestoreLinks()
+        {
+            foreach (ResourceViewModel resourceVM in Resources)
+            {
+                resourceVM.RestoreLinks();
+            }
+        }
 
         public ResourceBase GetModel()
         {

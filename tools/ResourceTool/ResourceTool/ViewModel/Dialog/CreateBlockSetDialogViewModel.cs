@@ -28,6 +28,23 @@ namespace ResourceTool.ViewModel.Dialog
             }
         }
 
+        private int _resolution = 64;
+        public int Resolution
+        {
+            get { return _resolution; }
+            set
+            {
+                if (value == _resolution)
+                {
+                    return;
+                }
+
+                _resolution = value;
+                OnPropertyChanged(nameof(Resolution));
+            }
+        }
+
+
         public CreateBlockSetDialogViewModel()
         {
 
@@ -37,7 +54,8 @@ namespace ResourceTool.ViewModel.Dialog
         {
             return new BlockSetViewModel(
                 Guid.NewGuid(),
-                Name
+                Name,
+                Resolution
                 );
         }
 
