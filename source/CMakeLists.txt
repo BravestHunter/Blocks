@@ -6,7 +6,6 @@ set(CORE_SOURCE_FILES
 	game.cpp
 	camera.hpp
 	camera.cpp
-	image.hpp
 	block_side.hpp
 
 	platform/glfw_headers.hpp
@@ -19,11 +18,12 @@ set(CORE_SOURCE_FILES
 	io/file_api.hpp
 	io/file_api.cpp
 
-	resource/resource_base.hpp
-	resource/resource_base.cpp
+	resource/image.hpp
+	resource/block_info.hpp
 	resource/block_set.hpp
 	resource/block_set.cpp
-	resource/block_info.hpp
+	resource/resource_base.hpp
+	resource/resource_base.cpp
 
 	render/glew_headers.hpp
 	render/opengl_render_system.hpp
@@ -32,10 +32,10 @@ set(CORE_SOURCE_FILES
 	render/opengl_buffer.cpp
 	render/opengl_vertex_array_object.hpp
 	render/opengl_vertex_array_object.cpp
-	render/opengl_texture.hpp
-	render/opengl_texture.cpp
-	render/opengl_texture_array.hpp
-	render/opengl_texture_array.cpp
+	render/opengl_texture_2d.hpp
+	render/opengl_texture_2d.cpp
+	render/opengl_texture_2d_array.hpp
+	render/opengl_texture_2d_array.cpp
 	render/opengl_model.hpp
 	render/opengl_model.cpp
 	render/opengl_chunk.hpp

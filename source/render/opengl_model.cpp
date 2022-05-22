@@ -1,13 +1,13 @@
 #include "opengl_model.hpp"
 
 
-OpenglModel::OpenglModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, std::shared_ptr<OpenglTexture> texture) :
+OpenglModel::OpenglModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, std::shared_ptr<OpenglTexture2D> texture) :
   vbo_(vbo), vao_(vao), ebo_(nullptr), texture_(texture)
 {
 
 }
 
-OpenglModel::OpenglModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, std::shared_ptr<OpenglBuffer> ebo, std::shared_ptr<OpenglTexture> texture) : 
+OpenglModel::OpenglModel(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, std::shared_ptr<OpenglBuffer> ebo, std::shared_ptr<OpenglTexture2D> texture) : 
   vbo_(vbo), vao_(vao), ebo_(ebo), texture_(texture)
 {
 
@@ -29,7 +29,7 @@ std::shared_ptr<OpenglVertexArrayObject> OpenglModel::GetVAO()
   return vao_;
 }
 
-std::shared_ptr<OpenglTexture> OpenglModel::GetTexture()
+std::shared_ptr<OpenglTexture2D> OpenglModel::GetTexture()
 {
   return texture_;
 }

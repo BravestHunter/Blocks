@@ -9,7 +9,6 @@
 #include "opengl_model.hpp"
 #include "opengl_chunk.hpp"
 #include "opengl_map.hpp"
-#include "opengl_texture.hpp"
 #include "opengl_shader.hpp"
 #include "camera.hpp"
 #include "model/chunk.hpp"

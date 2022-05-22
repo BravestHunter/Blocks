@@ -7,7 +7,7 @@
 
 #include "opengl_chunk.hpp"
 #include "opengl_raw_chunk_data.hpp"
-#include "opengl_texture_array.hpp"
+#include "opengl_texture_2d_array.hpp"
 #include "model/chunk.hpp"
 #include "resource/block_set.hpp"
 
@@ -42,6 +42,7 @@ private:
   std::queue<std::pair<int, int>> removeQueue_;
   std::mutex mutex_;
   std::shared_ptr<BlockSet> blockSet_;
+  std::shared_ptr<OpenglTexture2DArray> blocksTextureArray_;
 
   std::shared_ptr<OpenglRawChunkData> GenerateRawChunkData(std::shared_ptr<Chunk> chunk);
   void AddChunk(ChunksQueueItem& item);

@@ -29,7 +29,8 @@ void OpenglMap::SetBlockSet(std::shared_ptr<BlockSet> blockSet)
   }
 
   int resolution = blockSet->GetResolution();
-  OpenglTextureArray texAr(paths, resolution, resolution);
+  blocksTextureArray_ = std::make_shared<OpenglTexture2DArray>(paths, resolution, resolution);
+  blocksTextureArray_->Bind(0);
 }
 
 bool OpenglMap::HasBlockSet()

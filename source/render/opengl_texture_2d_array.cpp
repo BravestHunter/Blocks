@@ -1,11 +1,11 @@
-#include "opengl_texture_array.hpp"
+#include "opengl_texture_2d_array.hpp"
 
 #include <iostream>
 
 #include "io/file_api.hpp"
 
 
-OpenglTextureArray::OpenglTextureArray(std::vector<std::string> paths, int resolutionX, int resolutionY)
+OpenglTexture2DArray::OpenglTexture2DArray(const std::vector<std::string> paths, const int resolutionX, const int resolutionY)
 {
   glGenTextures(1, &id_);
   glBindTexture(GL_TEXTURE_2D_ARRAY, id_);
@@ -33,7 +33,37 @@ OpenglTextureArray::OpenglTextureArray(std::vector<std::string> paths, int resol
   glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-OpenglTextureArray::~OpenglTextureArray()
+OpenglTexture2DArray::OpenglTexture2DArray(OpenglTexture2DArray&& other) : id_(other.id_)
 {
+  other.id_ = 0;
+}
 
+OpenglTexture2DArray& OpenglTexture2DArray::operator=(OpenglTexture2DArray&& other)
+{
+  if (this != &other)
+  {
+    Release();
+    std::swap(id_, other.id_);
+  }
+
+  return *this;
+}
+
+OpenglTexture2DArray::~OpenglTexture2DArray()
+{
+  Release();
+}
+
+
+void OpenglTexture2DArray::Bind(int slot)
+{
+  glActiveTexture(GL_TEXTURE0 + slot);
+  glBindTexture(GL_TEXTURE_2D_ARRAY, id_);
+}
+
+
+void OpenglTexture2DArray::Release()
+{
+  glDeleteTextures(1, &id_);
+  id_ = 0;
 }
