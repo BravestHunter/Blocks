@@ -1,11 +1,11 @@
-#include "opengl_texture.hpp"
+#include "opengl_texture_2d.hpp"
 
 #include <iostream>
 
 #include "io/file_api.hpp"
 
 
-OpenglTexture::OpenglTexture(const char* path)
+OpenglTexture2D::OpenglTexture2D(const Image& image)
 {
   glGenTextures(1, &id_);
   glBindTexture(GL_TEXTURE_2D, id_);
@@ -14,7 +14,6 @@ OpenglTexture::OpenglTexture(const char* path)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  Image image = readImage(path);
   if (!image.data.empty())
   {
     GLuint channelsMode = GL_RGB;
@@ -30,14 +29,37 @@ OpenglTexture::OpenglTexture(const char* path)
   }
 }
 
-OpenglTexture::~OpenglTexture()
+OpenglTexture2D::OpenglTexture2D(OpenglTexture2D&& other) : id_(other.id_)
 {
+  other.id_ = 0;
+}
 
+OpenglTexture2D& OpenglTexture2D::operator=(OpenglTexture2D&& other)
+{
+  if (this != &other)
+  {
+    Release();
+    std::swap(id_, other.id_);
+  }
+
+  return *this;
+}
+
+OpenglTexture2D::~OpenglTexture2D()
+{
+  Release();
 }
 
 
-void OpenglTexture::Bind(int slot)
+void OpenglTexture2D::Bind(int slot)
 {
-  glActiveTexture(slot);
+  glActiveTexture(GL_TEXTURE0 + slot);
   glBindTexture(GL_TEXTURE_2D, id_);
+}
+
+
+void OpenglTexture2D::Release()
+{
+  glDeleteTextures(1, &id_);
+  id_ = 0;
 }

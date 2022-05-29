@@ -6,11 +6,10 @@
 
 #include "opengl_buffer.hpp"
 #include "opengl_vertex_array_object.hpp"
-#include "opengl_model.hpp"
 #include "opengl_chunk.hpp"
 #include "opengl_map.hpp"
-#include "opengl_texture.hpp"
 #include "opengl_shader.hpp"
+#include "opengl_program.hpp"
 #include "camera.hpp"
 #include "model/chunk.hpp"
 
@@ -36,5 +35,5 @@ public:
 private:
   int frameTrianglesNumber_;
 
-  std::unique_ptr<OpenglShader> defaultShader_;
+  std::unique_ptr<OpenglProgram> mapProgram_;
 };

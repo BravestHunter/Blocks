@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 
 #include "model/chunk.hpp"
+#include "resource/image.hpp"
+#include "io/file_api.hpp"
 
 
 OpenglMap::OpenglMap()
@@ -22,14 +24,15 @@ void OpenglMap::SetBlockSet(std::shared_ptr<BlockSet> blockSet)
 {
   blockSet_ = blockSet;
 
-  std::vector<std::string> paths;
+  std::vector<Image> images;
   for (int i = 0; i < blockSet->GetTexturesNumber(); i++)
   {
-    paths.push_back(blockSet->GetTexture(i));
+    images.push_back(readImage(blockSet->GetTexture(i)));
   }
 
   int resolution = blockSet->GetResolution();
-  OpenglTextureArray texAr(paths, resolution, resolution);
+  blocksTextureArray_ = std::make_shared<OpenglTexture2DArray>(images, resolution, resolution);
+  blocksTextureArray_->Bind(0);
 }
 
 bool OpenglMap::HasBlockSet()

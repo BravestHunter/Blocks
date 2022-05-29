@@ -18,9 +18,7 @@
 #include "imgui_internal.h"
 
 #include "model/chunk.hpp"
-#include "render/opengl_model.hpp"
 #include "render/opengl_chunk.hpp"
-#include "render/opengl_texture_array.hpp"
 
 #include "compile_utils.hpp"
 #include "resourceConfig.h"

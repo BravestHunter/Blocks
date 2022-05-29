@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "image.hpp"
+#include "resource/image.hpp"
 
 
 bool isPathExist(std::string path);
