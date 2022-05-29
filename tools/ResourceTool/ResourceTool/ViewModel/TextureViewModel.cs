@@ -1,4 +1,5 @@
 ﻿using ResourceTool.Model;
+using ResourceTool.Service;
 using ResourceTool.Utils;
 using System;
 using System.Collections.Generic;
@@ -47,24 +48,45 @@ namespace ResourceTool.ViewModel
             } 
         }
 
+        private string? ActualPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Path))
+                {
+                    return null;
+                }
+
+                var resourceService = App.ServiceProvider.GetService(typeof(IResourceService)) as IResourceService;
+                if (resourceService == null)
+                {
+                    throw new NullReferenceException("Resorce service wasn't found");
+                }
+
+                string? texturesPath = resourceService.GetTexturesPath();
+                if (string.IsNullOrEmpty(texturesPath))
+                {
+                    return null;
+                }
+
+                return System.IO.Path.Combine(texturesPath, Path);
+            }
+        }
+
 
         public TextureViewModel(Guid id, string path, string name) : base(id, name)
         {
             Path = path;
-
-            UpdateImage();
         }
 
         public TextureViewModel(Texture texture) : base(texture.Id, texture.Name)
         {
             Path = texture.Path;
-
-            UpdateImage();
         }
 
         public override void RestoreLinks()
         {
-            // Nothing to do here
+            UpdateImage();
         }
 
 
@@ -80,13 +102,14 @@ namespace ResourceTool.ViewModel
 
         private void UpdateImage()
         {
-            if (!File.Exists(Path))
+            string actualPath = ActualPath;
+            if (!File.Exists(actualPath))
             {
                 _image = null;
                 return;
             }
 
-            using (FileStream fs = new FileStream(Path, FileMode.Open))
+            using (FileStream fs = new FileStream(actualPath, FileMode.Open))
             {
                 _image = Image.FromStream(fs);
             }

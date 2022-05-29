@@ -66,7 +66,7 @@ namespace ResourceTool.ViewModel
             }
         }
 
-        private string TextureDirectory { get { return Path.Combine(RootPath, "Textures"); } }
+        public string TextureDirectory { get { return Path.Combine(RootPath, "Textures"); } }
 
         public ICommand CreateTextureCommand { get; private init; }
         public ICommand CreateBlockCommand { get; private init; }
@@ -158,7 +158,7 @@ namespace ResourceTool.ViewModel
                 if (!File.Exists(targetPath))
                     File.Copy(dialogVM.Path, targetPath);
             
-                TextureViewModel textureVM = new TextureViewModel(Guid.NewGuid(), targetPath, dialogVM.Name);
+                TextureViewModel textureVM = new TextureViewModel(Guid.NewGuid(), fileName, dialogVM.Name);
                 Resources.Add(textureVM);
             }
         }

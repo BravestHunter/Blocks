@@ -22,6 +22,17 @@ namespace ResourceTool.Service
             _mainVM = mainVM;
         }
 
+
+        public string? GetTexturesPath()
+        {
+            if (_mainVM.ResourceBaseVM == null)
+            {
+                return null;
+            }
+
+            return _mainVM.ResourceBaseVM.TextureDirectory;
+        }
+
         public string? GetBlockSetPath()
         {
             if (_mainVM.ResourceBaseVM == null)
