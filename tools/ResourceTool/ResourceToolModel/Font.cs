@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace ResourceTool.Model
 {
-    public class Texture : Resource
+    public class Font : Resource
     {
         public string Path;
 
-        public Texture(Guid id, string path, string name) : base(id, name)
+        public Font(Guid id, string name, string path) : base(id, name)
         {
             if (string.IsNullOrEmpty(path))
             {
