@@ -13,12 +13,14 @@ namespace ResourceTool.Model
         public Texture[] Textures;
         public Block[] Blocks;
         public BlockSet[] BlockSets;
+        public Font[] Fonts;
 
         public ResourceBase(
             string name, 
             IEnumerable<Texture>? textures = null, 
             IEnumerable<Block>? blocks = null,
-            IEnumerable<BlockSet>? blockSets = null
+            IEnumerable<BlockSet>? blockSets = null,
+            IEnumerable<Font>? fonts = null
             )
         {
             if (string.IsNullOrEmpty(name))
@@ -30,6 +32,7 @@ namespace ResourceTool.Model
             Textures = textures?.ToArray() ?? new Texture[0];
             Blocks = blocks?.ToArray() ?? new Block[0];
             BlockSets = blockSets?.ToArray() ?? new BlockSet[0];
+            Fonts = fonts?.ToArray() ?? new Font[0];
         }
     }
 }

@@ -94,8 +94,8 @@ namespace ResourceTool.ViewModel
         {
             return new Texture(
                 Id,
-                Path!,
-                Name!
+                Name!,
+                Path!
                 );
         }
 

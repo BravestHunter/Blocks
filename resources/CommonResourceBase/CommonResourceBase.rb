@@ -89,5 +89,17 @@
       "Id": "666b023b-eb05-4ee8-a723-193240506595",
       "Name": "MainBlockSet"
     }
+  ],
+  "Fonts": [
+    {
+      "Path": "Roboto-Regular.ttf",
+      "Id": "5036e884-1ec4-4ee4-8493-83d16b5dfd08",
+      "Name": "Roboto Regular"
+    },
+    {
+      "Path": "Roboto-Bold.ttf",
+      "Id": "05bcb8a1-c673-4be1-a982-25ef799a342b",
+      "Name": "Roboto Bold"
+    }
   ]
 }

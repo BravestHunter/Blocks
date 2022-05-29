@@ -21,6 +21,10 @@
         <DataTemplate DataType="{x:Type vm:BlockSetViewModel}">
             <local:BlockSetProperties/>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:FontViewModel}">
+            <local:FontProperties/>
+        </DataTemplate>
     </UserControl.Resources>
     
     <Grid>

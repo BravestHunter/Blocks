@@ -67,10 +67,12 @@ namespace ResourceTool.ViewModel
         }
 
         public string TextureDirectory { get { return Path.Combine(RootPath, "Textures"); } }
+        public string FontDirectory { get { return Path.Combine(RootPath, "Fonts"); } }
 
         public ICommand CreateTextureCommand { get; private init; }
         public ICommand CreateBlockCommand { get; private init; }
         public ICommand CreateBlockSetCommand { get; private init; }
+        public ICommand CreateFontCommand { get; private init; }
 
 
         public ResourceBaseViewModel(string rootPath)
@@ -87,6 +89,7 @@ namespace ResourceTool.ViewModel
             CreateTextureCommand = new RelayCommand(CreateTextureCommandExecute);
             CreateBlockCommand = new RelayCommand(CreateBlockCommandExecute);
             CreateBlockSetCommand = new RelayCommand(CreateBlockSetCommandExecute);
+            CreateFontCommand = new RelayCommand(CreateFontCommandExecute);
         }
 
         public ResourceBaseViewModel(string rootPath, string name) : this(rootPath)
@@ -116,6 +119,10 @@ namespace ResourceTool.ViewModel
             {
                 Resources.Add(new BlockSetViewModel(blockSet));
             }
+            foreach (Font font in resourceBase.Fonts)
+            {
+                Resources.Add(new FontViewModel(font));
+            }
         }
 
 
@@ -133,7 +140,8 @@ namespace ResourceTool.ViewModel
                 _name,
                 Resources.OfType<TextureViewModel>().Select(t => t.GetModel()),
                 Resources.OfType<BlockViewModel>().Select(t => t.GetModel()),
-                Resources.OfType<BlockSetViewModel>().Select(bs => bs.GetModel())
+                Resources.OfType<BlockSetViewModel>().Select(bs => bs.GetModel()),
+                Resources.OfType<FontViewModel>().Select(f => f.GetModel())
                 );
 
             return resourceBase;
@@ -154,7 +162,12 @@ namespace ResourceTool.ViewModel
             {
                 string fileName = Path.GetFileName(dialogVM.Path);
                 string targetPath = Path.Combine(TextureDirectory, fileName);
-            
+
+                if (!Directory.Exists(TextureDirectory))
+                {
+                    Directory.CreateDirectory(TextureDirectory);
+                }
+
                 if (!File.Exists(targetPath))
                     File.Copy(dialogVM.Path, targetPath);
             
@@ -194,6 +207,34 @@ namespace ResourceTool.ViewModel
             {
                 BlockSetViewModel blockSetVM = dialogVM.GetBlockSetViewModel();
                 Resources.Add(blockSetVM);
+            }
+        }
+
+        private void CreateFontCommandExecute(object parameter)
+        {
+            var dialogService = App.ServiceProvider.GetService(typeof(IDialogService)) as IDialogService;
+            if (dialogService == null)
+            {
+                throw new NullReferenceException("Dialog service wasn't found");
+            }
+
+            CreateFontDialogViewModel dialogVM = new CreateFontDialogViewModel();
+            bool? dialogResult = dialogService.ShowDialog(dialogVM);
+            if (dialogResult.HasValue && dialogResult.Value)
+            {
+                string fileName = Path.GetFileName(dialogVM.Path);
+                string targetPath = Path.Combine(FontDirectory, fileName);
+
+                if (!Directory.Exists(FontDirectory))
+                {
+                    Directory.CreateDirectory(FontDirectory);
+                }
+
+                if (!File.Exists(targetPath))
+                    File.Copy(dialogVM.Path, targetPath);
+
+                FontViewModel fontVM = new FontViewModel(Guid.NewGuid(), fileName, dialogVM.Name);
+                Resources.Add(fontVM);
             }
         }
     }

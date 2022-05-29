@@ -10,11 +10,15 @@
 
   <ItemGroup>
     <None Remove="Resources\block_icon.png" />
+    <None Remove="Resources\font_icon.jpg" />
     <None Remove="Resources\list.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Resources\block_icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\font_icon.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\list.png">

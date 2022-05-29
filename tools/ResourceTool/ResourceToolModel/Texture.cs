@@ -10,7 +10,7 @@ namespace ResourceTool.Model
     {
         public string Path;
 
-        public Texture(Guid id, string path, string name) : base(id, name)
+        public Texture(Guid id, string name, string path) : base(id, name)
         {
             if (string.IsNullOrEmpty(path))
             {

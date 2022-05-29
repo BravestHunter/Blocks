@@ -23,7 +23,11 @@
         <DataTemplate DataType="{x:Type vmd:CreateBlockSetDialogViewModel}">
             <local:CreateBlockSetDialogView/>
         </DataTemplate>
-        
+
+        <DataTemplate DataType="{x:Type vmd:CreateFontDialogViewModel}">
+            <local:CreateFontDialogView/>
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type vmd:SelectTextureDialogViewModel}">
             <local:SelectTextureDialogView/>
         </DataTemplate>
