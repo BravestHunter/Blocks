@@ -38,7 +38,9 @@ void OpenglRenderSystem::Init()
 
   std::string vertexCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER));
   std::string fragmentCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
-  defaultShader_ = std::make_unique<OpenglShader>(vertexCode, fragmentCode);
+  OpenglShader vertexShader(vertexCode, GL_VERTEX_SHADER);
+  OpenglShader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
+  mapProgram_ = std::make_unique<OpenglProgram>(vertexShader, fragmentShader);
 }
 
 void OpenglRenderSystem::Deinit()
@@ -64,8 +66,8 @@ void OpenglRenderSystem::Clear(glm::vec4 clearColor)
 
 void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, Camera* camera, float ratio)
 {
-  defaultShader_->Setup();
-  defaultShader_->SetInt("texture", 0);
+  mapProgram_->Setup();
+  mapProgram_->SetInt("texture", 0);
 
   glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), ratio, 0.1f, 1000.0f);
   glm::mat4 view = camera->GetViewMatrix();
@@ -78,7 +80,7 @@ void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, Camera* camer
     glm::vec3 chunkOffset(coords.first * (int)Chunk::Length, coords.second * (int)Chunk::Width, 0.0f);
     glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), chunkOffset);
     glm::mat4 mvp = projection * view * modelTransform;
-    defaultShader_->SetMat4("MVP", mvp);
+    mapProgram_->SetMat4("MVP", mvp);
 
     chunk->vao_->Bind();
     glDrawArrays(GL_TRIANGLES, 0, chunk->verticesNumber_);

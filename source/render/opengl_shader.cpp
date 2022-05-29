@@ -7,31 +7,14 @@
 #include "io/file_api.hpp"
 
 
-OpenglShader::OpenglShader(const std::string& vertexCode, const std::string& fragmentCode)
+OpenglShader::OpenglShader(const std::string& shaderCode, GLuint shaderType) : shaderType_(shaderType)
 {
-  const char* fShaderCode = fragmentCode.c_str();
-  const char* vShaderCode = vertexCode.c_str();
+  const char* cShaderCode = shaderCode.c_str();
   
-  unsigned int vertex, fragment;
-  
-  vertex = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex, 1, &vShaderCode, NULL);
-  glCompileShader(vertex);
-  CheckCompileErrors(vertex, "VERTEX SHADER");
-  
-  fragment = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment, 1, &fShaderCode, NULL);
-  glCompileShader(fragment);
-  CheckCompileErrors(fragment, "FRAGMENT SHADER");
-  
-  id_ = glCreateProgram();
-  glAttachShader(id_, vertex);
-  glAttachShader(id_, fragment);
-  glLinkProgram(id_);
-  CheckCompileErrors(id_, "SHADER PROGRAM");
-  
-  glDeleteShader(vertex);
-  glDeleteShader(fragment);
+  id_ = glCreateShader(shaderType);
+  glShaderSource(id_, 1, &cShaderCode, NULL);
+  glCompileShader(id_);
+  CheckErrors();
 }
 
 OpenglShader::OpenglShader(OpenglShader&& other) : id_(other.id_)
@@ -56,101 +39,46 @@ OpenglShader::~OpenglShader()
 }
 
 
-void OpenglShader::Setup()
+GLuint OpenglShader::GetId() const
 {
-  glUseProgram(id_);
+  return id_;
 }
 
-void OpenglShader::SetBool(const std::string& name, bool value) const
+GLuint OpenglShader::GetType() const
 {
-  glUniform1i(glGetUniformLocation(id_, name.c_str()), (int)value);
-}
-
-void OpenglShader::SetInt(const std::string& name, int value) const
-{
-  glUniform1i(glGetUniformLocation(id_, name.c_str()), value);
-}
-
-void OpenglShader::SetFloat(const std::string& name, float value) const
-{
-  glUniform1f(glGetUniformLocation(id_, name.c_str()), value);
-}
-
-void OpenglShader::SetVec2(const std::string& name, const glm::vec2& value) const
-{
-  glUniform2fv(glGetUniformLocation(id_, name.c_str()), 1, &value[0]);
-}
-
-void OpenglShader::SetVec2(const std::string& name, float x, float y) const
-{
-  glUniform2f(glGetUniformLocation(id_, name.c_str()), x, y);
-}
-
-void OpenglShader::SetVec3(const std::string& name, const glm::vec3& value) const
-{
-  glUniform3fv(glGetUniformLocation(id_, name.c_str()), 1, &value[0]);
-}
-
-void OpenglShader::SetVec3(const std::string& name, float x, float y, float z) const
-{
-  glUniform3f(glGetUniformLocation(id_, name.c_str()), x, y, z);
-}
-
-void OpenglShader::SetVec4(const std::string& name, const glm::vec4& value) const
-{
-  glUniform4fv(glGetUniformLocation(id_, name.c_str()), 1, &value[0]);
-}
-
-void OpenglShader::SetVec4(const std::string& name, float x, float y, float z, float w) const
-{
-  glUniform4f(glGetUniformLocation(id_, name.c_str()), x, y, z, w);
-}
-
-void OpenglShader::SetIVec2(const std::string& name, int x, int y) const
-{
-  glUniform2i(glGetUniformLocation(id_, name.c_str()), x, y);
-}
-
-void OpenglShader::SetMat2(const std::string& name, const glm::mat2& mat) const
-{
-  glUniformMatrix2fv(glGetUniformLocation(id_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
-}
-void OpenglShader::SetMat3(const std::string& name, const glm::mat3& mat) const
-{
-  glUniformMatrix3fv(glGetUniformLocation(id_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
-}
-void OpenglShader::SetMat4(const std::string& name, const glm::mat4& mat) const
-{
-  glUniformMatrix4fv(glGetUniformLocation(id_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+  return shaderType_;
 }
 
 
 void OpenglShader::Release()
 {
-  glDeleteProgram(id_);
+  glDeleteShader(id_);
   id_ = 0;
 }
 
-void OpenglShader::CheckCompileErrors(GLuint shader, std::string type)
+void OpenglShader::CheckErrors()
 {
   GLint success;
   GLchar infoLog[1024];
-  if (type != "PROGRAM")
+
+  std::string shaderTypeName;
+  switch (shaderType_)
   {
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-      glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-      std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-    }
+  case GL_VERTEX_SHADER:
+    shaderTypeName = "VERTEX SHADER";
+    break;
+  case GL_GEOMETRY_SHADER:
+    shaderTypeName = "GEOMETRY SHADER";
+    break;
+  default:
+    shaderTypeName = "";
+    break;
   }
-  else
+
+  glGetProgramiv(id_, GL_LINK_STATUS, &success);
+  if (!success)
   {
-    glGetProgramiv(shader, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-      glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-      std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-    }
+    glGetProgramInfoLog(id_, 1024, NULL, infoLog);
+    std::cout << shaderTypeName << " COMPILING ERROR of type:\n" << infoLog << std::endl;
   }
 }
