@@ -3,12 +3,13 @@
 #include <string>
 
 #include "glew_headers.hpp"
+#include "resource/image.hpp"
 
 
 class OpenglTexture2D
 {
 public:
-  OpenglTexture2D(const std::string path);
+  OpenglTexture2D(const Image& image);
   OpenglTexture2D(const OpenglTexture2D&) = delete;
   OpenglTexture2D(OpenglTexture2D&& other);
   OpenglTexture2D& operator=(const OpenglTexture2D&) = delete;

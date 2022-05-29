@@ -5,15 +5,15 @@
 #include "io/file_api.hpp"
 
 
-OpenglTexture2DArray::OpenglTexture2DArray(const std::vector<std::string> paths, const int resolutionX, const int resolutionY)
+OpenglTexture2DArray::OpenglTexture2DArray(const std::vector<Image>& images, const int resolutionX, const int resolutionY)
 {
   glGenTextures(1, &id_);
   glBindTexture(GL_TEXTURE_2D_ARRAY, id_);
   glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, resolutionX, resolutionY, 6, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-  for (int i = 0; i < paths.size(); i++)
+  for (int i = 0; i < images.size(); i++)
   {
-    Image image = readImage(paths[i]);
+    const Image& image = images[i];
     if (!image.data.empty())
     {
       GLuint channelsMode = GL_RGB;

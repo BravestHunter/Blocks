@@ -5,7 +5,7 @@
 #include "io/file_api.hpp"
 
 
-OpenglTexture2D::OpenglTexture2D(const std::string path)
+OpenglTexture2D::OpenglTexture2D(const Image& image)
 {
   glGenTextures(1, &id_);
   glBindTexture(GL_TEXTURE_2D, id_);
@@ -14,7 +14,6 @@ OpenglTexture2D::OpenglTexture2D(const std::string path)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  Image image = readImage(path);
   if (!image.data.empty())
   {
     GLuint channelsMode = GL_RGB;
