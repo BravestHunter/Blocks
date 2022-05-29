@@ -21,5 +21,5 @@ public:
 private:
   void Release();
 
-  unsigned int id_;
+  GLuint id_;
 };

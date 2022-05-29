@@ -36,8 +36,6 @@ set(CORE_SOURCE_FILES
 	render/opengl_texture_2d.cpp
 	render/opengl_texture_2d_array.hpp
 	render/opengl_texture_2d_array.cpp
-	render/opengl_model.hpp
-	render/opengl_model.cpp
 	render/opengl_chunk.hpp
 	render/opengl_chunk.cpp
 	render/opengl_map.hpp

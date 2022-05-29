@@ -7,10 +7,16 @@ class OpenglVertexArrayObject
 {
 public:
   OpenglVertexArrayObject();
+  OpenglVertexArrayObject(const OpenglVertexArrayObject&) = delete;
+  OpenglVertexArrayObject(OpenglVertexArrayObject&& other);
+  OpenglVertexArrayObject& operator=(const OpenglVertexArrayObject&) = delete;
+  OpenglVertexArrayObject& operator=(OpenglVertexArrayObject&& other);
   ~OpenglVertexArrayObject();
 
   void Bind();
 
 private:
-  unsigned int id_;
+  void Release();
+
+  GLuint id_;
 };

@@ -18,7 +18,6 @@
 #include "imgui_internal.h"
 
 #include "model/chunk.hpp"
-#include "render/opengl_model.hpp"
 #include "render/opengl_chunk.hpp"
 
 #include "compile_utils.hpp"

@@ -6,7 +6,6 @@
 
 #include "opengl_buffer.hpp"
 #include "opengl_vertex_array_object.hpp"
-#include "opengl_model.hpp"
 #include "opengl_chunk.hpp"
 #include "opengl_map.hpp"
 #include "opengl_shader.hpp"
