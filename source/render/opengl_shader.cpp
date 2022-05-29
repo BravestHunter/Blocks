@@ -7,64 +7,56 @@
 #include "io/file_api.hpp"
 
 
-OpenglShader::OpenglShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+OpenglShader::OpenglShader(const std::string& vertexCode, const std::string& fragmentCode)
 {
-  std::string vertexCode = readTextFile(vertexPath);
-  std::string fragmentCode = readTextFile(fragmentPath);
-  std::string geometryCode;
-
-  if (geometryPath != nullptr)
-  {
-    geometryCode = readTextFile(geometryPath);
-  }
-
-  const char* vShaderCode = vertexCode.c_str();
   const char* fShaderCode = fragmentCode.c_str();
+  const char* vShaderCode = vertexCode.c_str();
   
   unsigned int vertex, fragment;
   
   vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex, 1, &vShaderCode, NULL);
   glCompileShader(vertex);
-  CheckCompileErrors(vertex, "VERTEX");
+  CheckCompileErrors(vertex, "VERTEX SHADER");
   
   fragment = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragment, 1, &fShaderCode, NULL);
   glCompileShader(fragment);
-  CheckCompileErrors(fragment, "FRAGMENT");
-  
-  unsigned int geometry;
-  if (geometryPath != nullptr)
-  {
-    const char* gShaderCode = geometryCode.c_str();
-    geometry = glCreateShader(GL_GEOMETRY_SHADER);
-    glShaderSource(geometry, 1, &gShaderCode, NULL);
-    glCompileShader(geometry);
-    CheckCompileErrors(geometry, "GEOMETRY");
-  }
+  CheckCompileErrors(fragment, "FRAGMENT SHADER");
   
   id_ = glCreateProgram();
   glAttachShader(id_, vertex);
   glAttachShader(id_, fragment);
-  if (geometryPath != nullptr)
-    glAttachShader(id_, geometry);
   glLinkProgram(id_);
-  CheckCompileErrors(id_, "PROGRAM");
+  CheckCompileErrors(id_, "SHADER PROGRAM");
   
   glDeleteShader(vertex);
   glDeleteShader(fragment);
-  if (geometryPath != nullptr)
-    glDeleteShader(geometry);
+}
 
+OpenglShader::OpenglShader(OpenglShader&& other) : id_(other.id_)
+{
+  other.id_ = 0;
+}
+
+OpenglShader& OpenglShader::operator=(OpenglShader&& other)
+{
+  if (this != &other)
+  {
+    Release();
+    std::swap(id_, other.id_);
+  }
+
+  return *this;
 }
 
 OpenglShader::~OpenglShader()
 {
-  glDeleteProgram(id_);
+  Release();
 }
 
 
-void OpenglShader::Use()
+void OpenglShader::Setup()
 {
   glUseProgram(id_);
 }
@@ -83,7 +75,6 @@ void OpenglShader::SetFloat(const std::string& name, float value) const
 {
   glUniform1f(glGetUniformLocation(id_, name.c_str()), value);
 }
-
 
 void OpenglShader::SetVec2(const std::string& name, const glm::vec2& value) const
 {
@@ -115,12 +106,10 @@ void OpenglShader::SetVec4(const std::string& name, float x, float y, float z, f
   glUniform4f(glGetUniformLocation(id_, name.c_str()), x, y, z, w);
 }
 
-
 void OpenglShader::SetIVec2(const std::string& name, int x, int y) const
 {
   glUniform2i(glGetUniformLocation(id_, name.c_str()), x, y);
 }
-
 
 void OpenglShader::SetMat2(const std::string& name, const glm::mat2& mat) const
 {
@@ -135,6 +124,12 @@ void OpenglShader::SetMat4(const std::string& name, const glm::mat4& mat) const
   glUniformMatrix4fv(glGetUniformLocation(id_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
+
+void OpenglShader::Release()
+{
+  glDeleteProgram(id_);
+  id_ = 0;
+}
 
 void OpenglShader::CheckCompileErrors(GLuint shader, std::string type)
 {

@@ -8,6 +8,7 @@
 
 #include "compile_utils.hpp"
 #include "resourceConfig.h"
+#include "io/file_api.hpp"
 
 
 OpenglRenderSystem::OpenglRenderSystem()
@@ -35,7 +36,9 @@ void OpenglRenderSystem::Init()
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
 
-  defaultShader_ = std::make_unique<OpenglShader>(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER), PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
+  std::string vertexCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER));
+  std::string fragmentCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
+  defaultShader_ = std::make_unique<OpenglShader>(vertexCode, fragmentCode);
 }
 
 void OpenglRenderSystem::Deinit()
@@ -61,7 +64,7 @@ void OpenglRenderSystem::Clear(glm::vec4 clearColor)
 
 void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, Camera* camera, float ratio)
 {
-  defaultShader_->Use();
+  defaultShader_->Setup();
   defaultShader_->SetInt("texture", 0);
 
   glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), ratio, 0.1f, 1000.0f);
