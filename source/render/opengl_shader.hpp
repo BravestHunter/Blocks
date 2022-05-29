@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include <glm/glm.hpp>
-
 #include "glew_headers.hpp"
 
 

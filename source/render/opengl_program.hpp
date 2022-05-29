@@ -1,7 +1,10 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include "glew_headers.hpp"
 #include "opengl_shader.hpp"
+
 
 class OpenglProgram
 {

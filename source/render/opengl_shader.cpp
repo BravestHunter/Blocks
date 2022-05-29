@@ -1,10 +1,6 @@
 #include "opengl_shader.hpp"
 
-#include <fstream>
-#include <sstream>
 #include <iostream>
-
-#include "io/file_api.hpp"
 
 
 OpenglShader::OpenglShader(const std::string& shaderCode, GLuint shaderType) : shaderType_(shaderType)
