@@ -2,6 +2,7 @@ set(CORE_SOURCE_FILES
 	export.h
 	compile_utils.hpp
 
+	game_system_interface.hpp
 	game.hpp
 	game.cpp
 	camera.hpp

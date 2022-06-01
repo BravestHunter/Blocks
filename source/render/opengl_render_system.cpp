@@ -18,33 +18,55 @@ OpenglRenderSystem::OpenglRenderSystem()
 
 OpenglRenderSystem::~OpenglRenderSystem()
 {
-
+  if (isWorking_)
+  {
+    ShutDown();
+  }
 }
 
 
-void OpenglRenderSystem::Init()
+void OpenglRenderSystem::StartUp()
 {
-  glewExperimental = GL_TRUE;
-  if (glewInit() != GLEW_OK)
+  if (isWorking_)
+  {
+    return;
+  }
+
+  GLenum initResult = glewInit();
+  if (initResult != GLEW_OK)
   {
     std::cout << "Failed to initialize GLEW" << std::endl;
     return;
   }
 
+  // Configure
   glEnable(GL_DEPTH_TEST);
-
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
 
+  // Load map shader program
   std::string vertexCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER));
   std::string fragmentCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
   OpenglShader vertexShader(vertexCode, GL_VERTEX_SHADER);
   OpenglShader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
   mapProgram_ = std::make_unique<OpenglProgram>(vertexShader, fragmentShader);
+
+  isWorking_ = true;
 }
 
-void OpenglRenderSystem::Deinit()
+void OpenglRenderSystem::ShutDown()
 {
+  if (!isWorking_)
+  {
+    return;
+  }
+
+  isWorking_ = false;
+}
+
+bool OpenglRenderSystem::IsWorking()
+{
+  return isWorking_;
 }
 
 
@@ -64,13 +86,13 @@ void OpenglRenderSystem::Clear(glm::vec4 clearColor)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, Camera* camera, float ratio)
+void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, Camera& camera, float ratio)
 {
   mapProgram_->Setup();
   mapProgram_->SetInt("texture", 0);
 
-  glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), ratio, 0.1f, 1000.0f);
-  glm::mat4 view = camera->GetViewMatrix();
+  glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), ratio, 0.1f, 1000.0f);
+  glm::mat4 view = camera.GetViewMatrix();
 
   for (auto pair : map->chunks_)
   {

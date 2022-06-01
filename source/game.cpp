@@ -43,30 +43,40 @@ std::string string_format(const std::string& format, Args ... args)
 }
 
 
-Game::Game(int width, int height) : framebufferWidth_(width), framebufferHeight_(height), lastX_(width / 2), lastY_(height / 2)
+Game::Game(int width, int height) : 
+  framebufferWidth_(width), 
+  framebufferHeight_(height), 
+  lastMouseX_(width / 2), 
+  lastMouseY_(height / 2)
 {
-  platform_ = std::make_unique<GlfwPlatform>();
-  resourceBase_ = std::make_unique<ResourceBase>();
   openglScene_ = std::make_shared<OpenglScene>();
-
-  camera_ = std::make_unique<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
-
-  platform_->Init();
+  
   openglScene_->InitMap();
-
-  resourceBase_->SetUp(RESOURCE_BASE_PATH);
 
   currentScene_ = CreateMainMenuScene();
 }
 
 Game::~Game()
 {
-  platform_->Deinit();
+  // Nothing to do here
 }
 
 
+void Game::StartSystems()
+{
+  platformSystem_.StartUp();
+  resourceBase_.SetUp(RESOURCE_BASE_PATH);
+}
+
+void Game::StopSystems()
+{
+  platformSystem_.ShutDown();
+}
+
 int Game::Run()
 {
+  StartSystems();
+
   std::thread renderThread(&Game::RunRenderCycle, this);
   std::thread fixedUpdateThread(&Game::RunFixedUpdateCycle, this);
 
@@ -75,19 +85,21 @@ int Game::Run()
   renderThread.join();
   fixedUpdateThread.join();
 
+  StopSystems();
+
   return 0;
 }
 
 
 glm::ivec2 Game::CalculateChunkCenter()
 {
-  glm::vec3 position = camera_->GetPosition();
+  glm::vec3 position = camera_.GetPosition();
   return glm::ivec2((int)position.x / Chunk::Length, (int)position.y / Chunk::Width);
 }
 
 void Game::RunSimulationCycle()
 {
-  while (running)
+  while (isRunning_)
   {
     if (requestedScene_ != nullptr)
     {
@@ -151,12 +163,11 @@ void Game::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunk
 
 void Game::RunRenderCycle()
 {
-  window_ = platform_->CreateWindow(framebufferWidth_, framebufferHeight_, "Title");
+  window_ = platformSystem_.CreateWindow(framebufferWidth_, framebufferHeight_, "Title");
   window_->SetCursorMode(CursorMode::Normal);
   window_->MakeCurrentContext();
 
-  renderSystem_ = std::make_shared<OpenglRenderSystem>();
-  renderSystem_->Init();
+  renderSystem_.StartUp();
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -195,7 +206,7 @@ void Game::RunRenderCycle()
       if (keycode == GLFW_KEY_X)
       {
         wireframeMode = !wireframeMode;
-        renderSystem_->SetWireframeMode(wireframeMode);
+        renderSystem_.SetWireframeMode(wireframeMode);
       }
 
       if (keycode == GLFW_KEY_L)
@@ -212,27 +223,27 @@ void Game::RunRenderCycle()
 
       if (firstMouse_)
       {
-        lastX_ = xposF;
-        lastY_ = yposF;
+        lastMouseX_ = xposF;
+        lastMouseY_ = yposF;
         firstMouse_ = false;
       }
 
-      float xoffset = xposF - lastX_;
-      float yoffset = lastY_ - yposF; // reversed since y-coordinates go from bottom to top
+      float xoffset = xposF - lastMouseX_;
+      float yoffset = lastMouseY_ - yposF; // reversed since y-coordinates go from bottom to top
 
-      lastX_ = xposF;
-      lastY_ = yposF;
+      lastMouseX_ = xposF;
+      lastMouseY_ = yposF;
 
       if (!isCursorEnabled_)
       {
-        camera_->ProcessMouseMovement(xoffset, yoffset);
+        camera_.ProcessMouseMovement(xoffset, yoffset);
       }
     }
   );
   window_->SetScrollCallback(
     [this](double xoffset, double yoffset)
     {
-      camera_->ProcessMouseScroll(static_cast<float>(yoffset));
+      camera_.ProcessMouseScroll(static_cast<float>(yoffset));
     }
   );
   window_->SetMouseButtonCallback(
@@ -242,7 +253,7 @@ void Game::RunRenderCycle()
       {
         if (currentScene_->ContainsMap() && !isCursorEnabled_)
         {
-          BlockLookAt blockLookAt = currentScene_->GetMap()->GetBlockLookAt(Ray(camera_->GetPosition(), camera_->GetForward()));
+          BlockLookAt blockLookAt = currentScene_->GetMap()->GetBlockLookAt(Ray(camera_.GetPosition(), camera_.GetForward()));
           if (!blockLookAt.hit)
           {
             return;
@@ -323,7 +334,7 @@ void Game::RunRenderCycle()
           // Check collision
           glm::vec3 worldBlockPosition(placeBlockPosition.x + placeChunkPosition.first * Chunk::Length, placeBlockPosition.y + placeChunkPosition.second * Chunk::Width, placeBlockPosition.z);
           const AABB blockBounds(glm::vec3(worldBlockPosition.x, worldBlockPosition.y, worldBlockPosition.z), glm::vec3(worldBlockPosition.x + 1, worldBlockPosition.y + 1, worldBlockPosition.z + 1));
-          const AABB playerBounds(playerBounds_.low + camera_->GetPosition(), playerBounds_.high + camera_->GetPosition());
+          const AABB playerBounds(playerBounds_.low + camera_.GetPosition(), playerBounds_.high + camera_.GetPosition());
           if (CheckCollision(blockBounds, playerBounds))
           {
             return;
@@ -338,7 +349,7 @@ void Game::RunRenderCycle()
       {
         if (currentScene_->ContainsMap() && !isCursorEnabled_)
         {
-          BlockLookAt blockLookAt = currentScene_->GetMap()->GetBlockLookAt(Ray(camera_->GetPosition(), camera_->GetForward()));
+          BlockLookAt blockLookAt = currentScene_->GetMap()->GetBlockLookAt(Ray(camera_.GetPosition(), camera_.GetForward()));
           if (!blockLookAt.hit)
           {
             return;
@@ -352,26 +363,26 @@ void Game::RunRenderCycle()
     }
   );
 
-  std::shared_ptr<BlockSet> blockSet = resourceBase_->LoadBlockSet(resourceBase_->GetBlockSetNames()->front());
+  std::shared_ptr<BlockSet> blockSet = resourceBase_.LoadBlockSet(resourceBase_.GetBlockSetNames()->front());
   openglScene_->GetMap()->SetBlockSet(blockSet);
 
-  while (running)
+  while (isRunning_)
   {
     sceneMutex_.lock();
 
     glfwPollEvents();
     ProcessInput();
 
-    renderSystem_->StartFrame();
+    renderSystem_.StartFrame();
 
-    renderSystem_->Clear();
+    renderSystem_.Clear();
 
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
 
     if (openglScene_)
     {
       openglScene_->GetMap()->ProcessQueues();
-      renderSystem_->RenderMap(openglScene_->GetMap(), camera_.get(), framebufferRatio);
+      renderSystem_.RenderMap(openglScene_->GetMap(), camera_, framebufferRatio);
     }
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -388,7 +399,7 @@ void Game::RunRenderCycle()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    renderSystem_->FinishFrame();
+    renderSystem_.FinishFrame();
 
     window_->SwapBuffers();
 
@@ -396,11 +407,11 @@ void Game::RunRenderCycle()
 
     if (window_->IsWindowShouldClose())
     {
-      running = false;
+      isRunning_ = false;
     }
   }
 
-  renderSystem_->Deinit();
+  renderSystem_.ShutDown();
 }
 
 void Game::ProcessInput()
@@ -434,7 +445,7 @@ void Game::RunFixedUpdateCycle()
   auto next = std::chrono::steady_clock::now() + delta{ 1 };
   std::unique_lock<std::mutex> lk(mut);
 
-  while (running)
+  while (isRunning_)
   {
     mut.unlock();
 
@@ -454,30 +465,30 @@ void Game::MovePlayer()
   float fixedDelta = 0.016f;
   float velocity = 32.0f * fixedDelta;
 
-  glm::vec3 position = camera_->GetPosition();
+  glm::vec3 position = camera_.GetPosition();
   glm::vec3 shift = glm::vec3(0.0f);
 
   if (isWPressed_)
   {
-    shift += camera_->GetForward() * velocity;
+    shift += camera_.GetForward() * velocity;
   }
   if (isSPressed_)
   {
-    shift -= camera_->GetForward() * velocity;
+    shift -= camera_.GetForward() * velocity;
   }
   if (isAPressed_)
   {
-    shift -= camera_->GetRight() * velocity;
+    shift -= camera_.GetRight() * velocity;
   }
   if (isDPressed_)
   {
-    shift += camera_->GetRight() * velocity;
+    shift += camera_.GetRight() * velocity;
   }
 
   position += shift;
   if (!currentScene_->GetMap()->Collides(playerBounds_, position))
   {
-    camera_->SetPosition(position);
+    camera_.SetPosition(position);
   }
 }
 
@@ -563,7 +574,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> renderStatisticsText = std::make_shared<ImguiText>(
     [this]()
     {
-      return string_format("Rendered triangles: %d", renderSystem_->GetFrameTrianlgesNumber());
+      return string_format("Rendered triangles: %d", renderSystem_.GetFrameTrianlgesNumber());
     }
   );
   window->AddElement(renderStatisticsText);
@@ -571,7 +582,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> cameraPositionText = std::make_shared<ImguiText>(
     [this]()
     {
-      return string_format("Camera position: %.2f %.2f %.2f", camera_->GetPosition().x, camera_->GetPosition().y, camera_->GetPosition().z);
+      return string_format("Camera position: %.2f %.2f %.2f", camera_.GetPosition().x, camera_.GetPosition().y, camera_.GetPosition().z);
     }
   );
   window->AddElement(cameraPositionText);
@@ -579,7 +590,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> cameraDirectionText = std::make_shared<ImguiText>(
     [this]()
     {
-      return string_format("Camera direction: %.2f %.2f %.2f", camera_->GetForward().x, camera_->GetForward().y, camera_->GetForward().z);
+      return string_format("Camera direction: %.2f %.2f %.2f", camera_.GetForward().x, camera_.GetForward().y, camera_.GetForward().z);
     }
   );
   window->AddElement(cameraDirectionText);

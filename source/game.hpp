@@ -4,10 +4,10 @@
 #include <mutex>
 
 #include "export.h"
-
 #include "platform/glfw_platform.hpp"
-#include "resource/resource_base.hpp"
 #include "render/opengl_render_system.hpp"
+
+#include "resource/resource_base.hpp"
 #include "render/opengl_scene.hpp"
 #include "camera.hpp"
 #include "scene/map.hpp"
@@ -19,16 +19,23 @@ class DllExport Game
 {
 public:
   Game(int width, int height);
+  Game(const Game&) = delete;
+  Game(Game&& other) = delete;
+  Game& operator=(const Game&) = delete;
+  Game& operator=(Game&& other) = delete;
   ~Game();
 
   int Run();
 
 private:
-  bool running = true;
+  void StartSystems();
+  void StopSystems();
 
-  std::unique_ptr<GlfwPlatform> platform_;
-  std::unique_ptr<ResourceBase> resourceBase_;
-  std::shared_ptr<OpenglRenderSystem> renderSystem_;
+  bool isRunning_ = true;
+
+  GlfwPlatform platformSystem_;
+  OpenglRenderSystem renderSystem_;
+  ResourceBase resourceBase_;
 
   // Window
   std::unique_ptr<GlfwWindow> window_;
@@ -41,15 +48,15 @@ private:
   bool isSPressed_ = false;
   bool isAPressed_ = false;
   bool isDPressed_ = false;
+  float lastMouseX_;
+  float lastMouseY_;
+  bool firstMouse_ = true;
+
+  // Camera
+  Camera camera_ = Camera(glm::vec3(8.0f, 8.0f, 270.0f));
 
   // Collision
   AABB playerBounds_ = AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
-
-  // Camera
-  std::unique_ptr<Camera> camera_;
-  float lastX_;
-  float lastY_;
-  bool firstMouse_ = true;
 
   //Chunks
   int renderRadius_ = 3;
