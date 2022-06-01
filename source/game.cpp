@@ -7,6 +7,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <format>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -29,18 +30,6 @@
 #include "ui/imgui_button.hpp"
 #include "ui/imgui_text.hpp"
 #include "ui/imgui_window.hpp"
-
-
-template<typename ... Args>
-std::string string_format(const std::string& format, Args ... args)
-{
-  int size_s = std::snprintf(nullptr, 0, format.c_str(), args ...) + 1; // Extra space for '\0'
-  if (size_s <= 0) { throw std::runtime_error("Error during formatting."); }
-  auto size = static_cast<size_t>(size_s);
-  std::unique_ptr<char[]> buf(new char[size]);
-  std::snprintf(buf.get(), size, format.c_str(), args ...);
-  return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
-}
 
 
 Game::Game(int width, int height) : 
@@ -566,7 +555,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> fpsText = std::make_shared<ImguiText>(
     [this]()
     {
-      return string_format("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      return std::format("Application average {0:.3f} ms/frame ({1:.0f} FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }
   );
   window->AddElement(fpsText);
@@ -574,7 +563,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> renderStatisticsText = std::make_shared<ImguiText>(
     [this]()
     {
-      return string_format("Rendered triangles: %d", renderSystem_.GetFrameTrianlgesNumber());
+      return  std::format("Rendered triangles: {}", renderSystem_.GetFrameTrianlgesNumber());
     }
   );
   window->AddElement(renderStatisticsText);
@@ -582,7 +571,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> cameraPositionText = std::make_shared<ImguiText>(
     [this]()
     {
-      return string_format("Camera position: %.2f %.2f %.2f", camera_.GetPosition().x, camera_.GetPosition().y, camera_.GetPosition().z);
+      return std::format("Camera position: {0:.2f} {1:.2f} {2:.2f}", camera_.GetPosition().x, camera_.GetPosition().y, camera_.GetPosition().z);
     }
   );
   window->AddElement(cameraPositionText);
@@ -590,7 +579,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> cameraDirectionText = std::make_shared<ImguiText>(
     [this]()
     {
-      return string_format("Camera direction: %.2f %.2f %.2f", camera_.GetForward().x, camera_.GetForward().y, camera_.GetForward().z);
+      return  std::format("Camera direction: {0:.2f} {1:.2f} {2:.2f}", camera_.GetForward().x, camera_.GetForward().y, camera_.GetForward().z);
     }
   );
   window->AddElement(cameraDirectionText);
@@ -598,7 +587,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> seedText = std::make_shared<ImguiText>(
     [this]()
     {
-      return string_format("Map seed: %d", currentScene_->GetMap()->GetSeed());
+      return  std::format("Map seed: {}", currentScene_->GetMap()->GetSeed());
     }
   );
   window->AddElement(seedText);
@@ -667,7 +656,7 @@ void Game::SaveMap(std::shared_ptr<Map> map)
   auto chunksIterator = map->GetChunksIterator();
   for (auto it = chunksIterator.first; it != chunksIterator.second; it++)
   {
-    std::string path = string_format("map/%d_%d.chunk", it->first.first, it->first.second);
+    std::string path = std::format("map/{0}_{1}.chunk", it->first.first, it->first.second);
 
     size_t a = sizeof(Chunk);
     std::vector<unsigned char> data(sizeof(Chunk));
