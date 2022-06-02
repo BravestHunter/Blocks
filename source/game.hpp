@@ -4,7 +4,7 @@
 #include <mutex>
 
 #include "export.h"
-#include "platform/glfw_platform.hpp"
+#include "environment.hpp"
 #include "render/opengl_render_system.hpp"
 
 #include "resource/resource_base.hpp"
@@ -33,12 +33,10 @@ private:
 
   bool isRunning_ = true;
 
-  GlfwPlatform platformSystem_;
   OpenglRenderSystem renderSystem_;
   ResourceBase resourceBase_;
 
   // Window
-  std::unique_ptr<GlfwWindow> window_;
   int framebufferWidth_;
   int framebufferHeight_;
   bool isCursorEnabled_ = true;
@@ -67,8 +65,8 @@ private:
   void AddChunks(glm::ivec2 centerChunkCoords);
   void RemoveChunks(glm::ivec2 centerChunkCoords, glm::ivec2 lastCenterChunkCoords);
   void RunRenderCycle();
-  void ProcessInput();
-  void SwitchCursorMode();
+  void ProcessInput(GlfwWindow& window);
+  void SwitchCursorMode(GlfwWindow& window);
   void RunFixedUpdateCycle();
   void MovePlayer();
 

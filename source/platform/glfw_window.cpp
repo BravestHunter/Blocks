@@ -2,6 +2,7 @@
 
 #include <exception>
 
+#include "environment.hpp"
 #include "backends/imgui_impl_glfw.h"
 
 
@@ -26,11 +27,33 @@ GlfwWindow::GlfwWindow(GLFWwindow* window) : windowPtr_(window)
   glfwSetDropCallback(windowPtr_, DropCallback);
 }
 
+GlfwWindow::GlfwWindow(GlfwWindow&& other) : windowPtr_(other.windowPtr_)
+{
+  glfwSetWindowUserPointer(other.windowPtr_, this);
+  other.windowPtr_ = nullptr;
+}
+
+GlfwWindow& GlfwWindow::operator=(GlfwWindow&& other)
+{
+  if (this != &other)
+  {
+    Release();
+    glfwSetWindowUserPointer(other.windowPtr_, this);
+    std::swap(windowPtr_, other.windowPtr_);
+  }
+
+  return *this;
+}
+
 GlfwWindow::~GlfwWindow()
 {
-  // Glfw platform can be already terminated
-  // But it kinda works fine
-  glfwDestroyWindow(windowPtr_);
+  Release();
+}
+
+
+bool GlfwWindow::IsReleased()
+{
+  return windowPtr_ == nullptr;
 }
 
 
@@ -178,6 +201,15 @@ void GlfwWindow::SetScrollCallback(std::function<void(double, double)> func)
 void GlfwWindow::SetDropCallback(std::function<void(int, const char**)> func)
 {
   dropCallbackFunction_ = func;
+}
+
+
+void GlfwWindow::Release()
+{
+  if (windowPtr_ != nullptr && Enviroment::GetPlatformSystem().IsInitialized())
+  {
+    glfwDestroyWindow(windowPtr_);
+  }
 }
 
 

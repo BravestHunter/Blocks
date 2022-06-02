@@ -2,6 +2,9 @@ set(CORE_SOURCE_FILES
 	export.h
 	compile_utils.hpp
 
+	enviroment_system_interface.hpp
+	environment.hpp
+	environment.cpp
 	game_system_interface.hpp
 	game.hpp
 	game.cpp

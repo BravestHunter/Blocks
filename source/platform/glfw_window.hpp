@@ -16,7 +16,13 @@ private:
   GlfwWindow(GLFWwindow* window);
 
 public:
+  GlfwWindow(const GlfwWindow&) = delete;
+  GlfwWindow(GlfwWindow&& other);
+  GlfwWindow& operator=(const GlfwWindow&) = delete;
+  GlfwWindow& operator=(GlfwWindow&& other);
   ~GlfwWindow();
+
+  bool IsReleased();
 
   void SwapBuffers();
   void MakeCurrentContext();
@@ -47,23 +53,7 @@ public:
   void SetDropCallback(std::function<void(int, const char**)> func);
 
 private:
-  GLFWwindow* windowPtr_;
-
-  std::function<void(int, int)> positionCallbackFunction_ = nullptr;
-  std::function<void(int, int)> sizeCallbackFunction_ = nullptr;
-  std::function<void()> closeCallbackFunction_ = nullptr;
-  std::function<void()> refreshCallbackFunction_ = nullptr;
-  std::function<void(int)> focusCallbackFunction_ = nullptr;
-  std::function<void(int)> iconifyCallbackFunction_ = nullptr;
-  std::function<void(int, int)> framebufferCallbackFunction_ = nullptr;
-  
-  std::function<void(int, int, int, int)> keyCallbackFunction_ = nullptr;
-  std::function<void(unsigned int)> charCallbackFunction_ = nullptr;
-  std::function<void(int, int, int)> mouseButtonCallbackFunction_ = nullptr;
-  std::function<void(double, double)> cursorPositionCallbackFunction_ = nullptr;
-  std::function<void(int)> cursorEnterCallbackFunction_ = nullptr;
-  std::function<void(double, double)> scrollCallbackFunction_ = nullptr;
-  std::function<void(int, const char**)> dropCallbackFunction_ = nullptr;
+  void Release();
 
   static void PositionCallback(GLFWwindow* window, int xpos, int ypos);
   static void SizeCallback(GLFWwindow* window, int width, int height);
@@ -80,4 +70,22 @@ private:
   static void CursorEnterCallback(GLFWwindow* window, int entered);
   static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
   static void DropCallback(GLFWwindow* window, int count, const char** paths);
+
+  GLFWwindow* windowPtr_;
+
+  std::function<void(int, int)> positionCallbackFunction_ = nullptr;
+  std::function<void(int, int)> sizeCallbackFunction_ = nullptr;
+  std::function<void()> closeCallbackFunction_ = nullptr;
+  std::function<void()> refreshCallbackFunction_ = nullptr;
+  std::function<void(int)> focusCallbackFunction_ = nullptr;
+  std::function<void(int)> iconifyCallbackFunction_ = nullptr;
+  std::function<void(int, int)> framebufferCallbackFunction_ = nullptr;
+
+  std::function<void(int, int, int, int)> keyCallbackFunction_ = nullptr;
+  std::function<void(unsigned int)> charCallbackFunction_ = nullptr;
+  std::function<void(int, int, int)> mouseButtonCallbackFunction_ = nullptr;
+  std::function<void(double, double)> cursorPositionCallbackFunction_ = nullptr;
+  std::function<void(int)> cursorEnterCallbackFunction_ = nullptr;
+  std::function<void(double, double)> scrollCallbackFunction_ = nullptr;
+  std::function<void(int, const char**)> dropCallbackFunction_ = nullptr;
 };

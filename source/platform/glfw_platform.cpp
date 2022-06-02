@@ -2,84 +2,72 @@
 
 #include <exception>
 #include <iostream>
-
-
-void ErrorCallback(int code, const char* description);
-
-
-static std::unique_ptr<GlfwPlatform> platformInstance;
+#include <format>
 
 
 GlfwPlatform::GlfwPlatform()
 {
-  if (platformInstance.get())
+  if (instance_ != nullptr)
   {
-    throw std::exception("Only one instance of glfw platform allowed");
+    throw std::exception("Only one instance of GLFW platform system allowed");
   }
-
-  platformInstance = std::unique_ptr<GlfwPlatform>(this);
+  instance_ = this;
 
   int major, minor, revision;
   glfwGetVersion(&major, &minor, &revision);
-  printf("Running against GLFW %i.%i.%i\n", major, minor, revision);
+  std::cout << std::format("Running GLFW {0}.{1}.{2}\n", major, minor, revision) << std::endl;
 }
 
 GlfwPlatform::~GlfwPlatform()
 {
-  if (isRunning_)
+  if (isInitialized_)
   { 
-    ShutDown();
+    Deinit();
   }
 
-  platformInstance.release();
+  instance_ = nullptr;
 }
 
 
-void GlfwPlatform::StartUp()
+void GlfwPlatform::Init()
 {
-  if (isRunning_)
+  if (isInitialized_)
   {
-    return;
+    throw std::exception("GLFW platform system is already initialized");
+  }
+
+  if (!glfwInit())
+  {
+    throw std::exception("Failed to initialize GLFW platform system");
   }
 
   // Add init hints here
 
-  if (!glfwInit())
-  {
-    std::cout << "Failed to initialize Glfw" << std::endl;
-    return;
-  }
-
-  isRunning_ = true;
+  isInitialized_ = true;
 
   glfwSetErrorCallback(ErrorCallback);
 }
 
-void GlfwPlatform::ShutDown()
+void GlfwPlatform::Deinit()
 {
-  if (!isRunning_)
+  if (!isInitialized_)
   {
-    return;
+    throw std::exception("GLFW platform system was not initialized");
   }
 
   glfwTerminate();
 
-  isRunning_ = false;
+  isInitialized_ = false;
 }
 
-bool GlfwPlatform::IsWorking()
+bool GlfwPlatform::IsInitialized()
 {
-  return false;
+  return isInitialized_;
 }
 
 
-std::unique_ptr<GlfwWindow> GlfwPlatform::CreateWindow(int width, int height, std::string title)
+GlfwWindow GlfwPlatform::CreateWindow(int width, int height, std::string title)
 {
-  if (!isRunning_)
-  {
-    throw std::exception("GLFW must be initialized first");
-  }
-
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -87,15 +75,12 @@ std::unique_ptr<GlfwWindow> GlfwPlatform::CreateWindow(int width, int height, st
   GLFWwindow* windowPtr = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
   if (!windowPtr)
   {
-    std::cout << "Failed to create GLFW window" << std::endl;
+    throw std::exception("Failed to create GLFW window");
   }
 
   glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-  GlfwWindow* window = new GlfwWindow(windowPtr);
-  std::unique_ptr<GlfwWindow> result(window);
-
-  return result;
+  return GlfwWindow(windowPtr);
 }
 
 
@@ -106,7 +91,7 @@ int GlfwPlatform::GetError()
 
   if (isWritingErrors_)
   {
-    std::cout << "Glfw error code " << code << ", " << description;
+    std::cout << "Glfw error; code " << code << "; " << description;
   }
 
   return code;
@@ -118,10 +103,13 @@ double GlfwPlatform::GetTime()
 }
 
 
-void ErrorCallback(int code, const char* description)
+GlfwPlatform* GlfwPlatform::instance_ = nullptr;
+
+
+void GlfwPlatform::ErrorCallback(int code, const char* description)
 {
-  if (platformInstance->isWritingErrors_)
+  if (GlfwPlatform::instance_->isWritingErrors_)
   {
-    std::cout << "Glfw error code " << code << "; " << description;
+    std::cout << "GLFW error; code " << code << "; " << description;
   }
 }

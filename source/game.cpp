@@ -53,13 +53,11 @@ Game::~Game()
 
 void Game::StartSystems()
 {
-  platformSystem_.StartUp();
   resourceBase_.SetUp(RESOURCE_BASE_PATH);
 }
 
 void Game::StopSystems()
 {
-  platformSystem_.ShutDown();
 }
 
 int Game::Run()
@@ -152,9 +150,9 @@ void Game::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunk
 
 void Game::RunRenderCycle()
 {
-  window_ = platformSystem_.CreateWindow(framebufferWidth_, framebufferHeight_, "Title");
-  window_->SetCursorMode(CursorMode::Normal);
-  window_->MakeCurrentContext();
+  GlfwWindow window = Enviroment::GetPlatformSystem().CreateWindow(framebufferWidth_, framebufferHeight_, "Blocks Game");
+  window.SetCursorMode(CursorMode::Normal);
+  window.MakeCurrentContext();
 
   renderSystem_.StartUp();
 
@@ -164,7 +162,7 @@ void Game::RunRenderCycle()
 
   ImGui::StyleColorsDark();
 
-  window_->InitImgui();
+  window.InitImgui();
   // GL 3.0 + GLSL 130
   const char* glsl_version = "#version 130";
   ImGui_ImplOpenGL3_Init(glsl_version);
@@ -172,7 +170,7 @@ void Game::RunRenderCycle()
   bool wireframeMode = false;
 
   // Set callbacks
-  window_->SetFramebufferCallback(
+  window.SetFramebufferCallback(
     [this](int width, int height)
     {
       framebufferWidth_ = width;
@@ -181,15 +179,15 @@ void Game::RunRenderCycle()
       glViewport(0, 0, width, height);
     }
   );
-  window_->SetKeyCallback(
-    [this, &wireframeMode](int keycode, int scancode, int action, int mods)
+  window.SetKeyCallback(
+    [this, &window, &wireframeMode](int keycode, int scancode, int action, int mods)
     {
-      if (action != GLFW_PRESS || window_ == nullptr)
+      if (action != GLFW_PRESS)
         return;
 
       if (keycode == GLFW_KEY_ESCAPE)
       {
-        window_->SetWindowShouldClose(true);
+        window.SetWindowShouldClose(true);
       }
 
       if (keycode == GLFW_KEY_X)
@@ -200,11 +198,11 @@ void Game::RunRenderCycle()
 
       if (keycode == GLFW_KEY_L)
       {
-        SwitchCursorMode();
+        SwitchCursorMode(window);
       }
     }
   );
-  window_->SetCursorPositionCallback(
+  window.SetCursorPositionCallback(
     [this](double xpos, double ypos)
     {
       float xposF = static_cast<float>(xpos);
@@ -229,13 +227,13 @@ void Game::RunRenderCycle()
       }
     }
   );
-  window_->SetScrollCallback(
+  window.SetScrollCallback(
     [this](double xoffset, double yoffset)
     {
       camera_.ProcessMouseScroll(static_cast<float>(yoffset));
     }
   );
-  window_->SetMouseButtonCallback(
+  window.SetMouseButtonCallback(
     [this](int button, int action, int mods)
     {
       if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS) // Place block
@@ -360,7 +358,7 @@ void Game::RunRenderCycle()
     sceneMutex_.lock();
 
     glfwPollEvents();
-    ProcessInput();
+    ProcessInput(window);
 
     renderSystem_.StartFrame();
 
@@ -390,11 +388,11 @@ void Game::RunRenderCycle()
 
     renderSystem_.FinishFrame();
 
-    window_->SwapBuffers();
+    window.SwapBuffers();
 
     sceneMutex_.unlock();
 
-    if (window_->IsWindowShouldClose())
+    if (window.IsWindowShouldClose())
     {
       isRunning_ = false;
     }
@@ -403,25 +401,25 @@ void Game::RunRenderCycle()
   renderSystem_.ShutDown();
 }
 
-void Game::ProcessInput()
+void Game::ProcessInput(GlfwWindow& window)
 {
-  isWPressed_ = window_->GetKeyState(GLFW_KEY_W) == GLFW_PRESS;
-  isSPressed_ = window_->GetKeyState(GLFW_KEY_S) == GLFW_PRESS;
-  isAPressed_ = window_->GetKeyState(GLFW_KEY_A) == GLFW_PRESS;
-  isDPressed_ = window_->GetKeyState(GLFW_KEY_D) == GLFW_PRESS;
+  isWPressed_ = window.GetKeyState(GLFW_KEY_W) == GLFW_PRESS;
+  isSPressed_ = window.GetKeyState(GLFW_KEY_S) == GLFW_PRESS;
+  isAPressed_ = window.GetKeyState(GLFW_KEY_A) == GLFW_PRESS;
+  isDPressed_ = window.GetKeyState(GLFW_KEY_D) == GLFW_PRESS;
 }
 
-void Game::SwitchCursorMode()
+void Game::SwitchCursorMode(GlfwWindow& window)
 {
   isCursorEnabled_ = !isCursorEnabled_;
 
   if (isCursorEnabled_)
   {
-    window_->SetCursorMode(CursorMode::Normal);
+    window.SetCursorMode(CursorMode::Normal);
   }
   else
   {
-    window_->SetCursorMode(CursorMode::Disabled);
+    window.SetCursorMode(CursorMode::Disabled);
   }
 }
 
@@ -517,7 +515,6 @@ std::shared_ptr<Scene> Game::CreateMainMenuScene()
       srand(time(0));
       std::shared_ptr<Scene> worldScene_ = CreateWorldScene(std::make_shared<Map>(rand()));
       RequestScene(worldScene_);
-      SwitchCursorMode();
     }
   );
   window->AddElement(createWorldButton);
@@ -535,7 +532,6 @@ std::shared_ptr<Scene> Game::CreateMainMenuScene()
       std::shared_ptr<Scene> worldScene_ = CreateWorldScene(map);
 
       RequestScene(worldScene_);
-      SwitchCursorMode();
     }
   );
   window->AddElement(loadWorldButton);

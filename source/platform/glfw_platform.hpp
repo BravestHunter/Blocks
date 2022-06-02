@@ -3,15 +3,13 @@
 #include <memory>
 #include <string>
 
-#include "game_system_interface.hpp"
+#include "enviroment_system_interface.hpp"
 #include "glfw_headers.hpp"
 #include "glfw_window.hpp"
 
 
-class GlfwPlatform : public GameSystemInterface
+class GlfwPlatform : public EnviromentSystemInterface
 {
-  friend void ErrorCallback(int code, const char* description);
-
 public:
   GlfwPlatform();
   GlfwPlatform(const GlfwPlatform&) = delete;
@@ -20,16 +18,20 @@ public:
   GlfwPlatform& operator=(GlfwPlatform&& other) = delete;
   ~GlfwPlatform() override;
 
-  void StartUp() override;
-  void ShutDown() override;
-  bool IsWorking() override;
+  void Init() override;
+  void Deinit() override;
+  bool IsInitialized() override;
 
-  std::unique_ptr<GlfwWindow> CreateWindow(int width, int height, std::string title);
+  GlfwWindow CreateWindow(int width, int height, std::string title);
 
   int GetError();
   double GetTime();
 
 private:
-  bool isRunning_ = false;
+  static void ErrorCallback(int code, const char* description);
+
+  bool isInitialized_ = false;
   bool isWritingErrors_ = true;
+
+  static GlfwPlatform* instance_;
 };
