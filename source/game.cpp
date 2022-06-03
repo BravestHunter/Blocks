@@ -152,9 +152,16 @@ void Game::RunRenderCycle()
 {
   GlfwWindow window = Enviroment::GetPlatformSystem().CreateWindow(framebufferWidth_, framebufferHeight_, "Blocks Game");
   window.SetCursorMode(CursorMode::Normal);
-  window.MakeCurrentContext();
+  window.SetCurrentContext();
 
-  renderSystem_.StartUp();
+  renderSystem_.OnContextChanged();
+
+  // Load map shader program
+  std::string vertexCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER));
+  std::string fragmentCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
+  OpenglShader vertexShader(vertexCode, GL_VERTEX_SHADER);
+  OpenglShader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
+  OpenglProgram mapProgram(vertexShader, fragmentShader);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -369,7 +376,7 @@ void Game::RunRenderCycle()
     if (openglScene_)
     {
       openglScene_->GetMap()->ProcessQueues();
-      renderSystem_.RenderMap(openglScene_->GetMap(), camera_, framebufferRatio);
+      renderSystem_.RenderMap(openglScene_->GetMap(), mapProgram, camera_, framebufferRatio);
     }
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -398,7 +405,10 @@ void Game::RunRenderCycle()
     }
   }
 
-  renderSystem_.ShutDown();
+  if (openglScene_)
+  {
+    openglScene_.reset();
+  }
 }
 
 void Game::ProcessInput(GlfwWindow& window)

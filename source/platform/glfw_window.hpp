@@ -25,7 +25,7 @@ public:
   bool IsReleased();
 
   void SwapBuffers();
-  void MakeCurrentContext();
+  void SetCurrentContext();
   void InitImgui();
 
   bool IsWindowShouldClose();

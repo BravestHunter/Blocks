@@ -62,7 +62,7 @@ void GlfwWindow::SwapBuffers()
   glfwSwapBuffers(windowPtr_);
 }
 
-void GlfwWindow::MakeCurrentContext()
+void GlfwWindow::SetCurrentContext()
 {
   glfwMakeContextCurrent(windowPtr_);
 

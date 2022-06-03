@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "game_system_interface.hpp"
+#include "game_module_interface.hpp"
 #include "glew_headers.hpp"
 #include "opengl_buffer.hpp"
 #include "opengl_vertex_array_object.hpp"
@@ -14,7 +14,7 @@
 #include "model/chunk.hpp"
 
 
-class OpenglRenderSystem : public GameSystemInterface
+class OpenglRenderSystem
 {
 public:
   OpenglRenderSystem();
@@ -22,23 +22,19 @@ public:
   OpenglRenderSystem(OpenglRenderSystem&& other) = delete;
   OpenglRenderSystem& operator=(const OpenglRenderSystem&) = delete;
   OpenglRenderSystem& operator=(OpenglRenderSystem&& other) = delete;
-  ~OpenglRenderSystem() override;
+  ~OpenglRenderSystem();
 
-  void StartUp() override;
-  void ShutDown() override;
-  bool IsWorking() override;
+  void OnContextChanged();
 
   void StartFrame();
   void FinishFrame();
   void Clear(glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-  void RenderMap(std::shared_ptr<OpenglMap> map, Camera& camera, float ratio);
+  void RenderMap(std::shared_ptr<OpenglMap> map, OpenglProgram& mapProgram, Camera& camera, float ratio);
 
   int GetFrameTrianlgesNumber();
 
   void SetWireframeMode(bool value);
 
 private:
-  bool isWorking_ = false;
   int frameTrianglesNumber_ = 0;
-  std::unique_ptr<OpenglProgram> mapProgram_;
 };

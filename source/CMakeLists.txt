@@ -5,7 +5,7 @@ set(CORE_SOURCE_FILES
 	enviroment_system_interface.hpp
 	environment.hpp
 	environment.cpp
-	game_system_interface.hpp
+	game_module_interface.hpp
 	game.hpp
 	game.cpp
 	camera.hpp
