@@ -26,15 +26,8 @@ public:
 
   void OnContextChanged();
 
-  void StartFrame();
-  void FinishFrame();
   void Clear(glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
   void RenderMap(std::shared_ptr<OpenglMap> map, OpenglProgram& mapProgram, Camera& camera, float ratio);
 
-  int GetFrameTrianlgesNumber();
-
   void SetWireframeMode(bool value);
-
-private:
-  int frameTrianglesNumber_ = 0;
 };

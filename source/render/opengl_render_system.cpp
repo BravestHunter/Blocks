@@ -38,16 +38,6 @@ void OpenglRenderSystem::OnContextChanged()
 }
 
 
-void OpenglRenderSystem::StartFrame()
-{
-  frameTrianglesNumber_ = 0;
-}
-
-void OpenglRenderSystem::FinishFrame()
-{
-
-}
-
 void OpenglRenderSystem::Clear(glm::vec4 clearColor)
 {
   glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
@@ -74,15 +64,7 @@ void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, OpenglProgram
 
     chunk->vao_->Bind();
     glDrawArrays(GL_TRIANGLES, 0, chunk->verticesNumber_);
-
-    frameTrianglesNumber_ += chunk->verticesNumber_ / 3;
   }
-}
-
-
-int OpenglRenderSystem::GetFrameTrianlgesNumber()
-{
-  return frameTrianglesNumber_;
 }
 
 

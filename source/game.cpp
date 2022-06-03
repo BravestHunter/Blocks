@@ -367,8 +367,6 @@ void Game::RunRenderCycle()
     glfwPollEvents();
     ProcessInput(window);
 
-    renderSystem_.StartFrame();
-
     renderSystem_.Clear();
 
     float framebufferRatio = (float)framebufferWidth_ / (float)framebufferHeight_;
@@ -392,8 +390,6 @@ void Game::RunRenderCycle()
     // Render imgui ui
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    renderSystem_.FinishFrame();
 
     window.SwapBuffers();
 
@@ -565,14 +561,6 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
     }
   );
   window->AddElement(fpsText);
-
-  std::shared_ptr<ImguiText> renderStatisticsText = std::make_shared<ImguiText>(
-    [this]()
-    {
-      return  std::format("Rendered triangles: {}", renderSystem_.GetFrameTrianlgesNumber());
-    }
-  );
-  window->AddElement(renderStatisticsText);
 
   std::shared_ptr<ImguiText> cameraPositionText = std::make_shared<ImguiText>(
     [this]()
