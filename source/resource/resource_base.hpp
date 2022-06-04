@@ -4,14 +4,27 @@
 #include <memory>
 #include <vector>
 
+#include "enviroment_system_interface.hpp"
+#include "export.h"
 #include "block_set.hpp"
 
-class ResourceBase
+
+class DllExport ResourceBase : public EnviromentSystemInterface
 {
 public:
   ResourceBase();
+  ResourceBase(const ResourceBase&) = delete;
+  ResourceBase(ResourceBase&& other) = delete;
+  ResourceBase& operator=(const ResourceBase&) = delete;
+  ResourceBase& operator=(ResourceBase&& other) = delete;
+  ~ResourceBase() override;
 
-  bool SetUp(std::string path);
+  void Init() override;
+  void Deinit() override;
+  bool IsInitialized() override;
+
+  void SetUp(std::string path);
+
   std::shared_ptr<std::vector<std::string>> GetBlockSetNames();
   std::shared_ptr<BlockSet> LoadBlockSet(std::string name);
 

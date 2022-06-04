@@ -10,12 +10,34 @@ ResourceBase::ResourceBase()
   blockSetPaths_ = std::make_shared<std::vector<std::string>>();
 }
 
+ResourceBase::~ResourceBase()
+{
 
-bool ResourceBase::SetUp(std::string path)
+}
+
+
+void ResourceBase::Init()
+{
+  // Nothing to do here
+}
+
+void ResourceBase::Deinit()
+{
+  // Nothing to do here
+}
+
+bool ResourceBase::IsInitialized()
+{
+  return true;
+}
+
+
+
+void ResourceBase::SetUp(std::string path)
 {
   if (!isPathExist(path))
   {
-    return false;
+    return;
   }
 
   size_t found = path.find_last_of("/\\");
@@ -29,9 +51,8 @@ bool ResourceBase::SetUp(std::string path)
   {
     blockSetPaths_->push_back(value["Name"]);
   }
-
-  return true;
 }
+
 
 std::shared_ptr<std::vector<std::string>> ResourceBase::GetBlockSetNames()
 {

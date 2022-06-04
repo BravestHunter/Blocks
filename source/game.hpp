@@ -10,13 +10,6 @@
 #include "player_control_module.hpp"
 #include "map_loading_module.hpp"
 
-#include "resource/resource_base.hpp"
-#include "render/opengl_scene.hpp"
-#include "camera.hpp"
-#include "scene/map.hpp"
-#include "scene/scene.hpp"
-#include "collision/aabb.hpp"
-
 
 class DllExport Game
 {
@@ -31,18 +24,6 @@ public:
   int Run();
 
 private:
-  bool isRunning_ = true;
-
-  GlfwWindow window_;
-  GameContext context_;
-
-  // Game modules
-  OpenglRenderModule renderModule_;
-  PlayerControlModule playerControlModule_;
-  MapLoadingModule mapLoadingModule_;
-
-  ResourceBase resourceBase_;
-
   void RunRenderCycle();
   void RunSimulationCycle();
   void RunFixedUpdateCycle();
@@ -58,4 +39,14 @@ private:
   std::shared_ptr<Scene> CreateWorldScene(std::shared_ptr<Map> map);
   std::shared_ptr<Map> LoadMap();
   void SaveMap(std::shared_ptr<Map> map);
+
+  bool isRunning_ = true;
+
+  GlfwWindow window_;
+  GameContext context_;
+
+  // Game modules
+  OpenglRenderModule renderModule_;
+  PlayerControlModule playerControlModule_;
+  MapLoadingModule mapLoadingModule_;
 };

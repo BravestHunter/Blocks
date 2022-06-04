@@ -13,19 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
-#include "imgui_internal.h"
-
-#include "model/chunk.hpp"
-#include "render/opengl_chunk.hpp"
-
-#include "compile_utils.hpp"
-#include "resourceConfig.h"
-
 #include "io/file_api.hpp"
-
 #include "ui/i_imgui_element.hpp"
 #include "ui/imgui_button.hpp"
 #include "ui/imgui_text.hpp"
@@ -40,8 +28,6 @@ Game::Game(int width, int height) :
   context_.lastMouseX = width / 2;
   context_.lastMouseY = height / 2;
   context_.playerBounds = AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
-
-  resourceBase_.SetUp(RESOURCE_BASE_PATH);
 }
 
 Game::~Game()
@@ -95,9 +81,6 @@ void Game::RunRenderCycle()
       }
     }
   );
-
-  std::shared_ptr<BlockSet> blockSet = resourceBase_.LoadBlockSet(resourceBase_.GetBlockSetNames()->front());
-  renderModule_.GetOpenglScene()->GetMap()->SetBlockSet(blockSet);
 
   float lastTime = (float)platform.GetTime();
   while (isRunning_)

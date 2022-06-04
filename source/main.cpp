@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "config.h"
+#include "resourceConfig.h"
 
 #include "environment.hpp"
 #include "game.hpp"
@@ -21,6 +22,8 @@ int main()
   std::cout << "Version " << Blocks_VERSION_MAJOR << "." << Blocks_VERSION_MINOR << std::endl;
 
   Enviroment::InitSystems();
+
+  Enviroment::GetResourceSystem().SetUp(RESOURCE_BASE_PATH);
 
   RunGame();
 
