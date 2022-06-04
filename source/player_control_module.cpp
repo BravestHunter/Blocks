@@ -60,7 +60,7 @@ void PlayerControlModule::SetCallbacks(GlfwWindow& window, GameContext& context,
       {
         if (context.scene->ContainsMap() && !context.isCursorEnabled)
         {
-          BlockLookAt blockLookAt = context.scene->GetMap()->GetBlockLookAt(Ray(context.camera->GetPosition(), context.camera->GetForward()));
+          BlockLookAt blockLookAt = context.scene->GetMap()->GetBlockLookAt(blocks::Ray(context.camera->GetPosition(), context.camera->GetForward()));
           if (!blockLookAt.hit)
           {
             return;
@@ -147,7 +147,7 @@ void PlayerControlModule::SetCallbacks(GlfwWindow& window, GameContext& context,
       {
         if (context.scene->ContainsMap() && !context.isCursorEnabled)
         {
-          BlockLookAt blockLookAt = context.scene->GetMap()->GetBlockLookAt(Ray(context.camera->GetPosition(), context.camera->GetForward()));
+          BlockLookAt blockLookAt = context.scene->GetMap()->GetBlockLookAt(blocks::Ray(context.camera->GetPosition(), context.camera->GetForward()));
           if (!blockLookAt.hit)
           {
             return;

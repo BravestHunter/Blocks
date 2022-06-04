@@ -7,6 +7,7 @@
 #include "enviroment_system_interface.hpp"
 #include "export.h"
 #include "block_set.hpp"
+#include "resource/image.hpp"
 
 
 class DllExport ResourceBase : public EnviromentSystemInterface
@@ -27,6 +28,8 @@ public:
 
   std::shared_ptr<std::vector<std::string>> GetBlockSetNames();
   std::shared_ptr<BlockSet> LoadBlockSet(std::string name);
+
+  Image ReadImage(std::string path);
 
 private:
   std::string rootDirectory_;

@@ -59,7 +59,7 @@ void Map::AddChunk(std::pair<int, int> position, std::shared_ptr<Chunk> chunk)
 }
 
 
-bool Map::Collides(const AABB& bounds, glm::vec3 position)
+bool Map::Collides(const blocks::AABB& bounds, glm::vec3 position)
 {
   std::pair<int, int> chunkPosition = std::make_pair(position.x / Chunk::Length, position.y / Chunk::Width);
   glm::vec3 localPosition = glm::vec3(position.x - chunkPosition.first * (int)Chunk::Length, position.y - chunkPosition.second * (int)Chunk::Width, position.z);
@@ -75,7 +75,7 @@ bool Map::Collides(const AABB& bounds, glm::vec3 position)
   }
   std::shared_ptr<Chunk> chunk = GetChunk(chunkPosition);
 
-  AABB localBounds(bounds.low + localPosition, bounds.high + localPosition);
+  blocks::AABB localBounds(bounds.low + localPosition, bounds.high + localPosition);
 
   glm::ivec3 centralBlockPosition = glm::ivec3(localPosition);
 
@@ -106,7 +106,7 @@ bool Map::Collides(const AABB& bounds, glm::vec3 position)
           continue;
         }
 
-        AABB blockBounds(glm::vec3(x, y, z), glm::vec3(x + 1, y + 1, z + 1));
+        blocks::AABB blockBounds(glm::vec3(x, y, z), glm::vec3(x + 1, y + 1, z + 1));
         if (CheckCollision(blockBounds, localBounds))
         {
           return true;
@@ -118,7 +118,7 @@ bool Map::Collides(const AABB& bounds, glm::vec3 position)
   return false;
 }
 
-BlockLookAt Map::GetBlockLookAt(const Ray& ray)
+BlockLookAt Map::GetBlockLookAt(const blocks::Ray& ray)
 {
   std::pair<int, int> chunkPosition = std::make_pair(ray.origin.x / Chunk::Length, ray.origin.y / Chunk::Width);
   glm::vec3 localPosition = glm::vec3(ray.origin.x - chunkPosition.first * (int)Chunk::Length, ray.origin.y - chunkPosition.second * (int)Chunk::Width, ray.origin.z);
@@ -134,11 +134,11 @@ BlockLookAt Map::GetBlockLookAt(const Ray& ray)
   }
 
   std::shared_ptr<Chunk> chunk = GetChunk(chunkPosition);
-  Ray localRay(localPosition, ray.direction);
+  blocks::Ray localRay(localPosition, ray.direction);
 
   glm::ivec3 centralBlockPosition = glm::ivec3(localPosition);
 
-  RayIntersectionPoint closestIntersectionPoint;
+  blocks::RayIntersectionPoint closestIntersectionPoint;
   glm::ivec3 intersectedBlock;
   int radius = 3;
   for (int x = centralBlockPosition.x - radius; x <= centralBlockPosition.x + radius; x++)
@@ -167,8 +167,8 @@ BlockLookAt Map::GetBlockLookAt(const Ray& ray)
           continue;
         }
 
-        AABB blockBounds(glm::vec3(x, y, z), glm::vec3(x + 1, y + 1, z + 1));
-        RayIntersectionPoint intersectionPoint = CheckCollision(localRay, blockBounds);
+        blocks::AABB blockBounds(glm::vec3(x, y, z), glm::vec3(x + 1, y + 1, z + 1));
+        blocks::RayIntersectionPoint intersectionPoint = CheckCollision(localRay, blockBounds);
         if (intersectionPoint.distance != FLT_MAX && closestIntersectionPoint.distance > intersectionPoint.distance)
         {
           closestIntersectionPoint = intersectionPoint;

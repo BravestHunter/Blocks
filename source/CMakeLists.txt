@@ -1,3 +1,5 @@
+add_subdirectory(utils)
+
 set(CORE_SOURCE_FILES
 	export.h
 	compile_utils.hpp
@@ -23,9 +25,6 @@ set(CORE_SOURCE_FILES
 	platform/glfw_window.cpp
 	platform/glfw_platform.hpp
 	platform/glfw_platform.cpp
-
-	io/file_api.hpp
-	io/file_api.cpp
 
 	resource/image.hpp
 	resource/block_info.hpp
@@ -69,12 +68,6 @@ set(CORE_SOURCE_FILES
 	scene/scene.hpp
 	scene/scene.cpp
 
-	collision/aabb.hpp
-	collision/ray.hpp
-	collision/ray_intersection_point.hpp
-	collision/collisions_api.hpp
-	collision/collisions_api.cpp
-
 	ui/i_imgui_element.hpp
 	ui/imgui_text.hpp
 	ui/imgui_text.cpp
@@ -92,6 +85,8 @@ target_include_directories(BlocksCore
 
 target_link_libraries(BlocksCore
 	PUBLIC
+		BlocksUtils
+
 		OpenGL::GL
 		OpenGL::GLU
 		glew

@@ -1,5 +1,7 @@
 #include "resource_base.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
 #include "nlohmann/json.hpp"
 
 #include "io/file_api.hpp"
@@ -35,7 +37,7 @@ bool ResourceBase::IsInitialized()
 
 void ResourceBase::SetUp(std::string path)
 {
-  if (!isPathExist(path))
+  if (!blocks::isPathExist(path))
   {
     return;
   }
@@ -43,7 +45,7 @@ void ResourceBase::SetUp(std::string path)
   size_t found = path.find_last_of("/\\");
   rootDirectory_ = (path.substr(0, found));
 
-  std::string resourceBaseStr = readTextFile(path);
+  std::string resourceBaseStr = blocks::readTextFile(path);
 
   nlohmann::json resourceBaseJson = nlohmann::json::parse(resourceBaseStr);
   nlohmann::json blockSets = resourceBaseJson["BlockSets"];
@@ -64,7 +66,7 @@ std::shared_ptr<BlockSet> ResourceBase::LoadBlockSet(std::string name)
   std::string bsDirectory = rootDirectory_ + "\\" + "BlockSets" + "\\" + name;
   std::string bsFile = bsDirectory + "\\" + name + ".bs";
 
-  std::string blockSetStr = readTextFile(bsFile);
+  std::string blockSetStr = blocks::readTextFile(bsFile);
   nlohmann::json resourceBaseJson = nlohmann::json::parse(blockSetStr);
   nlohmann::json blocksJson = resourceBaseJson["Blocks"];
 
@@ -92,4 +94,20 @@ std::shared_ptr<BlockSet> ResourceBase::LoadBlockSet(std::string name)
   }
 
   return blockSet;
+}
+
+
+Image ResourceBase::ReadImage(std::string path)
+{
+  Image result;
+
+  std::vector<unsigned char> data = blocks::readBinaryFile(path);
+
+  stbi_set_flip_vertically_on_load(true);
+
+  unsigned char* rawData = stbi_load_from_memory(&data[0], data.size(), &result.width, &result.height, &result.channels, 0);
+  result.data = std::vector<unsigned char>(rawData, rawData + result.height * result.width * result.channels);
+  stbi_image_free(rawData);
+
+  return result;
 }

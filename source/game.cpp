@@ -27,7 +27,7 @@ Game::Game(int width, int height) :
   context_.camera = std::make_shared<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
   context_.lastMouseX = width / 2;
   context_.lastMouseY = height / 2;
-  context_.playerBounds = AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
+  context_.playerBounds = blocks::AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
 }
 
 Game::~Game()
@@ -211,7 +211,7 @@ std::shared_ptr<Scene> Game::CreateMainMenuScene()
     "Load world",
     [this]()
     {
-      if (!isPathExist("map"))
+      if (!blocks::isPathExist("map"))
       {
         return;
       }
@@ -274,15 +274,15 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
     "Save world",
     [this]()
     {
-      if (!isPathExist("map"))
+      if (!blocks::isPathExist("map"))
       {
-        createDirectory("map");
+        blocks::createDirectory("map");
       }
       else
       {
-        for (const std::string& path : getFilesInDirectory("map"))
+        for (const std::string& path : blocks::getFilesInDirectory("map"))
         {
-          removePath(path);
+          blocks::removePath(path);
         }
       }
 
@@ -296,19 +296,19 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
 
 std::shared_ptr<Map> Game::LoadMap()
 {
-  std::string seedStr = readTextFile("map/seed.txt");
+  std::string seedStr = blocks::readTextFile("map/seed.txt");
   int seed = std::stoi(seedStr);
 
   std::shared_ptr<Map> map = std::make_shared<Map>(seed);
 
-  for (const std::string& path : getFilesInDirectory("map"))
+  for (const std::string& path : blocks::getFilesInDirectory("map"))
   {
     if (path == "seed.txt")
     {
       continue;
     }
 
-    std::vector<unsigned char> data = readBinaryFile("map/" + path);
+    std::vector<unsigned char> data = blocks::readBinaryFile("map/" + path);
     std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>();
     memcpy(chunk.get(), &data[0], sizeof(Chunk));
 
@@ -329,7 +329,7 @@ std::shared_ptr<Map> Game::LoadMap()
 
 void Game::SaveMap(std::shared_ptr<Map> map)
 {
-  saveTextFile("map/seed.txt", std::to_string(map->GetSeed()));
+  blocks::saveTextFile("map/seed.txt", std::to_string(map->GetSeed()));
 
   auto chunksIterator = map->GetChunksIterator();
   for (auto it = chunksIterator.first; it != chunksIterator.second; it++)
@@ -340,6 +340,6 @@ void Game::SaveMap(std::shared_ptr<Map> map)
     std::vector<unsigned char> data(sizeof(Chunk));
     memcpy(&data[0], it->second.get(), sizeof(Chunk));
 
-    saveBinaryFile(path, data);
+    blocks::saveBinaryFile(path, data);
   }
 }

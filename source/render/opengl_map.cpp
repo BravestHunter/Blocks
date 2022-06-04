@@ -4,9 +4,9 @@
 
 #include <glm/glm.hpp>
 
+#include "environment.hpp"
 #include "model/chunk.hpp"
 #include "resource/image.hpp"
-#include "io/file_api.hpp"
 
 
 OpenglMap::OpenglMap()
@@ -24,10 +24,12 @@ void OpenglMap::SetBlockSet(std::shared_ptr<BlockSet> blockSet)
 {
   blockSet_ = blockSet;
 
+  ResourceBase& resourceBase = Enviroment::GetResourceSystem();
+
   std::vector<Image> images;
   for (int i = 0; i < blockSet->GetTexturesNumber(); i++)
   {
-    images.push_back(readImage(blockSet->GetTexture(i)));
+    images.push_back(resourceBase.ReadImage(blockSet->GetTexture(i)));
   }
 
   int resolution = blockSet->GetResolution();

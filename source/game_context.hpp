@@ -4,7 +4,7 @@
 
 #include "camera.hpp"
 #include "scene/scene.hpp"
-#include "collision/aabb.hpp"
+#include "geometry/aabb.hpp"
 
 
 struct GameContext
@@ -23,5 +23,5 @@ struct GameContext
   float lastMouseX;
   float lastMouseY;
 
-  AABB playerBounds;
+  blocks::AABB playerBounds;
 };

@@ -10,6 +10,7 @@
 #include "opengl_scene.hpp"
 #include "camera.hpp"
 
+
 class OpenglRenderModule : public GameModuleInterface
 {
 public:

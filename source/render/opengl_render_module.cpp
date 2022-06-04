@@ -95,8 +95,8 @@ void OpenglRenderModule::InitResources()
   }
 
   // Load map shader program
-  std::string vertexCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER));
-  std::string fragmentCode = readTextFile(PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
+  std::string vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER));
+  std::string fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
   OpenglShader vertexShader(vertexCode, GL_VERTEX_SHADER);
   OpenglShader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
   mapProgram_ = std::make_shared<OpenglProgram>(vertexShader, fragmentShader);

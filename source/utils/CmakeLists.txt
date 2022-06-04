@@ -1,0 +1,24 @@
+set(SOURCE_FILES
+	io/file_api.hpp
+	io/file_api.cpp
+
+	geometry/aabb.hpp
+	geometry/ray.hpp
+	geometry/ray_intersection_point.hpp
+	geometry/collisions_api.hpp
+	geometry/collisions_api.cpp
+)
+
+add_library(BlocksUtils STATIC ${SOURCE_FILES})
+target_include_directories(BlocksUtils
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(BlocksUtils
+	PUBLIC
+		glm
+)
+
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})

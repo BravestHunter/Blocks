@@ -7,7 +7,7 @@
 
 #include "block_look_at.hpp"
 #include "model/chunk.hpp"
-#include "collision/collisions_api.hpp"
+#include "geometry/collisions_api.hpp"
 
 
 class Map
@@ -23,8 +23,8 @@ public:
 
   void AddChunk(std::pair<int, int> position, std::shared_ptr<Chunk> chunk);
 
-  bool Collides(const AABB& bounds, glm::vec3 position);
-  BlockLookAt GetBlockLookAt(const Ray& ray);
+  bool Collides(const blocks::AABB& bounds, glm::vec3 position);
+  BlockLookAt GetBlockLookAt(const blocks::Ray& ray);
 
 private:
   std::map<std::pair<int, int>, std::shared_ptr<Chunk>> chunks_;
