@@ -5,12 +5,15 @@ set(CORE_SOURCE_FILES
 	enviroment_system_interface.hpp
 	environment.hpp
 	environment.cpp
+	game_context.hpp
 	game_module_interface.hpp
-	game.hpp
-	game.cpp
+	player_control_module.hpp
+	player_control_module.cpp
 	camera.hpp
 	camera.cpp
 	block_side.hpp
+	game.hpp
+	game.cpp
 
 	platform/glfw_headers.hpp
 	platform/cursor_mode.hpp

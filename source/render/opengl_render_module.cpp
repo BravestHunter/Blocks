@@ -2,8 +2,12 @@
 
 #include <exception>
 
-#include "resourceConfig.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "imgui_internal.h"
 
+#include "resourceConfig.h"
 #include "compile_utils.hpp"
 #include "io/file_api.hpp"
 #include "environment.hpp"
@@ -19,7 +23,7 @@ OpenglRenderModule::~OpenglRenderModule()
 }
 
 
-void OpenglRenderModule::Update(float delta)
+void OpenglRenderModule::Update(float delta, GameContext& context)
 {
   if (!IsCorrectThread())
   {
@@ -34,21 +38,53 @@ void OpenglRenderModule::Update(float delta)
 
   glm::ivec2 windowSize = context_->window_.GetSize();
   float ratio = (float)windowSize.x / (float)windowSize.y;
-  renderSystem.RenderMap(openglScene_->GetMap(), mapProgram_, camera_, ratio);
+  renderSystem.RenderMap(openglScene_->GetMap(), mapProgram_, context.camera, ratio);
+
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
+  auto imguiWindowsIterator = context.scene->GetImguiWindowsIterator();
+  for (auto it = imguiWindowsIterator.first; it != imguiWindowsIterator.second; it++)
+  {
+    it->get()->Render();
+  }
+
+  // Render imgui ui
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 
-void OpenglRenderModule::SetContext(GlfwWindow& context)
+void OpenglRenderModule::SetContext(GlfwWindow& window)
 {
   Enviroment::GetRenderSystem().OnContextChanged();
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+  ImGui::StyleColorsDark();
+
+  window.InitImgui();
+  // GL 3.0 + GLSL 130
+  const char* glsl_version = "#version 130";
+  ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Configure
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
 
+  window.SetFramebufferCallback(
+    [this](int width, int height)
+    {
+      glViewport(0, 0, width, height);
+    }
+  );
+
   std::thread::id id = std::this_thread::get_id();
-  context_ = std::make_unique<OpenglContext>(context, id);
+  context_ = std::make_unique<OpenglContext>(window, id);
 }
 
 void OpenglRenderModule::InitResources()
@@ -84,12 +120,6 @@ std::shared_ptr<OpenglScene> OpenglRenderModule::GetOpenglScene()
   }
 
   return openglScene_;
-}
-
-
-void OpenglRenderModule::SetCamera(std::shared_ptr<Camera> camera)
-{
-  camera_ = camera;
 }
 
 

@@ -39,7 +39,11 @@ Game::Game(int width, int height) :
   lastMouseX_(width / 2), 
   lastMouseY_(height / 2)
 {
-  currentScene_ = CreateMainMenuScene();
+  context_.scene = CreateMainMenuScene();
+  context_.camera = camera_;
+  context_.playerBounds = AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
+  context_.lastMouseX = width / 2;
+  context_.lastMouseY = height / 2;
 
   resourceBase_.SetUp(RESOURCE_BASE_PATH);
 }
@@ -79,7 +83,7 @@ void Game::RunSimulationCycle()
       SetRequestedScene();
     }
 
-    if (currentScene_->ContainsMap())
+    if (context_.scene->ContainsMap())
     {
       glm::ivec2 centerChunk = CalculateChunkCenter();
       
@@ -96,7 +100,7 @@ void Game::RunSimulationCycle()
 
 void Game::AddChunks(glm::ivec2 centerChunkCoords)
 {
-  std::shared_ptr<Map> map = currentScene_->GetMap();
+  std::shared_ptr<Map> map = context_.scene->GetMap();
   std::shared_ptr<OpenglMap> openglMap = renderModule_.GetOpenglScene()->GetMap();
 
   for (int x = centerChunkCoords.x - renderRadius_; x <= centerChunkCoords.x + renderRadius_; x++)
@@ -144,29 +148,10 @@ void Game::RunRenderCycle()
 
   renderModule_.SetContext(window);
   renderModule_.InitResources();
-  renderModule_.SetCamera(camera_);
 
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-  ImGui::StyleColorsDark();
-
-  window.InitImgui();
-  // GL 3.0 + GLSL 130
-  const char* glsl_version = "#version 130";
-  ImGui_ImplOpenGL3_Init(glsl_version);
+  playerControlModule_.SetCallbacks(window, context_, renderModule_);
 
   // Set callbacks
-  window.SetFramebufferCallback(
-    [this](int width, int height)
-    {
-      framebufferWidth_ = width;
-      framebufferHeight_ = height;
-
-      glViewport(0, 0, width, height);
-    }
-  );
   window.SetKeyCallback(
     [this, &window](int keycode, int scancode, int action, int mods)
     {
@@ -184,153 +169,6 @@ void Game::RunRenderCycle()
       }
     }
   );
-  window.SetCursorPositionCallback(
-    [this](double xpos, double ypos)
-    {
-      float xposF = static_cast<float>(xpos);
-      float yposF = static_cast<float>(ypos);
-
-      if (firstMouse_)
-      {
-        lastMouseX_ = xposF;
-        lastMouseY_ = yposF;
-        firstMouse_ = false;
-      }
-
-      float xoffset = xposF - lastMouseX_;
-      float yoffset = lastMouseY_ - yposF; // reversed since y-coordinates go from bottom to top
-
-      lastMouseX_ = xposF;
-      lastMouseY_ = yposF;
-
-      if (!isCursorEnabled_)
-      {
-        camera_->ProcessMouseMovement(xoffset, yoffset);
-      }
-    }
-  );
-  window.SetScrollCallback(
-    [this](double xoffset, double yoffset)
-    {
-      camera_->ProcessMouseScroll(static_cast<float>(yoffset));
-    }
-  );
-  window.SetMouseButtonCallback(
-    [this](int button, int action, int mods)
-    {
-      if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS) // Place block
-      {
-        if (currentScene_->ContainsMap() && !isCursorEnabled_)
-        {
-          BlockLookAt blockLookAt = currentScene_->GetMap()->GetBlockLookAt(Ray(camera_->GetPosition(), camera_->GetForward()));
-          if (!blockLookAt.hit)
-          {
-            return;
-          }
-
-          std::pair<int, int> placeChunkPosition = blockLookAt.chunkPosition;
-          glm::ivec3 placeBlockPosition = blockLookAt.blockPosition;
-          switch (blockLookAt.loockFromDirection)
-          {
-          case Direction::Forward:
-            if (blockLookAt.blockPosition.x == Chunk::Length - 1)
-            {
-              placeChunkPosition.first += 1;
-              placeBlockPosition.x = 0;
-            }
-            else
-            {
-              placeBlockPosition.x++;
-            }
-            break;
-          case Direction::Back:
-            if (blockLookAt.blockPosition.x == 0)
-            {
-              placeChunkPosition.first -= 1;
-              placeBlockPosition.x = 15;
-            }
-            else
-            {
-              placeBlockPosition.x--;
-            }
-            break;
-
-          case Direction::Right:
-            if (blockLookAt.blockPosition.y == Chunk::Width - 1)
-            {
-              placeChunkPosition.second += 1;
-              placeBlockPosition.y = 0;
-            }
-            else
-            {
-              placeBlockPosition.y++;
-            }
-            break;
-          case Direction::Left:
-            if (blockLookAt.blockPosition.y == 0)
-            {
-              placeChunkPosition.second -= 1;
-              placeBlockPosition.y = 15;
-            }
-            else
-            {
-              placeBlockPosition.y--;
-            }
-            break;
-
-          case Direction::Up:
-            if (blockLookAt.blockPosition.z == Chunk::Height - 1)
-            {
-              return;
-            }
-            else
-            {
-              placeBlockPosition.z++;
-            }
-            break;
-          case Direction::Down:
-            if (blockLookAt.blockPosition.z == 0)
-            {
-              return;
-            }
-            else
-            {
-              placeBlockPosition.z--;
-            }
-            break;
-          }
-
-          // Check collision
-          glm::vec3 worldBlockPosition(placeBlockPosition.x + placeChunkPosition.first * Chunk::Length, placeBlockPosition.y + placeChunkPosition.second * Chunk::Width, placeBlockPosition.z);
-          const AABB blockBounds(glm::vec3(worldBlockPosition.x, worldBlockPosition.y, worldBlockPosition.z), glm::vec3(worldBlockPosition.x + 1, worldBlockPosition.y + 1, worldBlockPosition.z + 1));
-          const AABB playerBounds(playerBounds_.low + camera_->GetPosition(), playerBounds_.high + camera_->GetPosition());
-          if (CheckCollision(blockBounds, playerBounds))
-          {
-            return;
-          }
-
-          std::shared_ptr<Chunk> chunk = currentScene_->GetMap()->GetChunk(placeChunkPosition);
-          chunk->blocks[placeBlockPosition.x + placeBlockPosition.y * Chunk::Width + placeBlockPosition.z * Chunk::LayerBlocksNumber] = 1;
-          renderModule_.GetOpenglScene()->AddChunk(chunk, placeChunkPosition);
-        }
-      }
-      else if (button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS) // Remove block
-      {
-        if (currentScene_->ContainsMap() && !isCursorEnabled_)
-        {
-          BlockLookAt blockLookAt = currentScene_->GetMap()->GetBlockLookAt(Ray(camera_->GetPosition(), camera_->GetForward()));
-          if (!blockLookAt.hit)
-          {
-            return;
-          }
-
-          std::shared_ptr<Chunk> chunk = currentScene_->GetMap()->GetChunk(blockLookAt.chunkPosition);
-          chunk->blocks[blockLookAt.blockPosition.x + blockLookAt.blockPosition.y * Chunk::Width + blockLookAt.blockPosition.z * Chunk::LayerBlocksNumber] = 0;
-          renderModule_.GetOpenglScene()->AddChunk(chunk, blockLookAt.chunkPosition);
-        }
-      }
-    }
-  );
 
   std::shared_ptr<BlockSet> blockSet = resourceBase_.LoadBlockSet(resourceBase_.GetBlockSetNames()->front());
   renderModule_.GetOpenglScene()->GetMap()->SetBlockSet(blockSet);
@@ -338,34 +176,18 @@ void Game::RunRenderCycle()
   float lastTime = (float)platform.GetTime();
   while (isRunning_)
   {
-    sceneMutex_.lock();
-
-    glfwPollEvents();
-    ProcessInput(window);
-
     float currentTime = (float)platform.GetTime();
     float delta = currentTime - lastTime;
     lastTime = currentTime;
 
-    renderModule_.Update(delta);
+    platform.ProcessEvents();
+    ProcessInput(window);
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    auto imguiWindowsIterator = currentScene_->GetImguiWindowsIterator();
-    for (auto it = imguiWindowsIterator.first; it != imguiWindowsIterator.second; it++)
-    {
-      it->get()->Render();
-    }
-
-    // Render imgui ui
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    sceneMutex_.lock();
+    renderModule_.Update(delta, context_);
+    sceneMutex_.unlock();
 
     window.SwapBuffers();
-
-    sceneMutex_.unlock();
 
     if (window.IsWindowShouldClose())
     {
@@ -378,17 +200,17 @@ void Game::RunRenderCycle()
 
 void Game::ProcessInput(GlfwWindow& window)
 {
-  isWPressed_ = window.GetKeyState(GLFW_KEY_W) == GLFW_PRESS;
-  isSPressed_ = window.GetKeyState(GLFW_KEY_S) == GLFW_PRESS;
-  isAPressed_ = window.GetKeyState(GLFW_KEY_A) == GLFW_PRESS;
-  isDPressed_ = window.GetKeyState(GLFW_KEY_D) == GLFW_PRESS;
+  context_.isWPressed = window.GetKeyState(GLFW_KEY_W) == GLFW_PRESS;
+  context_.isSPressed = window.GetKeyState(GLFW_KEY_S) == GLFW_PRESS;
+  context_.isAPressed = window.GetKeyState(GLFW_KEY_A) == GLFW_PRESS;
+  context_.isDPressed = window.GetKeyState(GLFW_KEY_D) == GLFW_PRESS;
 }
 
 void Game::SwitchCursorMode(GlfwWindow& window)
 {
-  isCursorEnabled_ = !isCursorEnabled_;
+  context_.isCursorEnabled = !context_.isCursorEnabled;
 
-  if (isCursorEnabled_)
+  if (context_.isCursorEnabled)
   {
     window.SetCursorMode(CursorMode::Normal);
   }
@@ -411,49 +233,13 @@ void Game::RunFixedUpdateCycle()
   {
     mut.unlock();
 
-    if (currentScene_->ContainsMap())
-    {
-      MovePlayer();
-    }
+    playerControlModule_.Update(0.016f, context_);
 
     mut.lock();
     cv.wait_until(lk, next, [] {return false; });
     next += delta{ 1 };
   }
 }
-
-void Game::MovePlayer()
-{
-  float fixedDelta = 0.016f;
-  float velocity = 32.0f * fixedDelta;
-
-  glm::vec3 position = camera_->GetPosition();
-  glm::vec3 shift = glm::vec3(0.0f);
-
-  if (isWPressed_)
-  {
-    shift += camera_->GetForward() * velocity;
-  }
-  if (isSPressed_)
-  {
-    shift -= camera_->GetForward() * velocity;
-  }
-  if (isAPressed_)
-  {
-    shift -= camera_->GetRight() * velocity;
-  }
-  if (isDPressed_)
-  {
-    shift += camera_->GetRight() * velocity;
-  }
-
-  position += shift;
-  if (!currentScene_->GetMap()->Collides(playerBounds_, position))
-  {
-    camera_->SetPosition(position);
-  }
-}
-
 
 void Game::RequestScene(std::shared_ptr<Scene> scene)
 {
@@ -464,10 +250,10 @@ void Game::SetRequestedScene()
 {
   sceneMutex_.lock();
 
-  currentScene_ = requestedScene_;
+  context_.scene = requestedScene_;
   requestedScene_ = nullptr;
 
-  if (currentScene_->ContainsMap())
+  if (context_.scene->ContainsMap())
   {
     lastCenterChunkCoords_ = CalculateChunkCenter();
     AddChunks(lastCenterChunkCoords_);
@@ -550,7 +336,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> seedText = std::make_shared<ImguiText>(
     [this]()
     {
-      return  std::format("Map seed: {}", currentScene_->GetMap()->GetSeed());
+      return  std::format("Map seed: {}", context_.scene->GetMap()->GetSeed());
     }
   );
   window->AddElement(seedText);
@@ -571,7 +357,7 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
         }
       }
 
-      SaveMap(currentScene_->GetMap());
+      SaveMap(context_.scene->GetMap());
     }
   );
   window->AddElement(saveButton);

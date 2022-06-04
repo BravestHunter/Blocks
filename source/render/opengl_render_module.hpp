@@ -20,10 +20,9 @@ public:
   OpenglRenderModule& operator=(OpenglRenderModule&& other) = delete;
   ~OpenglRenderModule() override;
 
-  virtual void Update(float delta) override;
+  virtual void Update(float delta, GameContext& context) override;
 
-  void SetContext(GlfwWindow& context);
-  void SetCamera(std::shared_ptr<Camera> camera);
+  void SetContext(GlfwWindow& window);
   void InitResources();
   void FreeResources();
 
@@ -35,6 +34,4 @@ private:
   std::unique_ptr<OpenglContext> context_;
   std::shared_ptr<OpenglProgram> mapProgram_;
   std::shared_ptr<OpenglScene> openglScene_;
-  std::shared_ptr<Camera> camera_;
-
 };

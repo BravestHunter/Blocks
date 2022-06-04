@@ -22,6 +22,8 @@ public:
   void Deinit() override;
   bool IsInitialized() override;
 
+  void ProcessEvents();
+
   GlfwWindow CreateWindow(int width, int height, std::string title);
 
   int GetError();

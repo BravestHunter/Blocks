@@ -66,6 +66,12 @@ bool GlfwPlatform::IsInitialized()
 }
 
 
+void GlfwPlatform::ProcessEvents()
+{
+  glfwPollEvents();
+}
+
+
 GlfwWindow GlfwPlatform::CreateWindow(int width, int height, std::string title)
 {
   glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
