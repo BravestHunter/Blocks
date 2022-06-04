@@ -11,42 +11,45 @@
 #include "map_loading_module.hpp"
 
 
-class DllExport Game
+namespace blocks
 {
-public:
-  Game(int width, int height);
-  Game(const Game&) = delete;
-  Game(Game&& other) = delete;
-  Game& operator=(const Game&) = delete;
-  Game& operator=(Game&& other) = delete;
-  ~Game();
+  class DllExport Game
+  {
+  public:
+    Game(int width, int height);
+    Game(const Game&) = delete;
+    Game(Game&& other) = delete;
+    Game& operator=(const Game&) = delete;
+    Game& operator=(Game&& other) = delete;
+    ~Game();
 
-  int Run();
+    int Run();
 
-private:
-  void RunRenderCycle();
-  void RunSimulationCycle();
-  void RunFixedUpdateCycle();
+  private:
+    void RunRenderCycle();
+    void RunSimulationCycle();
+    void RunFixedUpdateCycle();
 
-  void ProcessInput(GlfwWindow& window);
-  void SwitchCursorMode(GlfwWindow& window);
+    void ProcessInput(GlfwWindow& window);
+    void SwitchCursorMode(GlfwWindow& window);
 
-  std::shared_ptr<Scene> requestedScene_ = nullptr;
-  std::mutex sceneMutex_;
-  void RequestScene(std::shared_ptr<Scene> scene);
-  void SetRequestedScene();
-  std::shared_ptr<Scene> CreateMainMenuScene();
-  std::shared_ptr<Scene> CreateWorldScene(std::shared_ptr<Map> map);
-  std::shared_ptr<Map> LoadMap();
-  void SaveMap(std::shared_ptr<Map> map);
+    std::shared_ptr<Scene> requestedScene_ = nullptr;
+    std::mutex sceneMutex_;
+    void RequestScene(std::shared_ptr<Scene> scene);
+    void SetRequestedScene();
+    std::shared_ptr<Scene> CreateMainMenuScene();
+    std::shared_ptr<Scene> CreateWorldScene(std::shared_ptr<Map> map);
+    std::shared_ptr<Map> LoadMap();
+    void SaveMap(std::shared_ptr<Map> map);
 
-  bool isRunning_ = true;
+    bool isRunning_ = true;
 
-  GlfwWindow window_;
-  GameContext context_;
+    GlfwWindow window_;
+    GameContext context_;
 
-  // Game modules
-  OpenglRenderModule renderModule_;
-  PlayerControlModule playerControlModule_;
-  MapLoadingModule mapLoadingModule_;
-};
+    // Game modules
+    OpenglRenderModule renderModule_;
+    PlayerControlModule playerControlModule_;
+    MapLoadingModule mapLoadingModule_;
+  };
+}

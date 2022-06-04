@@ -7,21 +7,24 @@
 #include "geometry/aabb.hpp"
 
 
-struct GameContext
+namespace blocks
 {
-  std::shared_ptr<Camera> camera;
-  std::shared_ptr<Scene> scene;
+  struct GameContext
+  {
+    std::shared_ptr<Camera> camera;
+    std::shared_ptr<Scene> scene;
 
-  bool isCursorEnabled = true;
+    bool isCursorEnabled = true;
 
-  // Input
-  bool isWPressed = false;
-  bool isSPressed = false;
-  bool isAPressed = false;
-  bool isDPressed = false;
-  bool firstMouse = true;
-  float lastMouseX;
-  float lastMouseY;
+    // Input
+    bool isWPressed = false;
+    bool isSPressed = false;
+    bool isAPressed = false;
+    bool isDPressed = false;
+    bool firstMouse = true;
+    float lastMouseX;
+    float lastMouseY;
 
-  blocks::AABB playerBounds;
-};
+    blocks::AABB playerBounds;
+  };
+}

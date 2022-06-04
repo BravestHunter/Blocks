@@ -3,10 +3,13 @@
 #include "game_context.hpp"
 
 
-class GameModuleInterface
+namespace blocks
 {
-public:
-  virtual ~GameModuleInterface() {};
+  class GameModuleInterface
+  {
+  public:
+    virtual ~GameModuleInterface() {};
 
-  virtual void Update(float delta, GameContext& context) = 0;
-};
+    virtual void Update(float delta, GameContext& context) = 0;
+  };
+}

@@ -31,10 +31,6 @@ add_subdirectory(source)
 
 
 add_executable(Blocks "source/main.cpp")
-target_include_directories(Blocks
-	PRIVATE 
-		"${PROJECT_BINARY_DIR}/configs"
-)
 target_link_libraries(Blocks PRIVATE BlocksCore)
 
 

@@ -5,20 +5,23 @@
 #include "render/opengl_render_module.hpp"
 
 
-class PlayerControlModule : public GameModuleInterface
+namespace blocks
 {
-public:
-  PlayerControlModule();
-  PlayerControlModule(const PlayerControlModule&) = delete;
-  PlayerControlModule(PlayerControlModule&& other) = delete;
-  PlayerControlModule& operator=(const PlayerControlModule&) = delete;
-  PlayerControlModule& operator=(PlayerControlModule&& other) = delete;
-  ~PlayerControlModule() override;
+  class PlayerControlModule : public GameModuleInterface
+  {
+  public:
+    PlayerControlModule();
+    PlayerControlModule(const PlayerControlModule&) = delete;
+    PlayerControlModule(PlayerControlModule&& other) = delete;
+    PlayerControlModule& operator=(const PlayerControlModule&) = delete;
+    PlayerControlModule& operator=(PlayerControlModule&& other) = delete;
+    ~PlayerControlModule() override;
 
-  virtual void Update(float delta, GameContext& context) override;
+    virtual void Update(float delta, GameContext& context) override;
 
-  void SetCallbacks(GlfwWindow& window, GameContext& context, OpenglRenderModule& renderModule);
+    void SetCallbacks(GlfwWindow& window, GameContext& context, OpenglRenderModule& renderModule);
 
-private:
-  void MovePlayer(float delta, GameContext& context);
-};
+  private:
+    void MovePlayer(float delta, GameContext& context);
+  };
+}

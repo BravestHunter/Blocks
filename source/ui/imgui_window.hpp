@@ -6,17 +6,19 @@
 
 #include "i_imgui_element.hpp"
 
-
-class ImguiWindow
+namespace blocks
 {
-public:
-  ImguiWindow(std::string title);
+  class ImguiWindow
+  {
+  public:
+    ImguiWindow(std::string title);
 
-  void Render();
+    void Render();
 
-  void AddElement(std::shared_ptr<IImguiElement> element);
+    void AddElement(std::shared_ptr<IImguiElement> element);
 
-private:
-  std::string title_;
-  std::vector<std::shared_ptr<IImguiElement>> elements_;
-};
+  private:
+    std::string title_;
+    std::vector<std::shared_ptr<IImguiElement>> elements_;
+  };
+}

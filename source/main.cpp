@@ -12,7 +12,7 @@ const unsigned int SCR_HEIGHT = 720;
 
 void RunGame()
 {
-  Game game(SCR_WIDTH, SCR_HEIGHT);
+  blocks::Game game(SCR_WIDTH, SCR_HEIGHT);
   game.Run();
 }
 
@@ -21,13 +21,13 @@ int main()
   std::cout << "Blocks application" << std::endl;
   std::cout << "Version " << Blocks_VERSION_MAJOR << "." << Blocks_VERSION_MINOR << std::endl;
 
-  Enviroment::InitSystems();
+  blocks::Enviroment::InitSystems();
 
-  Enviroment::GetResourceSystem().SetUp(RESOURCE_BASE_PATH);
+  blocks::Enviroment::GetResourceSystem().SetUp(RESOURCE_BASE_PATH);
 
   RunGame();
 
-  Enviroment::DeinitSystems();
+  blocks::Enviroment::DeinitSystems();
 
   return 0;
 }

@@ -10,26 +10,29 @@
 #include "geometry/collisions_api.hpp"
 
 
-class Map
+namespace blocks
 {
-public:
-  Map();
-  Map(int seed);
-  ~Map();
+  class Map
+  {
+  public:
+    Map();
+    Map(int seed);
+    ~Map();
 
-  int GetSeed();
-  std::shared_ptr<Chunk> GetChunk(std::pair<int, int> position);
-  std::pair<std::map<std::pair<int, int>, std::shared_ptr<Chunk>>::iterator, std::map<std::pair<int, int>, std::shared_ptr<Chunk>>::iterator> GetChunksIterator();
+    int GetSeed();
+    std::shared_ptr<Chunk> GetChunk(std::pair<int, int> position);
+    std::pair<std::map<std::pair<int, int>, std::shared_ptr<Chunk>>::iterator, std::map<std::pair<int, int>, std::shared_ptr<Chunk>>::iterator> GetChunksIterator();
 
-  void AddChunk(std::pair<int, int> position, std::shared_ptr<Chunk> chunk);
+    void AddChunk(std::pair<int, int> position, std::shared_ptr<Chunk> chunk);
 
-  bool Collides(const blocks::AABB& bounds, glm::vec3 position);
-  BlockLookAt GetBlockLookAt(const blocks::Ray& ray);
+    bool Collides(const blocks::AABB& bounds, glm::vec3 position);
+    BlockLookAt GetBlockLookAt(const blocks::Ray& ray);
 
-private:
-  std::map<std::pair<int, int>, std::shared_ptr<Chunk>> chunks_;
-  int seed_;
-  std::mutex mutex_;
+  private:
+    std::map<std::pair<int, int>, std::shared_ptr<Chunk>> chunks_;
+    int seed_;
+    std::mutex mutex_;
 
-  std::shared_ptr<Chunk> GenerateChunk(std::pair<int, int> position);
-};
+    std::shared_ptr<Chunk> GenerateChunk(std::pair<int, int> position);
+  };
+}

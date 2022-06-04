@@ -3,10 +3,13 @@
 #include "imgui.h"
 
 
-class IImguiElement
+namespace blocks
 {
-public:
-  virtual ~IImguiElement() {}
+  class IImguiElement
+  {
+  public:
+    virtual ~IImguiElement() {}
 
-  virtual void Render() = 0;
-};
+    virtual void Render() = 0;
+  };
+}

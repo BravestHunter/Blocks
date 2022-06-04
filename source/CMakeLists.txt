@@ -1,12 +1,7 @@
 add_subdirectory(utils)
+add_subdirectory(enviroment)
 
 set(CORE_SOURCE_FILES
-	export.h
-	compile_utils.hpp
-
-	enviroment_system_interface.hpp
-	environment.hpp
-	environment.cpp
 	game_context.hpp
 	game_module_interface.hpp
 	player_control_module.hpp
@@ -19,33 +14,6 @@ set(CORE_SOURCE_FILES
 	game.hpp
 	game.cpp
 
-	platform/glfw_headers.hpp
-	platform/cursor_mode.hpp
-	platform/glfw_window.hpp
-	platform/glfw_window.cpp
-	platform/glfw_platform.hpp
-	platform/glfw_platform.cpp
-
-	resource/image.hpp
-	resource/block_info.hpp
-	resource/block_set.hpp
-	resource/block_set.cpp
-	resource/resource_base.hpp
-	resource/resource_base.cpp
-
-	render/glew_headers.hpp
-	render/opengl_shader.hpp
-	render/opengl_shader.cpp
-	render/opengl_program.hpp
-	render/opengl_program.cpp
-	render/opengl_buffer.hpp
-	render/opengl_buffer.cpp
-	render/opengl_vertex_array_object.hpp
-	render/opengl_vertex_array_object.cpp
-	render/opengl_texture_2d.hpp
-	render/opengl_texture_2d.cpp
-	render/opengl_texture_2d_array.hpp
-	render/opengl_texture_2d_array.cpp
 	render/opengl_raw_chunk_data.hpp
 	render/opengl_chunk.hpp
 	render/opengl_chunk.cpp
@@ -53,11 +21,8 @@ set(CORE_SOURCE_FILES
 	render/opengl_map.cpp
 	render/opengl_scene.hpp
 	render/opengl_scene.cpp
-	render/opengl_context.hpp
 	render/opengl_render_module.hpp
 	render/opengl_render_module.cpp
-	render/opengl_render_system.hpp
-	render/opengl_render_system.cpp
 
 	model/block.hpp
 	model/chunk.hpp
@@ -86,17 +51,9 @@ target_include_directories(BlocksCore
 target_link_libraries(BlocksCore
 	PUBLIC
 		BlocksUtils
+		BlocksEnviroment
 
-		OpenGL::GL
-		OpenGL::GLU
-		glew
-		glfw3
-		glm
-		stb
-		Freetype::Freetype
-		imgui
 		FastNoise2::FastNoise
-		nlohmann_json
 )
 
 

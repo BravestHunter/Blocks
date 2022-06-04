@@ -1,25 +1,26 @@
 #include "imgui_text.hpp"
 
 
-ImguiText::ImguiText(std::string text) : text_(text)
+namespace blocks
 {
-
-}
-
-ImguiText::ImguiText(std::function<std::string()> updateStringCallback) : updateStringCallback_(updateStringCallback)
-{
-
-}
-
-
-void ImguiText::Render()
-{
-  if (updateStringCallback_ != nullptr)
+  ImguiText::ImguiText(std::string text) : text_(text)
   {
-    text_ = updateStringCallback_();
+
   }
 
-  ImGui::Text(text_.c_str());
+  ImguiText::ImguiText(std::function<std::string()> updateStringCallback) : updateStringCallback_(updateStringCallback)
+  {
+
+  }
+
+
+  void ImguiText::Render()
+  {
+    if (updateStringCallback_ != nullptr)
+    {
+      text_ = updateStringCallback_();
+    }
+
+    ImGui::Text(text_.c_str());
+  }
 }
-
-

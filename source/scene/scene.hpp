@@ -9,20 +9,23 @@
 #include "ui/imgui_window.hpp"
 
 
-class Scene
+namespace blocks
 {
-public:
-  Scene();
+  class Scene
+  {
+  public:
+    Scene();
 
-  void AddImguiWindow(std::shared_ptr<ImguiWindow> window);
+    void AddImguiWindow(std::shared_ptr<ImguiWindow> window);
 
-  bool ContainsMap();
-  void SetMap(std::shared_ptr<Map> map);
-  std::shared_ptr<Map> GetMap();
+    bool ContainsMap();
+    void SetMap(std::shared_ptr<Map> map);
+    std::shared_ptr<Map> GetMap();
 
-  std::pair<std::vector<std::shared_ptr<ImguiWindow>>::iterator, std::vector<std::shared_ptr<ImguiWindow>>::iterator> GetImguiWindowsIterator();
+    std::pair<std::vector<std::shared_ptr<ImguiWindow>>::iterator, std::vector<std::shared_ptr<ImguiWindow>>::iterator> GetImguiWindowsIterator();
 
-private:
-  std::shared_ptr<Map> map_ = nullptr;
-  std::vector<std::shared_ptr<ImguiWindow>> imguiWindows_;
-};
+  private:
+    std::shared_ptr<Map> map_ = nullptr;
+    std::vector<std::shared_ptr<ImguiWindow>> imguiWindows_;
+  };
+}

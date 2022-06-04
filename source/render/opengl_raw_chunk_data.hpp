@@ -1,9 +1,12 @@
 #pragma once
 
 
-struct OpenglRawChunkData
+namespace blocks
 {
-  float* verticesData;
-  size_t verticesDataLength;
-  int verticesNumber;
-};
+  struct OpenglRawChunkData
+  {
+    float* verticesData;
+    size_t verticesDataLength;
+    int verticesNumber;
+  };
+}

@@ -7,22 +7,25 @@
 #include "model/chunk.hpp"
 
 
-class OpenglRenderSystem;
-
-class OpenglScene
+namespace blocks
 {
-  friend OpenglRenderSystem;
+  class OpenglRenderSystem;
 
-public:
-  OpenglScene();
-  ~OpenglScene();
+  class OpenglScene
+  {
+    friend OpenglRenderSystem;
 
-  void InitMap();
-  void AddChunk(std::shared_ptr<Chunk> chunk, std::pair<int, int> position);
-  void RemoveChunk(std::pair<int, int> position);
+  public:
+    OpenglScene();
+    ~OpenglScene();
 
-  std::shared_ptr<OpenglMap> GetMap();
+    void InitMap();
+    void AddChunk(std::shared_ptr<Chunk> chunk, std::pair<int, int> position);
+    void RemoveChunk(std::pair<int, int> position);
 
-private:
-  std::shared_ptr<OpenglMap> map_;
-};
+    std::shared_ptr<OpenglMap> GetMap();
+
+  private:
+    std::shared_ptr<OpenglMap> map_;
+  };
+}

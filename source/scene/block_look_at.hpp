@@ -5,20 +5,23 @@
 #include <glm/glm.hpp>
 
 
-enum class Direction
+namespace blocks
 {
-  Forward,
-  Back,
-  Right,
-  Left,
-  Up,
-  Down
-};
+  enum class Direction
+  {
+    Forward,
+    Back,
+    Right,
+    Left,
+    Up,
+    Down
+  };
 
-struct BlockLookAt
-{
-  bool hit = false;
-  std::pair<int, int> chunkPosition;
-  glm::ivec3 blockPosition;
-  Direction loockFromDirection;
-};
+  struct BlockLookAt
+  {
+    bool hit = false;
+    std::pair<int, int> chunkPosition;
+    glm::ivec3 blockPosition;
+    Direction loockFromDirection;
+  };
+}
