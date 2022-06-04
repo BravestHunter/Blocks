@@ -9,6 +9,8 @@ set(CORE_SOURCE_FILES
 	game_module_interface.hpp
 	player_control_module.hpp
 	player_control_module.cpp
+	map_loading_module.hpp
+	map_loading_module.cpp
 	camera.hpp
 	camera.cpp
 	block_side.hpp

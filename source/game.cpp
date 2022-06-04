@@ -32,18 +32,14 @@
 #include "ui/imgui_window.hpp"
 
 
-Game::Game(int width, int height) :
-  camera_(std::make_shared<Camera>(glm::vec3(8.0f, 8.0f, 270.0f))),
-  framebufferWidth_(width), 
-  framebufferHeight_(height), 
-  lastMouseX_(width / 2), 
-  lastMouseY_(height / 2)
+Game::Game(int width, int height) : 
+  window_(Enviroment::GetPlatformSystem().CreateWindow(width, height, "Blocks Game"))
 {
   context_.scene = CreateMainMenuScene();
-  context_.camera = camera_;
-  context_.playerBounds = AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
+  context_.camera = std::make_shared<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
   context_.lastMouseX = width / 2;
   context_.lastMouseY = height / 2;
+  context_.playerBounds = AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
 
   resourceBase_.SetUp(RESOURCE_BASE_PATH);
 }
@@ -55,117 +51,47 @@ Game::~Game()
 
 int Game::Run()
 {
-
-  std::thread renderThread(&Game::RunRenderCycle, this);
+  std::thread simulationThread(&Game::RunSimulationCycle, this);
   std::thread fixedUpdateThread(&Game::RunFixedUpdateCycle, this);
 
-  RunSimulationCycle();
+  RunRenderCycle();
 
-  renderThread.join();
+  simulationThread.join();
   fixedUpdateThread.join();
 
   return 0;
 }
 
 
-glm::ivec2 Game::CalculateChunkCenter()
-{
-  glm::vec3 position = camera_->GetPosition();
-  return glm::ivec2((int)position.x / Chunk::Length, (int)position.y / Chunk::Width);
-}
-
-void Game::RunSimulationCycle()
-{
-  while (isRunning_)
-  {
-    if (requestedScene_ != nullptr)
-    {
-      SetRequestedScene();
-    }
-
-    if (context_.scene->ContainsMap())
-    {
-      glm::ivec2 centerChunk = CalculateChunkCenter();
-      
-      if (centerChunk != lastCenterChunkCoords_)
-      {
-        RemoveChunks(centerChunk, lastCenterChunkCoords_);
-        AddChunks(centerChunk);
-      
-        lastCenterChunkCoords_ = centerChunk;
-      }
-    }
-  }
-}
-
-void Game::AddChunks(glm::ivec2 centerChunkCoords)
-{
-  std::shared_ptr<Map> map = context_.scene->GetMap();
-  std::shared_ptr<OpenglMap> openglMap = renderModule_.GetOpenglScene()->GetMap();
-
-  for (int x = centerChunkCoords.x - renderRadius_; x <= centerChunkCoords.x + renderRadius_; x++)
-  {
-    for (int y = centerChunkCoords.y - renderRadius_; y <= centerChunkCoords.y + renderRadius_; y++)
-    {
-      std::pair<int, int> coordinates = std::make_pair(x, y);
-
-      if (!openglMap->ContainsChunk(coordinates))
-      {
-        std::shared_ptr<Chunk> chunk = map->GetChunk(coordinates);
-        openglMap->EnqueueChunkAdd(chunk, coordinates);
-      }
-    }
-  }
-}
-
-void Game::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunkCoords)
-{
-  std::shared_ptr<OpenglMap> openglMap = renderModule_.GetOpenglScene()->GetMap();
-  glm::ivec2 xBorders = glm::ivec2(CenterChunkCoords.x - renderRadius_, CenterChunkCoords.x + renderRadius_);
-  glm::ivec2 yBorders = glm::ivec2(CenterChunkCoords.y - renderRadius_, CenterChunkCoords.y + renderRadius_);
-
-  for (int x = lastCenterChunkCoords.x - renderRadius_; x <= lastCenterChunkCoords.x + renderRadius_; x++)
-  {
-    for (int y = lastCenterChunkCoords.y - renderRadius_; y <= lastCenterChunkCoords.y + renderRadius_; y++)
-    {
-      if (x < xBorders.x || x > xBorders.y ||
-          y < yBorders.x || y > yBorders.y)
-      {
-        std::pair<int, int> coordinates = std::make_pair(x, y);
-        openglMap->EnqueueChunkRemove(coordinates);
-      }
-    }
-  }
-}
-
 void Game::RunRenderCycle()
 {
   GlfwPlatform& platform = Enviroment::GetPlatformSystem();
 
-  GlfwWindow window = platform.CreateWindow(framebufferWidth_, framebufferHeight_, "Blocks Game");
-  window.SetCursorMode(CursorMode::Normal);
-  window.SetCurrentContext();
+  window_.SetCursorMode(CursorMode::Normal);
+  window_.SetCurrentContext();
 
-  renderModule_.SetContext(window);
+  renderModule_.SetContext(window_);
   renderModule_.InitResources();
 
-  playerControlModule_.SetCallbacks(window, context_, renderModule_);
+  mapLoadingModule_.SetRenderModule(&renderModule_);
+
+  playerControlModule_.SetCallbacks(window_, context_, renderModule_);
 
   // Set callbacks
-  window.SetKeyCallback(
-    [this, &window](int keycode, int scancode, int action, int mods)
+  window_.SetKeyCallback(
+    [this](int keycode, int scancode, int action, int mods)
     {
       if (action != GLFW_PRESS)
         return;
 
       if (keycode == GLFW_KEY_ESCAPE)
       {
-        window.SetWindowShouldClose(true);
+        window_.SetWindowShouldClose(true);
       }
 
       if (keycode == GLFW_KEY_L)
       {
-        SwitchCursorMode(window);
+        SwitchCursorMode(window_);
       }
     }
   );
@@ -181,15 +107,15 @@ void Game::RunRenderCycle()
     lastTime = currentTime;
 
     platform.ProcessEvents();
-    ProcessInput(window);
+    ProcessInput(window_);
 
     sceneMutex_.lock();
     renderModule_.Update(delta, context_);
     sceneMutex_.unlock();
 
-    window.SwapBuffers();
+    window_.SwapBuffers();
 
-    if (window.IsWindowShouldClose())
+    if (window_.IsWindowShouldClose())
     {
       isRunning_ = false;
     }
@@ -198,25 +124,23 @@ void Game::RunRenderCycle()
   renderModule_.FreeResources();
 }
 
-void Game::ProcessInput(GlfwWindow& window)
+void Game::RunSimulationCycle()
 {
-  context_.isWPressed = window.GetKeyState(GLFW_KEY_W) == GLFW_PRESS;
-  context_.isSPressed = window.GetKeyState(GLFW_KEY_S) == GLFW_PRESS;
-  context_.isAPressed = window.GetKeyState(GLFW_KEY_A) == GLFW_PRESS;
-  context_.isDPressed = window.GetKeyState(GLFW_KEY_D) == GLFW_PRESS;
-}
+  GlfwPlatform& platform = Enviroment::GetPlatformSystem();
 
-void Game::SwitchCursorMode(GlfwWindow& window)
-{
-  context_.isCursorEnabled = !context_.isCursorEnabled;
+  float lastTime = (float)platform.GetTime();
+  while (isRunning_)
+  {
+    float currentTime = (float)platform.GetTime();
+    float delta = currentTime - lastTime;
+    lastTime = currentTime;
 
-  if (context_.isCursorEnabled)
-  {
-    window.SetCursorMode(CursorMode::Normal);
-  }
-  else
-  {
-    window.SetCursorMode(CursorMode::Disabled);
+    if (requestedScene_ != nullptr)
+    {
+      SetRequestedScene();
+    }
+
+    mapLoadingModule_.Update(delta, context_);
   }
 }
 
@@ -241,6 +165,30 @@ void Game::RunFixedUpdateCycle()
   }
 }
 
+
+void Game::ProcessInput(GlfwWindow& window)
+{
+  context_.isWPressed = window.GetKeyState(GLFW_KEY_W) == GLFW_PRESS;
+  context_.isSPressed = window.GetKeyState(GLFW_KEY_S) == GLFW_PRESS;
+  context_.isAPressed = window.GetKeyState(GLFW_KEY_A) == GLFW_PRESS;
+  context_.isDPressed = window.GetKeyState(GLFW_KEY_D) == GLFW_PRESS;
+}
+
+void Game::SwitchCursorMode(GlfwWindow& window)
+{
+  context_.isCursorEnabled = !context_.isCursorEnabled;
+
+  if (context_.isCursorEnabled)
+  {
+    window.SetCursorMode(CursorMode::Normal);
+  }
+  else
+  {
+    window.SetCursorMode(CursorMode::Disabled);
+  }
+}
+
+
 void Game::RequestScene(std::shared_ptr<Scene> scene)
 {
   requestedScene_ = scene;
@@ -253,11 +201,7 @@ void Game::SetRequestedScene()
   context_.scene = requestedScene_;
   requestedScene_ = nullptr;
 
-  if (context_.scene->ContainsMap())
-  {
-    lastCenterChunkCoords_ = CalculateChunkCenter();
-    AddChunks(lastCenterChunkCoords_);
-  }
+  mapLoadingModule_.OnSceneChanged(context_);
 
   sceneMutex_.unlock();
 }
@@ -320,7 +264,8 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> cameraPositionText = std::make_shared<ImguiText>(
     [this]()
     {
-      return std::format("Camera position: {0:.2f} {1:.2f} {2:.2f}", camera_->GetPosition().x, camera_->GetPosition().y, camera_->GetPosition().z);
+      glm::vec3 position = context_.camera->GetPosition();
+      return std::format("Camera position: {0:.2f} {1:.2f} {2:.2f}", position.x, position.y, position.z);
     }
   );
   window->AddElement(cameraPositionText);
@@ -328,7 +273,8 @@ std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
   std::shared_ptr<ImguiText> cameraDirectionText = std::make_shared<ImguiText>(
     [this]()
     {
-      return  std::format("Camera direction: {0:.2f} {1:.2f} {2:.2f}", camera_->GetForward().x, camera_->GetForward().y, camera_->GetForward().z);
+      glm::vec3 direction = context_.camera->GetForward();
+      return  std::format("Camera direction: {0:.2f} {1:.2f} {2:.2f}", direction.x, direction.y, direction.z);
     }
   );
   window->AddElement(cameraDirectionText);

@@ -6,10 +6,10 @@
 #include "export.h"
 #include "environment.hpp"
 #include "game_context.hpp"
-#include "player_control_module.hpp"
 #include "render/opengl_render_module.hpp"
+#include "player_control_module.hpp"
+#include "map_loading_module.hpp"
 
-#include "render/opengl_render_system.hpp"
 #include "resource/resource_base.hpp"
 #include "render/opengl_scene.hpp"
 #include "camera.hpp"
@@ -33,39 +33,22 @@ public:
 private:
   bool isRunning_ = true;
 
+  GlfwWindow window_;
   GameContext context_;
 
   // Game modules
-  PlayerControlModule playerControlModule_;
   OpenglRenderModule renderModule_;
+  PlayerControlModule playerControlModule_;
+  MapLoadingModule mapLoadingModule_;
 
   ResourceBase resourceBase_;
 
-  // Window
-  int framebufferWidth_;
-  int framebufferHeight_;
-
-  // Input
-  float lastMouseX_;
-  float lastMouseY_;
-  bool firstMouse_ = true;
-
-  // Camera
-  std::shared_ptr<Camera> camera_;
-
-  //Chunks
-  int renderRadius_ = 3;
-  glm::ivec2 lastCenterChunkCoords_;
-
-  glm::ivec2 CalculateChunkCenter();
-  void RunSimulationCycle();
-  void AddChunks(glm::ivec2 centerChunkCoords);
-  void RemoveChunks(glm::ivec2 centerChunkCoords, glm::ivec2 lastCenterChunkCoords);
   void RunRenderCycle();
+  void RunSimulationCycle();
+  void RunFixedUpdateCycle();
+
   void ProcessInput(GlfwWindow& window);
   void SwitchCursorMode(GlfwWindow& window);
-  void RunFixedUpdateCycle();
-  void MovePlayer();
 
   std::shared_ptr<Scene> requestedScene_ = nullptr;
   std::mutex sceneMutex_;
