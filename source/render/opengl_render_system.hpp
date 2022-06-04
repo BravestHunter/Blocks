@@ -2,8 +2,9 @@
 
 #include <memory>
 
-#include "game_module_interface.hpp"
+#include "enviroment_system_interface.hpp"
 #include "glew_headers.hpp"
+#include "platform/glfw_window.hpp"
 #include "opengl_buffer.hpp"
 #include "opengl_vertex_array_object.hpp"
 #include "opengl_chunk.hpp"
@@ -14,7 +15,7 @@
 #include "model/chunk.hpp"
 
 
-class OpenglRenderSystem
+class OpenglRenderSystem : EnviromentSystemInterface
 {
 public:
   OpenglRenderSystem();
@@ -24,10 +25,15 @@ public:
   OpenglRenderSystem& operator=(OpenglRenderSystem&& other) = delete;
   ~OpenglRenderSystem();
 
+  virtual void Init() override;
+  virtual void Deinit() override;
+  virtual bool IsInitialized() override;
+
   void OnContextChanged();
 
   void Clear(glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-  void RenderMap(std::shared_ptr<OpenglMap> map, OpenglProgram& mapProgram, Camera& camera, float ratio);
+  void RenderMap(std::shared_ptr<OpenglMap> map, std::shared_ptr<OpenglProgram> mapProgram, std::shared_ptr<Camera> camera, float ratio);
 
-  void SetWireframeMode(bool value);
+private:
+  void InitResources();
 };

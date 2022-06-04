@@ -5,8 +5,10 @@
 
 #include "export.h"
 #include "environment.hpp"
-#include "render/opengl_render_system.hpp"
+#include "render/opengl_render_module.hpp"
 
+
+#include "render/opengl_render_system.hpp"
 #include "resource/resource_base.hpp"
 #include "render/opengl_scene.hpp"
 #include "camera.hpp"
@@ -28,12 +30,11 @@ public:
   int Run();
 
 private:
-  void StartSystems();
-  void StopSystems();
-
   bool isRunning_ = true;
 
-  OpenglRenderSystem renderSystem_;
+  // Game modules
+  OpenglRenderModule renderModule_;
+
   ResourceBase resourceBase_;
 
   // Window
@@ -51,7 +52,7 @@ private:
   bool firstMouse_ = true;
 
   // Camera
-  Camera camera_ = Camera(glm::vec3(8.0f, 8.0f, 270.0f));
+  std::shared_ptr<Camera> camera_;
 
   // Collision
   AABB playerBounds_ = AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
@@ -71,7 +72,6 @@ private:
   void MovePlayer();
 
   std::shared_ptr<Scene> currentScene_ = nullptr;
-  std::shared_ptr<OpenglScene> openglScene_ = nullptr;
   std::shared_ptr<Scene> requestedScene_ = nullptr;
   std::mutex sceneMutex_;
   void RequestScene(std::shared_ptr<Scene> scene);

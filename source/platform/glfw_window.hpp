@@ -2,6 +2,8 @@
 
 #include <functional>
 
+#include "glm/vec2.hpp"
+
 #include "glfw_headers.hpp"
 #include "cursor_mode.hpp"
 
@@ -31,10 +33,11 @@ public:
   bool IsWindowShouldClose();
   void SetWindowShouldClose(bool value);
 
+  glm::ivec2 GetSize();
   int GetKeyState(int keycode);
+  CursorMode GetCursorMode();
 
   void SetCursorMode(CursorMode mode);
-  CursorMode GetCursorMode();
 
   void SetPositionCallback(std::function<void(int, int)> func);
   void SetSizeCallback(std::function<void(int, int)> func);
@@ -72,6 +75,7 @@ private:
   static void DropCallback(GLFWwindow* window, int count, const char** paths);
 
   GLFWwindow* windowPtr_;
+  bool isImguiInitialized_ = false;
 
   std::function<void(int, int)> positionCallbackFunction_ = nullptr;
   std::function<void(int, int)> sizeCallbackFunction_ = nullptr;

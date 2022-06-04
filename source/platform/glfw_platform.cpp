@@ -68,9 +68,7 @@ bool GlfwPlatform::IsInitialized()
 
 GlfwWindow GlfwPlatform::CreateWindow(int width, int height, std::string title)
 {
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
 
   GLFWwindow* windowPtr = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
   if (!windowPtr)

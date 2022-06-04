@@ -23,6 +23,22 @@ OpenglRenderSystem::~OpenglRenderSystem()
 }
 
 
+void OpenglRenderSystem::Init()
+{
+  // Nothing to do here
+}
+
+void OpenglRenderSystem::Deinit()
+{
+  // Nothing to do here
+}
+
+bool OpenglRenderSystem::IsInitialized()
+{
+  return true;
+}
+
+
 void OpenglRenderSystem::OnContextChanged()
 {
   GLenum initResult = glewInit();
@@ -30,11 +46,6 @@ void OpenglRenderSystem::OnContextChanged()
   {
     throw std::exception("Failed to initialize GLEW");
   }
-
-  // Configure
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_FRONT);
 }
 
 
@@ -44,13 +55,13 @@ void OpenglRenderSystem::Clear(glm::vec4 clearColor)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, OpenglProgram& mapProgram, Camera& camera, float ratio)
+void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, std::shared_ptr<OpenglProgram> mapProgram, std::shared_ptr<Camera> camera, float ratio)
 {
-  mapProgram.Setup();
-  mapProgram.SetInt("texture", 0);
+  mapProgram->Setup();
+  mapProgram->SetInt("texture", 0);
 
-  glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), ratio, 0.1f, 1000.0f);
-  glm::mat4 view = camera.GetViewMatrix();
+  glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), ratio, 0.1f, 1000.0f);
+  glm::mat4 view = camera->GetViewMatrix();
 
   for (auto pair : map->chunks_)
   {
@@ -60,7 +71,7 @@ void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, OpenglProgram
     glm::vec3 chunkOffset(coords.first * (int)Chunk::Length, coords.second * (int)Chunk::Width, 0.0f);
     glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), chunkOffset);
     glm::mat4 mvp = projection * view * modelTransform;
-    mapProgram.SetMat4("MVP", mvp);
+    mapProgram->SetMat4("MVP", mvp);
 
     chunk->vao_->Bind();
     glDrawArrays(GL_TRIANGLES, 0, chunk->verticesNumber_);
@@ -68,14 +79,7 @@ void OpenglRenderSystem::RenderMap(std::shared_ptr<OpenglMap> map, OpenglProgram
 }
 
 
-void OpenglRenderSystem::SetWireframeMode(bool value)
+void OpenglRenderSystem::InitResources()
 {
-  if (value)
-  {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  }
-  else
-  {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  }
+
 }

@@ -14,10 +14,10 @@ set(CORE_SOURCE_FILES
 
 	platform/glfw_headers.hpp
 	platform/cursor_mode.hpp
-	platform/glfw_platform.hpp
-	platform/glfw_platform.cpp
 	platform/glfw_window.hpp
 	platform/glfw_window.cpp
+	platform/glfw_platform.hpp
+	platform/glfw_platform.cpp
 
 	io/file_api.hpp
 	io/file_api.cpp
@@ -49,6 +49,9 @@ set(CORE_SOURCE_FILES
 	render/opengl_map.cpp
 	render/opengl_scene.hpp
 	render/opengl_scene.cpp
+	render/opengl_context.hpp
+	render/opengl_render_module.hpp
+	render/opengl_render_module.cpp
 	render/opengl_render_system.hpp
 	render/opengl_render_system.cpp
 
