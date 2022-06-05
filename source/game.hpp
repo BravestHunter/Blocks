@@ -39,8 +39,6 @@ namespace blocks
     void SetRequestedScene();
     std::shared_ptr<Scene> CreateMainMenuScene();
     std::shared_ptr<Scene> CreateWorldScene(std::shared_ptr<Map> map);
-    std::shared_ptr<Map> LoadMap();
-    void SaveMap(std::shared_ptr<Map> map);
 
     bool isRunning_ = true;
 

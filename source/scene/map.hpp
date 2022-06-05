@@ -28,6 +28,9 @@ namespace blocks
     bool Collides(const blocks::AABB& bounds, glm::vec3 position);
     BlockLookAt GetBlockLookAt(const blocks::Ray& ray);
 
+    static std::shared_ptr<Map> Load();
+    static void Save(std::shared_ptr<Map> map);
+
   private:
     std::map<std::pair<int, int>, std::shared_ptr<Chunk>> chunks_;
     int seed_;

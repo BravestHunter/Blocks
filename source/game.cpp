@@ -218,7 +218,7 @@ namespace blocks
           return;
         }
 
-        std::shared_ptr<Map> map = LoadMap();
+        std::shared_ptr<Map> map = Map::Load();
         std::shared_ptr<Scene> worldScene_ = CreateWorldScene(map);
 
         RequestScene(worldScene_);
@@ -288,61 +288,11 @@ namespace blocks
           }
         }
 
-        SaveMap(context_.scene->GetMap());
+        Map::Save(context_.scene->GetMap());
       }
     );
     window->AddElement(saveButton);
 
     return scene;
-  }
-
-  std::shared_ptr<Map> Game::LoadMap()
-  {
-    std::string seedStr = blocks::readTextFile("map/seed.txt");
-    int seed = std::stoi(seedStr);
-
-    std::shared_ptr<Map> map = std::make_shared<Map>(seed);
-
-    for (const std::string& path : blocks::getFilesInDirectory("map"))
-    {
-      if (path == "seed.txt")
-      {
-        continue;
-      }
-
-      std::vector<unsigned char> data = blocks::readBinaryFile("map/" + path);
-      std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>();
-      memcpy(chunk.get(), &data[0], sizeof(Chunk));
-
-      size_t underscorePosition = path.find("_");
-      size_t dotPosition = path.find(".");
-
-      std::string xStr = path.substr(0, underscorePosition);
-      int x = std::stoi(xStr);
-      std::string yStr = path.substr(underscorePosition + 1, dotPosition - underscorePosition - 1);
-      int y = std::stoi(yStr);
-      std::pair<int, int> position = std::make_pair(x, y);
-
-      map->AddChunk(position, chunk);
-    }
-
-    return map;
-  }
-
-  void Game::SaveMap(std::shared_ptr<Map> map)
-  {
-    blocks::saveTextFile("map/seed.txt", std::to_string(map->GetSeed()));
-
-    auto chunksIterator = map->GetChunksIterator();
-    for (auto it = chunksIterator.first; it != chunksIterator.second; it++)
-    {
-      std::string path = std::format("map/{0}_{1}.chunk", it->first.first, it->first.second);
-
-      size_t a = sizeof(Chunk);
-      std::vector<unsigned char> data(sizeof(Chunk));
-      memcpy(&data[0], it->second.get(), sizeof(Chunk));
-
-      blocks::saveBinaryFile(path, data);
-    }
   }
 }
