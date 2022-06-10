@@ -4,7 +4,7 @@
 #include <utility>
 
 #include "opengl_map.hpp"
-#include "model/chunk.hpp"
+#include "chunk.hpp"
 
 
 namespace blocks

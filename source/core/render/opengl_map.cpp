@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "environment.hpp"
-#include "model/chunk.hpp"
+#include "chunk.hpp"
 #include "resource/image.hpp"
 
 

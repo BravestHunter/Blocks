@@ -6,7 +6,7 @@
 #include <mutex>
 
 #include "block_look_at.hpp"
-#include "model/chunk.hpp"
+#include "chunk.hpp"
 #include "geometry/collisions_api.hpp"
 
 
