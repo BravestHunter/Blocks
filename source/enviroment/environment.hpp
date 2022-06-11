@@ -13,11 +13,11 @@ namespace blocks
     Enviroment() = delete;
 
   public:
-    static void InitSystems();
-    static void DeinitSystems();
+    static void Init();
+    static void Deinit();
 
-    static GlfwPlatform& GetPlatformSystem();
-    static ResourceBase& GetResourceSystem();
+    static GlfwPlatform& GetPlatform();
+    static ResourceBase& GetResource();
 
   private:
     static GlfwPlatform platform_;

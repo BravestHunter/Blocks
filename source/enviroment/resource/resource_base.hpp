@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include "enviroment_system_interface.hpp"
 #include "export.h"
 #include "block_set.hpp"
 #include "resource/image.hpp"
@@ -12,7 +11,7 @@
 
 namespace blocks
 {
-  class DllExport ResourceBase : public EnviromentSystemInterface
+  class DllExport ResourceBase
   {
   public:
     ResourceBase();
@@ -20,11 +19,7 @@ namespace blocks
     ResourceBase(ResourceBase&& other) = delete;
     ResourceBase& operator=(const ResourceBase&) = delete;
     ResourceBase& operator=(ResourceBase&& other) = delete;
-    ~ResourceBase() override;
-
-    void Init() override;
-    void Deinit() override;
-    bool IsInitialized() override;
+    ~ResourceBase();
 
     void SetUp(std::string path);
 

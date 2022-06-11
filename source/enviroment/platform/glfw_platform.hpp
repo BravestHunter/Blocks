@@ -3,14 +3,13 @@
 #include <memory>
 #include <string>
 
-#include "enviroment_system_interface.hpp"
 #include "glfw_headers.hpp"
 #include "glfw_window.hpp"
 
 
 namespace blocks
 {
-  class GlfwPlatform : public EnviromentSystemInterface
+  class GlfwPlatform
   {
   public:
     GlfwPlatform();
@@ -18,11 +17,11 @@ namespace blocks
     GlfwPlatform(GlfwPlatform&& other) = delete;
     GlfwPlatform& operator=(const GlfwPlatform&) = delete;
     GlfwPlatform& operator=(GlfwPlatform&& other) = delete;
-    ~GlfwPlatform() override;
+    ~GlfwPlatform();
 
-    void Init() override;
-    void Deinit() override;
-    bool IsInitialized() override;
+    void Init();
+    void Deinit();
+    bool IsInitialized();
 
     void ProcessEvents();
 

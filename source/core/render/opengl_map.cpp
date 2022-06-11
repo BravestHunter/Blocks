@@ -26,7 +26,7 @@ namespace blocks
   {
     blockSet_ = blockSet;
 
-    ResourceBase& resourceBase = Enviroment::GetResourceSystem();
+    ResourceBase& resourceBase = Enviroment::GetResource();
 
     std::vector<Image> images;
     for (int i = 0; i < blockSet->GetTexturesNumber(); i++)

@@ -20,23 +20,6 @@ namespace blocks
   }
 
 
-  void ResourceBase::Init()
-  {
-    // Nothing to do here
-  }
-
-  void ResourceBase::Deinit()
-  {
-    // Nothing to do here
-  }
-
-  bool ResourceBase::IsInitialized()
-  {
-    return true;
-  }
-
-
-
   void ResourceBase::SetUp(std::string path)
   {
     if (!blocks::isPathExist(path))

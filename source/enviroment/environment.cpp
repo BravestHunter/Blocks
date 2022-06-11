@@ -3,25 +3,23 @@
 
 namespace blocks
 {
-  void Enviroment::InitSystems()
+  void Enviroment::Init()
   {
     platform_.Init();
-    resource_.Init();
   }
 
-  void Enviroment::DeinitSystems()
+  void Enviroment::Deinit()
   {
-    resource_.Deinit();
     platform_.Deinit();
   }
 
 
-  GlfwPlatform& Enviroment::GetPlatformSystem()
+  GlfwPlatform& Enviroment::GetPlatform()
   {
     return platform_;
   }
 
-  ResourceBase& Enviroment::GetResourceSystem()
+  ResourceBase& Enviroment::GetResource()
   {
     return resource_;
   }

@@ -108,7 +108,7 @@ namespace blocks
     openglScene_ = std::make_shared<OpenglScene>();
     openglScene_->InitMap();
 
-    ResourceBase& resourceBase = Enviroment::GetResourceSystem();
+    ResourceBase& resourceBase = Enviroment::GetResource();
     std::shared_ptr<BlockSet> blockSet = resourceBase.LoadBlockSet(resourceBase.GetBlockSetNames()->front());
     openglScene_->GetMap()->SetBlockSet(blockSet);
   }
