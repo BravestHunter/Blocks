@@ -34,9 +34,7 @@ namespace blocks
 
     openglScene_->GetMap()->ProcessQueues();
 
-    OpenglRenderSystem& renderSystem = Enviroment::GetRenderSystem();
-
-    renderSystem.Clear();
+    Clear();
 
     glm::ivec2 windowSize = context_->window_.GetSize();
     float ratio = (float)windowSize.x / (float)windowSize.y;
@@ -60,7 +58,11 @@ namespace blocks
 
   void OpenglRenderModule::SetContext(GlfwWindow& window)
   {
-    Enviroment::GetRenderSystem().OnContextChanged();
+    GLenum initResult = glewInit();
+    if (initResult != GLEW_OK)
+    {
+      throw std::exception("Failed to initialize GLEW");
+    }
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -132,6 +134,12 @@ namespace blocks
   bool OpenglRenderModule::IsCorrectThread()
   {
     return context_ && context_->threadId_ == std::this_thread::get_id();
+  }
+
+  void OpenglRenderModule::Clear(glm::vec4 color)
+  {
+    glClearColor(color.r, color.g, color.b, color.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
   void OpenglRenderModule::RenderMap(std::shared_ptr<OpenglMap> map, std::shared_ptr<OpenglProgram> mapProgram, std::shared_ptr<Camera> camera, float ratio)

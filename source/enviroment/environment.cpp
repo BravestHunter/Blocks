@@ -6,14 +6,12 @@ namespace blocks
   void Enviroment::InitSystems()
   {
     platform_.Init();
-    render_.Init();
     resource_.Init();
   }
 
   void Enviroment::DeinitSystems()
   {
     resource_.Deinit();
-    render_.Deinit();
     platform_.Deinit();
   }
 
@@ -23,11 +21,6 @@ namespace blocks
     return platform_;
   }
 
-  OpenglRenderSystem& Enviroment::GetRenderSystem()
-  {
-    return render_;
-  }
-
   ResourceBase& Enviroment::GetResourceSystem()
   {
     return resource_;
@@ -35,6 +28,5 @@ namespace blocks
 
 
   GlfwPlatform Enviroment::platform_ = GlfwPlatform();
-  OpenglRenderSystem Enviroment::render_ = OpenglRenderSystem();
   ResourceBase Enviroment::resource_ = ResourceBase();
 }

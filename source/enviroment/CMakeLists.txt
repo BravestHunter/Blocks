@@ -16,23 +16,6 @@ set(SOURCE_FILES
 	resource/block_set.cpp
 	resource/resource_base.hpp
 	resource/resource_base.cpp
-
-	render/glew_headers.hpp
-	render/opengl_shader.hpp
-	render/opengl_shader.cpp
-	render/opengl_program.hpp
-	render/opengl_program.cpp
-	render/opengl_buffer.hpp
-	render/opengl_buffer.cpp
-	render/opengl_vertex_array_object.hpp
-	render/opengl_vertex_array_object.cpp
-	render/opengl_texture_2d.hpp
-	render/opengl_texture_2d.cpp
-	render/opengl_texture_2d_array.hpp
-	render/opengl_texture_2d_array.cpp
-	render/opengl_context.hpp
-	render/opengl_render_system.hpp
-	render/opengl_render_system.cpp
 )
 
 add_library(BlocksEnviroment STATIC ${SOURCE_FILES})

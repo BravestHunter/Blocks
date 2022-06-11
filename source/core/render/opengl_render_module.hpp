@@ -33,6 +33,7 @@ namespace blocks
 
   private:
     bool IsCorrectThread();
+    void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     void RenderMap(std::shared_ptr<OpenglMap> map, std::shared_ptr<OpenglProgram> mapProgram, std::shared_ptr<Camera> camera, float ratio);
 
     std::unique_ptr<OpenglContext> context_;
