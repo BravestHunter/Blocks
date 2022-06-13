@@ -21,13 +21,13 @@ int main()
   std::cout << "Blocks application" << std::endl;
   std::cout << "Version " << Blocks_VERSION_MAJOR << "." << Blocks_VERSION_MINOR << std::endl;
 
-  blocks::Enviroment::Init();
+  blocks::Environment::Init();
 
-  blocks::Enviroment::GetResource().SetUp(RESOURCE_BASE_PATH);
+  blocks::Environment::GetResource().SetUp(RESOURCE_BASE_PATH);
 
   RunGame();
 
-  blocks::Enviroment::Deinit();
+  blocks::Environment::Deinit();
 
   return 0;
 }

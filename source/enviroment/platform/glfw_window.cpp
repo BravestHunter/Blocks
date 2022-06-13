@@ -218,7 +218,7 @@ namespace blocks
 
   void GlfwWindow::Release()
   {
-    if (windowPtr_ != nullptr && Enviroment::GetPlatform().IsInitialized())
+    if (windowPtr_ != nullptr && Environment::GetPlatform().IsInitialized())
     {
       glfwDestroyWindow(windowPtr_);
     }

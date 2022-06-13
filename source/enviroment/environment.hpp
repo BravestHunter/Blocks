@@ -7,10 +7,10 @@
 
 namespace blocks
 {
-  class DllExport Enviroment
+  class DllExport Environment
   {
   private:
-    Enviroment() = delete;
+    Environment() = delete;
 
   public:
     static void Init();

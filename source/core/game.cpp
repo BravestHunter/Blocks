@@ -23,7 +23,7 @@
 namespace blocks
 {
   Game::Game(int width, int height) :
-    window_(Enviroment::GetPlatform().CreateWindow(width, height, "Blocks Game"))
+    window_(Environment::GetPlatform().CreateWindow(width, height, "Blocks Game"))
   {
     context_.scene = CreateMainMenuScene();
     context_.camera = std::make_shared<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
@@ -53,7 +53,7 @@ namespace blocks
 
   void Game::RunRenderCycle()
   {
-    GlfwPlatform& platform = Enviroment::GetPlatform();
+    GlfwPlatform& platform = Environment::GetPlatform();
 
     window_.SetCursorMode(CursorMode::Normal);
     window_.SetCurrentContext();
@@ -111,7 +111,7 @@ namespace blocks
 
   void Game::RunSimulationCycle()
   {
-    GlfwPlatform& platform = Enviroment::GetPlatform();
+    GlfwPlatform& platform = Environment::GetPlatform();
 
     float lastTime = (float)platform.GetTime();
     while (isRunning_)
