@@ -22,7 +22,7 @@
 
 namespace blocks
 {
-  Game::Game(int width, int height) :
+  Game::Game(int width, int height) : 
     window_(Environment::GetPlatform().CreateWindow(width, height, "Blocks Game"))
   {
     context_.scene = CreateMainMenuScene();
@@ -39,13 +39,11 @@ namespace blocks
 
   int Game::Run()
   {
-    std::thread simulationThread(&Game::RunSimulationCycle, this);
-    std::thread fixedUpdateThread(&Game::RunFixedUpdateCycle, this);
+    std::thread renderThread(&Game::RunRenderCycle, this);
 
-    RunRenderCycle();
+    RunSimulationCycle();
 
-    simulationThread.join();
-    fixedUpdateThread.join();
+    renderThread.join();
 
     return 0;
   }
@@ -62,8 +60,6 @@ namespace blocks
     renderModule_.InitResources();
 
     mapLoadingModule_.SetRenderModule(&renderModule_);
-
-    playerControlModule_.SetCallbacks(window_, context_, renderModule_);
 
     // Set callbacks
     window_.SetKeyCallback(
@@ -91,9 +87,6 @@ namespace blocks
       float delta = currentTime - lastTime;
       lastTime = currentTime;
 
-      platform.ProcessEvents();
-      ProcessInput(window_);
-
       sceneMutex_.lock();
       renderModule_.Update(delta, context_);
       sceneMutex_.unlock();
@@ -111,26 +104,10 @@ namespace blocks
 
   void Game::RunSimulationCycle()
   {
+    playerControlModule_.SetCallbacks(window_, context_, renderModule_);
+
     GlfwPlatform& platform = Environment::GetPlatform();
 
-    float lastTime = (float)platform.GetTime();
-    while (isRunning_)
-    {
-      float currentTime = (float)platform.GetTime();
-      float delta = currentTime - lastTime;
-      lastTime = currentTime;
-
-      if (requestedScene_ != nullptr)
-      {
-        SetRequestedScene();
-      }
-
-      mapLoadingModule_.Update(delta, context_);
-    }
-  }
-
-  void Game::RunFixedUpdateCycle()
-  {
     std::condition_variable cv;
     std::mutex mut;
 
@@ -138,11 +115,22 @@ namespace blocks
     auto next = std::chrono::steady_clock::now() + delta{ 1 };
     std::unique_lock<std::mutex> lk(mut);
 
+    const static float deltaF = 0.0166;
     while (isRunning_)
     {
       mut.unlock();
 
-      playerControlModule_.Update(0.016f, context_);
+      Environment::GetPlatform().ProcessEvents();
+      ProcessInput(window_);
+
+      playerControlModule_.Update(deltaF, context_);
+
+      if (requestedScene_ != nullptr)
+      {
+        SetRequestedScene();
+      }
+
+      mapLoadingModule_.Update(deltaF, context_);
 
       mut.lock();
       cv.wait_until(lk, next, [] {return false; });

@@ -28,7 +28,6 @@ namespace blocks
   private:
     void RunRenderCycle();
     void RunSimulationCycle();
-    void RunFixedUpdateCycle();
 
     void ProcessInput(GlfwWindow& window);
     void SwitchCursorMode(GlfwWindow& window);
