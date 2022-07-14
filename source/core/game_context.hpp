@@ -5,7 +5,7 @@
 #include "camera.hpp"
 #include "scene/scene.hpp"
 #include "geometry/aabb.hpp"
-
+#include "render/opengl_scene.hpp"
 
 namespace blocks
 {
@@ -13,17 +13,9 @@ namespace blocks
   {
     std::shared_ptr<Camera> camera;
     std::shared_ptr<Scene> scene;
+    std::shared_ptr<OpenglScene> openglScene;
 
     bool isCursorEnabled = true;
-
-    // Input
-    bool isWPressed = false;
-    bool isSPressed = false;
-    bool isAPressed = false;
-    bool isDPressed = false;
-    bool firstMouse = true;
-    float lastMouseX;
-    float lastMouseY;
 
     blocks::AABB playerBounds;
   };

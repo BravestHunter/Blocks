@@ -2,12 +2,13 @@
 
 #include "game_module_interface.hpp"
 #include "platform/glfw_window.hpp"
+#include "input/input_state.hpp"
 #include "render/opengl_render_module.hpp"
 
 
 namespace blocks
 {
-  class PlayerControlModule : public GameModuleInterface
+  class PlayerControlModule
   {
   public:
     PlayerControlModule();
@@ -15,13 +16,14 @@ namespace blocks
     PlayerControlModule(PlayerControlModule&& other) = delete;
     PlayerControlModule& operator=(const PlayerControlModule&) = delete;
     PlayerControlModule& operator=(PlayerControlModule&& other) = delete;
-    ~PlayerControlModule() override;
+    ~PlayerControlModule();
 
-    virtual void Update(float delta, GameContext& context) override;
-
-    void SetCallbacks(GlfwWindow& window, GameContext& context, OpenglRenderModule& renderModule);
+    virtual void Update(const float delta, const InputState& inputState, GameContext& context);
 
   private:
-    void MovePlayer(float delta, GameContext& context);
+    void MovePlayer(const float delta, const InputState& inputState, GameContext& context);
+    void RotateCamera(const float delta, const InputState& inputState, GameContext& context);
+    void ZoomCamera(const float delta, const InputState& inputState, GameContext& context);
+    void ManageBlockPlacement(const float delta, const InputState& inputState, GameContext& context);
   };
 }

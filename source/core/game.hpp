@@ -6,6 +6,7 @@
 #include "export.h"
 #include "environment.hpp"
 #include "game_context.hpp"
+#include "input/input_module.hpp"
 #include "render/opengl_render_module.hpp"
 #include "player_control_module.hpp"
 #include "map_loading_module.hpp"
@@ -26,10 +27,9 @@ namespace blocks
     int Run();
 
   private:
-    void RunRenderCycle();
     void RunSimulationCycle();
+    void RunRenderCycle();
 
-    void ProcessInput(GlfwWindow& window);
     void SwitchCursorMode(GlfwWindow& window);
 
     std::shared_ptr<Scene> requestedScene_ = nullptr;
@@ -45,6 +45,7 @@ namespace blocks
     GameContext context_;
 
     // Game modules
+    InputModule inputModule_;
     OpenglRenderModule renderModule_;
     PlayerControlModule playerControlModule_;
     MapLoadingModule mapLoadingModule_;

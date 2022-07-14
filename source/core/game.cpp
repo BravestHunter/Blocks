@@ -27,9 +27,9 @@ namespace blocks
   {
     context_.scene = CreateMainMenuScene();
     context_.camera = std::make_shared<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
-    context_.lastMouseX = width / 2;
-    context_.lastMouseY = height / 2;
     context_.playerBounds = blocks::AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
+
+    inputModule_.SetupWindow(window_);
   }
 
   Game::~Game()
@@ -49,6 +49,57 @@ namespace blocks
   }
 
 
+  void Game::RunSimulationCycle()
+  {
+    std::condition_variable cv;
+    std::mutex mut;
+
+    using delta = std::chrono::duration<std::int64_t, std::ratio<1, 60>>;
+    auto next = std::chrono::steady_clock::now() + delta{ 1 };
+    std::unique_lock<std::mutex> lk(mut);
+
+    const static float deltaF = 0.0166;
+    long counter = 0;
+    while (isRunning_)
+    {
+      if (window_.IsWindowShouldClose())
+      {
+        isRunning_ = false;
+        continue;
+      }
+
+      mut.unlock();
+
+      {
+        if (requestedScene_ != nullptr)
+        {
+          SetRequestedScene();
+        }
+
+        inputModule_.Update();
+        InputState& inputState = inputModule_.GetState();
+
+        if (inputState.IsKeyJustPressed(GLFW_KEY_ESCAPE))
+        {
+          window_.SetWindowShouldClose(true);
+          isRunning_ = false;
+        }
+
+        if (inputState.IsKeyJustPressed(GLFW_KEY_L))
+        {
+          SwitchCursorMode(window_);
+        }
+
+        playerControlModule_.Update(deltaF, inputState, context_);
+        mapLoadingModule_.Update(deltaF, context_);
+      }
+
+      mut.lock();
+      cv.wait_until(lk, next, [] {return false; });
+      next += delta{ 1 };
+    }
+  }
+
   void Game::RunRenderCycle()
   {
     GlfwPlatform& platform = Environment::GetPlatform();
@@ -58,27 +109,9 @@ namespace blocks
 
     renderModule_.SetContext(window_);
     renderModule_.InitResources();
+    context_.openglScene = renderModule_.GetOpenglScene();
 
     mapLoadingModule_.SetRenderModule(&renderModule_);
-
-    // Set callbacks
-    window_.SetKeyCallback(
-      [this](int keycode, int scancode, int action, int mods)
-      {
-        if (action != GLFW_PRESS)
-          return;
-
-        if (keycode == GLFW_KEY_ESCAPE)
-        {
-          window_.SetWindowShouldClose(true);
-        }
-
-        if (keycode == GLFW_KEY_L)
-        {
-          SwitchCursorMode(window_);
-        }
-      }
-    );
 
     float lastTime = (float)platform.GetTime();
     while (isRunning_)
@@ -92,60 +125,11 @@ namespace blocks
       sceneMutex_.unlock();
 
       window_.SwapBuffers();
-
-      if (window_.IsWindowShouldClose())
-      {
-        isRunning_ = false;
-      }
     }
 
     renderModule_.FreeResources();
   }
 
-  void Game::RunSimulationCycle()
-  {
-    playerControlModule_.SetCallbacks(window_, context_, renderModule_);
-
-    GlfwPlatform& platform = Environment::GetPlatform();
-
-    std::condition_variable cv;
-    std::mutex mut;
-
-    using delta = std::chrono::duration<std::int64_t, std::ratio<1, 60>>;
-    auto next = std::chrono::steady_clock::now() + delta{ 1 };
-    std::unique_lock<std::mutex> lk(mut);
-
-    const static float deltaF = 0.0166;
-    while (isRunning_)
-    {
-      mut.unlock();
-
-      Environment::GetPlatform().ProcessEvents();
-      ProcessInput(window_);
-
-      playerControlModule_.Update(deltaF, context_);
-
-      if (requestedScene_ != nullptr)
-      {
-        SetRequestedScene();
-      }
-
-      mapLoadingModule_.Update(deltaF, context_);
-
-      mut.lock();
-      cv.wait_until(lk, next, [] {return false; });
-      next += delta{ 1 };
-    }
-  }
-
-
-  void Game::ProcessInput(GlfwWindow& window)
-  {
-    context_.isWPressed = window.GetKeyState(GLFW_KEY_W) == GLFW_PRESS;
-    context_.isSPressed = window.GetKeyState(GLFW_KEY_S) == GLFW_PRESS;
-    context_.isAPressed = window.GetKeyState(GLFW_KEY_A) == GLFW_PRESS;
-    context_.isDPressed = window.GetKeyState(GLFW_KEY_D) == GLFW_PRESS;
-  }
 
   void Game::SwitchCursorMode(GlfwWindow& window)
   {

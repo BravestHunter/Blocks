@@ -11,6 +11,11 @@ set(CORE_SOURCE_FILES
 	game.hpp
 	game.cpp
 
+	input/input_state.hpp
+	input/input_state.cpp
+	input/input_module.hpp
+	input/input_module.cpp
+
 	render/glew_headers.hpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp
