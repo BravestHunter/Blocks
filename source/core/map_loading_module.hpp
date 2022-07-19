@@ -1,5 +1,9 @@
 #pragma once
 
+#include <mutex>
+#include <utility>
+#include <vector>
+
 #include "glm/glm.hpp"
 
 #include "game_module_interface.hpp"
@@ -21,6 +25,7 @@ namespace blocks
     ~MapLoadingModule() override;
 
     virtual void Update(float delta, GameContext& context) override;
+    void ProcessChunksToAdd(float delta, GameContext& context);
 
     void SetRenderModule(OpenglRenderModule* renderModule);
 
@@ -33,6 +38,8 @@ namespace blocks
 
     int loadingRadius_ = 3;
     glm::ivec2 lastCenterChunkCoords_;
+    std::vector<std::pair<int, int>> chunksToAdd_;
+    std::mutex addMutex_;
     OpenglRenderModule* renderModule_ = nullptr;
   };
 }

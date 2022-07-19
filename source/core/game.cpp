@@ -40,10 +40,12 @@ namespace blocks
   int Game::Run()
   {
     std::thread renderThread(&Game::RunRenderCycle, this);
+    std::thread renderUpdateThread(&Game::RunRenderUpdateCycle, this);
 
     RunSimulationCycle();
 
     renderThread.join();
+    renderUpdateThread.join();
 
     return 0;
   }
@@ -58,7 +60,7 @@ namespace blocks
     auto next = std::chrono::steady_clock::now() + delta{ 1 };
     std::unique_lock<std::mutex> lk(mut);
 
-    const static float deltaF = 0.0166;
+    const static float deltaF = 1.0f / 60.0f;
     long counter = 0;
     while (isRunning_)
     {
@@ -128,6 +130,31 @@ namespace blocks
     }
 
     renderModule_.FreeResources();
+  }
+
+  void Game::RunRenderUpdateCycle()
+  {
+    std::condition_variable cv;
+    std::mutex mut;
+
+    using delta = std::chrono::duration<std::int64_t, std::ratio<1, 16>>;
+    auto next = std::chrono::steady_clock::now() + delta{ 1 };
+    std::unique_lock<std::mutex> lk(mut);
+
+    const static float deltaF = 1.0f / 16.0f;
+    long counter = 0;
+    while (isRunning_)
+    {
+      mut.unlock();
+
+      {
+        mapLoadingModule_.ProcessChunksToAdd(deltaF, context_);
+      }
+
+      mut.lock();
+      cv.wait_until(lk, next, [] {return false; });
+      next += delta{ 1 };
+    }
   }
 
 

@@ -7,6 +7,7 @@
 #include "geometry/aabb.hpp"
 #include "render/opengl_scene.hpp"
 
+
 namespace blocks
 {
   struct GameContext

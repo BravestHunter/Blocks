@@ -184,7 +184,6 @@ namespace blocks
     keyCallbackFunction_ = func;
   }
 
-
   void GlfwWindow::SetCharCallback(std::function<void(unsigned int)> func)
   {
     charCallbackFunction_ = func;

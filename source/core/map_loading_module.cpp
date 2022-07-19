@@ -30,6 +30,24 @@ namespace blocks
     }
   }
 
+  void MapLoadingModule::ProcessChunksToAdd(float delta, GameContext& context)
+  {
+    if (context.scene->ContainsMap())
+    {
+      std::lock_guard<std::mutex> lock(addMutex_);
+
+      std::shared_ptr<Map> map = context.scene->GetMap();
+      std::shared_ptr<OpenglMap> openglMap = context.openglScene->GetMap();
+      for (const std::pair<int, int>& coordinates : chunksToAdd_)
+      {
+        std::shared_ptr<Chunk> chunk = map->GetChunk(coordinates);
+        openglMap->EnqueueChunkAdd(chunk, coordinates);
+      }
+
+      chunksToAdd_.clear();
+    }
+  }
+
 
   void MapLoadingModule::SetRenderModule(OpenglRenderModule* renderModule)
   {
@@ -49,8 +67,9 @@ namespace blocks
 
   void MapLoadingModule::AddChunks(glm::ivec2 centerChunkCoords, std::shared_ptr<Map> map)
   {
-    std::shared_ptr<OpenglMap> openglMap = renderModule_->GetOpenglScene()->GetMap();
+    std::lock_guard<std::mutex> lock(addMutex_);
 
+    std::shared_ptr<OpenglMap> openglMap = renderModule_->GetOpenglScene()->GetMap();
     for (int x = centerChunkCoords.x - loadingRadius_; x <= centerChunkCoords.x + loadingRadius_; x++)
     {
       for (int y = centerChunkCoords.y - loadingRadius_; y <= centerChunkCoords.y + loadingRadius_; y++)
@@ -59,8 +78,7 @@ namespace blocks
 
         if (!openglMap->ContainsChunk(coordinates))
         {
-          std::shared_ptr<Chunk> chunk = map->GetChunk(coordinates);
-          openglMap->EnqueueChunkAdd(chunk, coordinates);
+          chunksToAdd_.push_back(coordinates);
         }
       }
     }
@@ -68,6 +86,8 @@ namespace blocks
 
   void MapLoadingModule::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunkCoords)
   {
+    std::lock_guard<std::mutex> lock(addMutex_);
+
     std::shared_ptr<OpenglMap> openglMap = renderModule_->GetOpenglScene()->GetMap();
     glm::ivec2 xBorders = glm::ivec2(CenterChunkCoords.x - loadingRadius_, CenterChunkCoords.x + loadingRadius_);
     glm::ivec2 yBorders = glm::ivec2(CenterChunkCoords.y - loadingRadius_, CenterChunkCoords.y + loadingRadius_);
@@ -81,6 +101,12 @@ namespace blocks
         {
           std::pair<int, int> coordinates = std::make_pair(x, y);
           openglMap->EnqueueChunkRemove(coordinates);
+
+          const auto iter = std::find(chunksToAdd_.begin(), chunksToAdd_.end(), coordinates);
+          if (iter != chunksToAdd_.end())
+          {
+            chunksToAdd_.erase(iter);
+          }
         }
       }
     }
