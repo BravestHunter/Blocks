@@ -1,12 +1,13 @@
 #pragma once
 
+#include "opengl_chunk_vertex.hpp"
+
 
 namespace blocks
 {
   struct OpenglRawChunkData
   {
-    float* verticesData;
-    size_t verticesDataLength;
-    int verticesNumber;
+    OpenglChunkVertex* data;
+    size_t length;
   };
 }

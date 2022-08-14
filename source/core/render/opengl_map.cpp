@@ -83,41 +83,20 @@ namespace blocks
   }
 
 
-  struct Vertex
-  {
-    float x;
-    float y;
-    float z;
-    float texU;
-    float texV;
-    float texI;
-  };
-
-  void AddVertex(Vertex& vertex, float* data, size_t& index)
-  {
-    data[index++] = vertex.x;
-    data[index++] = vertex.y;
-    data[index++] = vertex.z;
-    data[index++] = vertex.texU;
-    data[index++] = vertex.texV;
-    data[index++] = vertex.texI;
-  }
-
-
   std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_ptr<Chunk> chunk)
   {
-    static const size_t BlockVerticesNumber = 4 * 6;
-    static const size_t VertexSize = sizeof(float) * 6;
-    static const size_t verticesDataSize = Chunk::BlocksNumber * BlockVerticesNumber * VertexSize;
+    static const size_t VerticesPerBlockNumber = 4 * 6;
+    static const size_t verticesPerChunkNumber = Chunk::BlocksNumber * VerticesPerBlockNumber;
 
-    float* verticesData = new float[verticesDataSize];
+    OpenglChunkVertex* verticesData = new OpenglChunkVertex[verticesPerChunkNumber];
     size_t verticesDataIndex = 0;
     size_t verticesNumber = 0;
-    for (int z = 0; z < Chunk::Height; z++)
+
+    for (unsigned int z = 0; z < Chunk::Height; z++)
     {
-      for (int y = 0; y < Chunk::Width; y++)
+      for (unsigned int y = 0; y < Chunk::Width; y++)
       {
-        for (int x = 0; x < Chunk::Length; x++)
+        for (unsigned int x = 0; x < Chunk::Length; x++)
         {
           size_t blockIndex = x + y * Chunk::Width + z * Chunk::LayerBlocksNumber;
 
@@ -135,17 +114,12 @@ namespace blocks
           {
             // Add forward face
 
-            Vertex v1(x + 1, y + 1, z, 0.0f, 0.0f, fBlock.textures[0]);
-            Vertex v2(x + 1, y, z, 1.0f, 0.0f, fBlock.textures[0]);
-            Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f, fBlock.textures[0]);
-            Vertex v4(x + 1, y, z + 1, 1.0f, 1.0f, fBlock.textures[0]);
-
-            AddVertex(v1, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v4, verticesData, verticesDataIndex);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 0, 0, fBlock.textures[0]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 0, 1, fBlock.textures[0]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 0, 2, fBlock.textures[0]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 0, 2, fBlock.textures[0]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 0, 1, fBlock.textures[0]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 0, 3, fBlock.textures[0]);
 
             verticesNumber += 6;
           }
@@ -155,17 +129,12 @@ namespace blocks
           {
             // Add backward face
 
-            Vertex v1(x, y, z, 0.0f, 0.0f, fBlock.textures[1]);
-            Vertex v2(x, y + 1, z, 1.0f, 0.0f, fBlock.textures[1]);
-            Vertex v3(x, y, z + 1, 0.0f, 1.0f, fBlock.textures[1]);
-            Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f, fBlock.textures[1]);
-
-            AddVertex(v1, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v4, verticesData, verticesDataIndex);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 1, 0, fBlock.textures[1]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 1, 1, fBlock.textures[1]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 1, 2, fBlock.textures[1]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 1, 2, fBlock.textures[1]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 1, 1, fBlock.textures[1]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 1, 3, fBlock.textures[1]);
 
             verticesNumber += 6;
           }
@@ -175,17 +144,12 @@ namespace blocks
           {
             // Add right face
 
-            Vertex v1(x, y + 1, z, 0.0f, 0.0f, fBlock.textures[2]);
-            Vertex v2(x + 1, y + 1, z, 1.0f, 0.0f, fBlock.textures[2]);
-            Vertex v3(x, y + 1, z + 1, 0.0f, 1.0f, fBlock.textures[2]);
-            Vertex v4(x + 1, y + 1, z + 1, 1.0f, 1.0f, fBlock.textures[2]);
-
-            AddVertex(v1, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v4, verticesData, verticesDataIndex);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 2, 0, fBlock.textures[2]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 2, 1, fBlock.textures[2]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 2, 2, fBlock.textures[2]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 2, 2, fBlock.textures[2]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 2, 1, fBlock.textures[2]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 2, 3, fBlock.textures[2]);
 
             verticesNumber += 6;
           }
@@ -195,17 +159,12 @@ namespace blocks
           {
             // Add left face
 
-            Vertex v1(x + 1, y, z, 0.0f, 0.0f, fBlock.textures[3]);
-            Vertex v2(x, y, z, 1.0f, 0.0f, fBlock.textures[3]);
-            Vertex v3(x + 1, y, z + 1, 0.0f, 1.0f, fBlock.textures[3]);
-            Vertex v4(x, y, z + 1, 1.0f, 1.0f, fBlock.textures[3]);
-
-            AddVertex(v1, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v4, verticesData, verticesDataIndex);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 3, 0, fBlock.textures[3]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 3, 1, fBlock.textures[3]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 3, 2, fBlock.textures[3]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 3, 2, fBlock.textures[3]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 3, 1, fBlock.textures[3]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 3, 3, fBlock.textures[3]);
 
             verticesNumber += 6;
           }
@@ -215,17 +174,12 @@ namespace blocks
           {
             // Add upper face
 
-            Vertex v1(x + 1, y, z + 1, 0.0f, 0.0f, fBlock.textures[4]);
-            Vertex v2(x, y, z + 1, 1.0f, 0.0f, fBlock.textures[4]);
-            Vertex v3(x + 1, y + 1, z + 1, 0.0f, 1.0f, fBlock.textures[4]);
-            Vertex v4(x, y + 1, z + 1, 1.0f, 1.0f, fBlock.textures[4]);
-
-            AddVertex(v1, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v4, verticesData, verticesDataIndex);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 4, 0, fBlock.textures[4]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 4, 1, fBlock.textures[4]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 4, 2, fBlock.textures[4]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 4, 2, fBlock.textures[4]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 4, 1, fBlock.textures[4]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 4, 3, fBlock.textures[4]);
 
             verticesNumber += 6;
           }
@@ -235,17 +189,12 @@ namespace blocks
           {
             // Add bottom face
 
-            Vertex v1(x, y, z, 0.0f, 0.0f, fBlock.textures[5]);
-            Vertex v2(x + 1, y, z, 1.0f, 0.0f, fBlock.textures[5]);
-            Vertex v3(x, y + 1, z, 0.0f, 1.0f, fBlock.textures[5]);
-            Vertex v4(x + 1, y + 1, z, 1.0f, 1.0f, fBlock.textures[5]);
-
-            AddVertex(v1, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v3, verticesData, verticesDataIndex);
-            AddVertex(v2, verticesData, verticesDataIndex);
-            AddVertex(v4, verticesData, verticesDataIndex);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 5, 0, fBlock.textures[5]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 5, 1, fBlock.textures[5]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 5, 2, fBlock.textures[5]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 5, 2, fBlock.textures[5]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 5, 1, fBlock.textures[5]);
+            verticesData[verticesDataIndex++] = packVertex(x, y, z, 5, 3, fBlock.textures[5]);
 
             verticesNumber += 6;
           }
@@ -253,7 +202,7 @@ namespace blocks
       }
     }
 
-    return std::make_shared<OpenglRawChunkData>(verticesData, verticesDataIndex + 1, verticesNumber);
+    return std::make_shared<OpenglRawChunkData>(verticesData, verticesNumber);
   }
 
   void OpenglMap::AddChunk(ChunksQueueItem& item)
@@ -263,17 +212,15 @@ namespace blocks
 
     vao->Bind();
     vbo->Bind();
-    vbo->SetData(sizeof(float) * item.chunkData->verticesDataLength, item.chunkData->verticesData);
+    vbo->SetData(sizeof(OpenglChunkVertex) * item.chunkData->length, item.chunkData->data);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, sizeof(OpenglChunkVertex), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
-    std::shared_ptr<OpenglChunk> chunk = std::make_shared<OpenglChunk>(vbo, vao, item.chunkData->verticesNumber);
+    std::shared_ptr<OpenglChunk> chunk = std::make_shared<OpenglChunk>(vbo, vao, item.chunkData->length);
     chunks_[item.position] = chunk;
 
-    delete item.chunkData->verticesData;
+    delete item.chunkData->data;
   }
 
   void OpenglMap::RemoveChunk(std::pair<int, int> position)

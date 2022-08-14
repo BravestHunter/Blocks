@@ -51,10 +51,11 @@ namespace blocks
     }
 
     position += shift;
-    if (!context.scene->GetMap()->Collides(context.playerBounds, position))
-    {
-      context.camera->SetPosition(position);
-    }
+    context.camera->SetPosition(position);
+    //if (!context.scene->GetMap()->Collides(context.playerBounds, position))
+    //{
+    //  context.camera->SetPosition(position);
+    //}
   }
 
   void PlayerControlModule::RotateCamera(const float delta, const InputState& inputState, GameContext& context)

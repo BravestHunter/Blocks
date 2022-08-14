@@ -29,6 +29,8 @@ set(CORE_SOURCE_FILES
 	render/opengl_texture_2d.cpp
 	render/opengl_texture_2d_array.hpp
 	render/opengl_texture_2d_array.cpp
+	render/opengl_chunk_vertex.hpp
+	render/opengl_chunk_vertex.cpp
 	render/opengl_context.hpp
 	render/opengl_raw_chunk_data.hpp
 	render/opengl_chunk.hpp

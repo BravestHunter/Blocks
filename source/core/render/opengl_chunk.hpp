@@ -11,11 +11,11 @@ namespace blocks
   class OpenglChunk
   {
   public:
-    OpenglChunk(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, int verticesNumber);
+    OpenglChunk(std::shared_ptr<OpenglBuffer> vbo, std::shared_ptr<OpenglVertexArrayObject> vao, size_t verticesNumber);
     ~OpenglChunk();
 
 
-    int verticesNumber_;
+    size_t verticesNumber_;
     std::shared_ptr<OpenglVertexArrayObject> vao_;
 
   private:

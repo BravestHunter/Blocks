@@ -3,7 +3,6 @@
 #include "game_module_interface.hpp"
 #include "platform/glfw_window.hpp"
 #include "input/input_state.hpp"
-#include "render/opengl_render_module.hpp"
 
 
 namespace blocks
