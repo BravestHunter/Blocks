@@ -20,8 +20,6 @@ namespace blocks
     ~OpenglScene();
 
     void InitMap();
-    void AddChunk(std::shared_ptr<Chunk> chunk, std::pair<int, int> position);
-    void RemoveChunk(std::pair<int, int> position);
 
     std::shared_ptr<OpenglMap> GetMap();
 

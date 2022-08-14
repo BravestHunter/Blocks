@@ -9,6 +9,7 @@
 #include "opengl_raw_chunk_data.hpp"
 #include "render/opengl_texture_2d_array.hpp"
 #include "chunk.hpp"
+#include "scene/map.hpp"
 #include "resource/block_set.hpp"
 
 
@@ -34,7 +35,7 @@ namespace blocks
     bool HasBlockSet();
 
     bool ContainsChunk(std::pair<int, int> position);
-    void EnqueueChunkAdd(std::shared_ptr<Chunk> chunk, std::pair<int, int> position);
+    void EnqueueChunkAdd(std::shared_ptr<Map> map, std::pair<int, int> position);
     void EnqueueChunkRemove(std::pair<int, int> position);
     void ProcessQueues();
 
@@ -46,7 +47,13 @@ namespace blocks
     std::shared_ptr<BlockSet> blockSet_;
     std::shared_ptr<OpenglTexture2DArray> blocksTextureArray_;
 
-    std::shared_ptr<OpenglRawChunkData> GenerateRawChunkData(std::shared_ptr<Chunk> chunk);
+    std::shared_ptr<OpenglRawChunkData> GenerateRawChunkData(
+      std::shared_ptr<Chunk> chunk, 
+      std::shared_ptr<Chunk> frontChunk, 
+      std::shared_ptr<Chunk> backChunk, 
+      std::shared_ptr<Chunk> rightChunk, 
+      std::shared_ptr<Chunk> leftChunk
+    );
     void AddChunk(ChunksQueueItem& item);
     void RemoveChunk(std::pair<int, int> position);
   };

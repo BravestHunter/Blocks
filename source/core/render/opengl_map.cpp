@@ -50,9 +50,15 @@ namespace blocks
     return chunks_.contains(position);
   }
 
-  void OpenglMap::EnqueueChunkAdd(std::shared_ptr<Chunk> chunk, std::pair<int, int> position)
+  void OpenglMap::EnqueueChunkAdd(std::shared_ptr<Map> map, std::pair<int, int> position)
   {
-    std::shared_ptr<OpenglRawChunkData> rawData = GenerateRawChunkData(chunk);
+    std::shared_ptr<Chunk> chunk = map->GetChunk(position);
+    std::shared_ptr<Chunk> frontChunk = map->GetChunk(std::make_pair(position.first + 1, position.second));
+    std::shared_ptr<Chunk> backChunk = map->GetChunk(std::make_pair(position.first - 1, position.second));
+    std::shared_ptr<Chunk> rightChunk = map->GetChunk(std::make_pair(position.first, position.second + 1));
+    std::shared_ptr<Chunk> leftChunk = map->GetChunk(std::make_pair(position.first, position.second - 1));
+
+    std::shared_ptr<OpenglRawChunkData> rawData = GenerateRawChunkData(chunk, frontChunk, backChunk, rightChunk, leftChunk);
     ChunksQueueItem item(rawData, position);
 
     std::lock_guard<std::mutex> locker(mutex_);
@@ -83,7 +89,13 @@ namespace blocks
   }
 
 
-  std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(std::shared_ptr<Chunk> chunk)
+  std::shared_ptr<OpenglRawChunkData> OpenglMap::GenerateRawChunkData(
+    std::shared_ptr<Chunk> chunk,
+    std::shared_ptr<Chunk> frontChunk,
+    std::shared_ptr<Chunk> backChunk,
+    std::shared_ptr<Chunk> rightChunk,
+    std::shared_ptr<Chunk> leftChunk
+  )
   {
     static const size_t VerticesPerBlockNumber = 4 * 6;
     static const size_t verticesPerChunkNumber = Chunk::BlocksNumber * VerticesPerBlockNumber;
@@ -91,6 +103,8 @@ namespace blocks
     OpenglChunkVertex* verticesData = new OpenglChunkVertex[verticesPerChunkNumber];
     size_t verticesDataIndex = 0;
     size_t verticesNumber = 0;
+
+    BlockInfo testBlock = blockSet_->GetBlockInfo(0);
 
     for (unsigned int z = 0; z < Chunk::Height; z++)
     {
@@ -109,10 +123,11 @@ namespace blocks
 
           glm::vec3 position(x, y, z);
 
-          // Check forward face
-          if (x == Chunk::Length - 1 || chunk->blocks[blockIndex + 1] == 0)
+          // Check front face
+          bool isFrontBorder = x == Chunk::Length - 1;
+          if ((isFrontBorder && frontChunk->blocks[blockIndex - Chunk::Length + 1] == 0) || (!isFrontBorder && chunk->blocks[blockIndex + 1] == 0))
           {
-            // Add forward face
+            // Add front face
 
             verticesData[verticesDataIndex++] = packVertex(x, y, z, 0, 0, fBlock.textures[0]);
             verticesData[verticesDataIndex++] = packVertex(x, y, z, 0, 1, fBlock.textures[0]);
@@ -124,10 +139,11 @@ namespace blocks
             verticesNumber += 6;
           }
 
-          // Check backward face
-          if (x == 0 || chunk->blocks[blockIndex - 1] == 0)
+          // Check back face
+          bool isBackBorder = x == 0;
+          if ((isBackBorder && backChunk->blocks[blockIndex + Chunk::Length - 1] == 0) || (!isBackBorder && chunk->blocks[blockIndex - 1] == 0))
           {
-            // Add backward face
+            // Add back face
 
             verticesData[verticesDataIndex++] = packVertex(x, y, z, 1, 0, fBlock.textures[1]);
             verticesData[verticesDataIndex++] = packVertex(x, y, z, 1, 1, fBlock.textures[1]);
@@ -140,7 +156,8 @@ namespace blocks
           }
 
           // Check right face
-          if (y == Chunk::Width - 1 || chunk->blocks[blockIndex + Chunk::Length] == 0)
+          bool isRightBorder = y == Chunk::Width - 1;
+          if ((isRightBorder && rightChunk->blocks[blockIndex - Chunk::LayerBlocksNumber + Chunk::Length] == 0) || (!isRightBorder && chunk->blocks[blockIndex + Chunk::Length] == 0))
           {
             // Add right face
 
@@ -155,7 +172,8 @@ namespace blocks
           }
 
           // Check left face
-          if (y == 0 || chunk->blocks[blockIndex - Chunk::Length] == 0)
+          bool isLeftBorder = y == 0;
+          if ((isLeftBorder && leftChunk->blocks[blockIndex + Chunk::LayerBlocksNumber - Chunk::Length] == 0) || (!isLeftBorder && chunk->blocks[blockIndex - Chunk::Length] == 0))
           {
             // Add left face
 
@@ -169,10 +187,11 @@ namespace blocks
             verticesNumber += 6;
           }
 
-          // Check upper face
-          if (z == Chunk::Height - 1 || chunk->blocks[blockIndex + Chunk::LayerBlocksNumber] == 0)
+          // Check top face
+          bool isTopBorder = z == Chunk::Height - 1;
+          if (isTopBorder || chunk->blocks[blockIndex + Chunk::LayerBlocksNumber] == 0)
           {
-            // Add upper face
+            // Add top face
 
             verticesData[verticesDataIndex++] = packVertex(x, y, z, 4, 0, fBlock.textures[4]);
             verticesData[verticesDataIndex++] = packVertex(x, y, z, 4, 1, fBlock.textures[4]);
@@ -185,7 +204,8 @@ namespace blocks
           }
 
           // Check bottom face
-          if (z == 0 || chunk->blocks[blockIndex - Chunk::LayerBlocksNumber] == 0)
+          bool isBottomBorder = z == 0;
+          if (isBottomBorder || chunk->blocks[blockIndex - Chunk::LayerBlocksNumber] == 0)
           {
             // Add bottom face
 

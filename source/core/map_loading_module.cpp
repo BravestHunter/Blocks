@@ -40,8 +40,7 @@ namespace blocks
       std::shared_ptr<OpenglMap> openglMap = context.openglScene->GetMap();
       for (const std::pair<int, int>& coordinates : chunksToAdd_)
       {
-        std::shared_ptr<Chunk> chunk = map->GetChunk(coordinates);
-        openglMap->EnqueueChunkAdd(chunk, coordinates);
+        openglMap->EnqueueChunkAdd(map, coordinates);
       }
 
       chunksToAdd_.clear();

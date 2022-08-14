@@ -162,7 +162,7 @@ namespace blocks
 
         std::shared_ptr<Chunk> chunk = context.scene->GetMap()->GetChunk(placeChunkPosition);
         chunk->blocks[placeBlockPosition.x + placeBlockPosition.y * Chunk::Width + placeBlockPosition.z * Chunk::LayerBlocksNumber] = 1;
-        context.openglScene->AddChunk(chunk, placeChunkPosition);
+        context.openglScene->GetMap()->EnqueueChunkAdd(context.scene->GetMap(), placeChunkPosition);
       }
     }
     else if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_2))
@@ -177,7 +177,7 @@ namespace blocks
 
         std::shared_ptr<Chunk> chunk = context.scene->GetMap()->GetChunk(blockLookAt.chunkPosition);
         chunk->blocks[blockLookAt.blockPosition.x + blockLookAt.blockPosition.y * Chunk::Width + blockLookAt.blockPosition.z * Chunk::LayerBlocksNumber] = 0;
-        context.openglScene->AddChunk(chunk, blockLookAt.chunkPosition);
+        context.openglScene->GetMap()->EnqueueChunkAdd(context.scene->GetMap(), blockLookAt.chunkPosition);
       }
     }
   }
