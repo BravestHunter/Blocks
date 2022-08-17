@@ -3,6 +3,7 @@
 #include "FastNoise/FastNoise.h"
 
 #include "io/file_api.hpp"
+#include "serialization.hpp"
 
 
 namespace blocks
@@ -231,8 +232,7 @@ namespace blocks
       }
 
       std::vector<unsigned char> data = blocks::readBinaryFile("map/" + path);
-      std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>();
-      memcpy(chunk.get(), &data[0], sizeof(Chunk));
+      std::shared_ptr<Chunk> chunk(deserializeChunk(data));
 
       size_t underscorePosition = path.find("_");
       size_t dotPosition = path.find(".");
@@ -258,10 +258,7 @@ namespace blocks
     {
       std::string path = std::format("map/{0}_{1}.chunk", it->first.first, it->first.second);
 
-      size_t a = sizeof(Chunk);
-      std::vector<unsigned char> data(sizeof(Chunk));
-      memcpy(&data[0], it->second.get(), sizeof(Chunk));
-
+      std::vector<unsigned char> data = serializeChunk(it->second.get());
       blocks::saveBinaryFile(path, data);
     }
   }

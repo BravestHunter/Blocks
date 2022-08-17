@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstring>
+
 #include "block.hpp"
 
 
@@ -13,11 +15,11 @@ namespace blocks
     static const size_t LayerBlocksNumber = Length * Width;
     static const size_t BlocksNumber = LayerBlocksNumber * Height;
 
-    Block blocks[BlocksNumber];
-
-    static bool AreEqual(const Chunk& chunk1, const Chunk& chunk2)
+    inline bool operator==(const Chunk& other) const
     {
-      return memcmp(&chunk1.blocks, &chunk2.blocks, sizeof(Block) * BlocksNumber) == 0;
+      return std::memcmp(&blocks, &other.blocks, sizeof(Chunk)) == 0;
     }
+
+    Block blocks[BlocksNumber];
   };
 }
