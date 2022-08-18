@@ -108,11 +108,11 @@ namespace blocks
     window_.SetCursorMode(CursorMode::Normal);
     window_.SetCurrentContext();
 
-    renderModule_.SetContext(window_);
-    renderModule_.InitResources();
-    context_.openglScene = renderModule_.GetOpenglScene();
+    presentationModule_.SetContext(window_);
+    presentationModule_.InitResources();
+    context_.openglScene = presentationModule_.GetRenderModule().GetOpenglScene();
 
-    simulationModule_.SetRenderModule(&renderModule_);
+    simulationModule_.SetRenderModule(&presentationModule_.GetRenderModule());
 
     float lastTime = (float)platform.GetTime();
     while (isRunning_)
@@ -122,13 +122,13 @@ namespace blocks
       lastTime = currentTime;
 
       sceneMutex_.lock();
-      renderModule_.Update(delta, context_);
+      presentationModule_.Update(delta, context_);
       sceneMutex_.unlock();
 
       window_.SwapBuffers();
     }
 
-    renderModule_.FreeResources();
+    presentationModule_.FreeResources();
   }
 
   void Game::RunRenderUpdateCycle()

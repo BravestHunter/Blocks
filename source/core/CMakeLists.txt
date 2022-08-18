@@ -18,6 +18,9 @@ set(CORE_SOURCE_FILES
 	input/input_module.hpp
 	input/input_module.cpp
 
+	presentation/presentation_module.hpp
+	presentation/presentation_module.cpp
+
 	render/glew_headers.hpp
 	render/opengl_shader.hpp
 	render/opengl_shader.cpp

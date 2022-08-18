@@ -8,7 +8,7 @@
 #include "game_context.hpp"
 #include "input/input_module.hpp"
 #include "simulation_module.hpp"
-#include "render/opengl_render_module.hpp"
+#include "presentation/presentation_module.hpp"
 
 
 namespace blocks
@@ -47,6 +47,6 @@ namespace blocks
     // Game modules
     InputModule inputModule_;
     SimulationModule simulationModule_;
-    OpenglRenderModule renderModule_;
+    PresentationModule presentationModule_;
   };
 }
