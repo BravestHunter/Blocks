@@ -7,9 +7,8 @@
 #include "environment.hpp"
 #include "game_context.hpp"
 #include "input/input_module.hpp"
+#include "simulation_module.hpp"
 #include "render/opengl_render_module.hpp"
-#include "player_control_module.hpp"
-#include "map_loading_module.hpp"
 
 
 namespace blocks
@@ -47,8 +46,7 @@ namespace blocks
 
     // Game modules
     InputModule inputModule_;
+    SimulationModule simulationModule_;
     OpenglRenderModule renderModule_;
-    PlayerControlModule playerControlModule_;
-    MapLoadingModule mapLoadingModule_;
   };
 }

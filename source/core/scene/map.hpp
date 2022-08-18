@@ -6,8 +6,8 @@
 #include <mutex>
 
 #include "block_look_at.hpp"
-#include "chunk.hpp"
 #include "geometry/collisions_api.hpp"
+#include "chunk.hpp"
 
 
 namespace blocks

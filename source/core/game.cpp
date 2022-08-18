@@ -92,8 +92,7 @@ namespace blocks
           SwitchCursorMode(window_);
         }
 
-        playerControlModule_.Update(deltaF, inputState, context_);
-        mapLoadingModule_.Update(deltaF, context_);
+        simulationModule_.Update(deltaF, inputState, context_);
       }
 
       mut.lock();
@@ -113,7 +112,7 @@ namespace blocks
     renderModule_.InitResources();
     context_.openglScene = renderModule_.GetOpenglScene();
 
-    mapLoadingModule_.SetRenderModule(&renderModule_);
+    simulationModule_.SetRenderModule(&renderModule_);
 
     float lastTime = (float)platform.GetTime();
     while (isRunning_)
@@ -148,7 +147,7 @@ namespace blocks
       mut.unlock();
 
       {
-        mapLoadingModule_.ProcessChunksToAdd(deltaF, context_);
+        simulationModule_.ProcessChunksToAdd(deltaF, context_);
       }
 
       mut.lock();
@@ -185,7 +184,7 @@ namespace blocks
     context_.scene = requestedScene_;
     requestedScene_ = nullptr;
 
-    mapLoadingModule_.OnSceneChanged(context_);
+    simulationModule_.OnSceneChanged(context_);
 
     sceneMutex_.unlock();
   }

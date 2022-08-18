@@ -8,6 +8,8 @@ set(CORE_SOURCE_FILES
 	camera.hpp
 	camera.cpp
 	block_side.hpp
+	simulation_module.hpp
+	simulation_module.cpp
 	game.hpp
 	game.cpp
 
