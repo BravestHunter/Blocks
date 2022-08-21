@@ -14,10 +14,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "io/file_api.hpp"
-#include "ui/i_imgui_element.hpp"
-#include "ui/imgui_button.hpp"
-#include "ui/imgui_text.hpp"
-#include "ui/imgui_window.hpp"
+#include "scene/scene_builder.hpp"
 
 
 namespace blocks
@@ -25,7 +22,7 @@ namespace blocks
   Game::Game(int width, int height) : 
     window_(Environment::GetPlatform().CreateWindow(width, height, "Blocks Game"))
   {
-    context_.scene = CreateMainMenuScene();
+    context_.scene = SceneBuilder::BuildMainMenuScene(this);
     context_.camera = std::make_shared<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
     context_.playerBounds = blocks::AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
 
@@ -48,6 +45,17 @@ namespace blocks
     renderUpdateThread.join();
 
     return 0;
+  }
+
+  void Game::RequestScene(std::shared_ptr<Scene> scene)
+  {
+    requestedScene_ = scene;
+  }
+
+
+  GameContext& Game::GetContext()
+  {
+    return context_;
   }
 
 
@@ -172,11 +180,6 @@ namespace blocks
   }
 
 
-  void Game::RequestScene(std::shared_ptr<Scene> scene)
-  {
-    requestedScene_ = scene;
-  }
-
   void Game::SetRequestedScene()
   {
     sceneMutex_.lock();
@@ -187,110 +190,5 @@ namespace blocks
     simulationModule_.OnSceneChanged(context_);
 
     sceneMutex_.unlock();
-  }
-
-  std::shared_ptr<Scene> Game::CreateMainMenuScene()
-  {
-    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-
-    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Main menu");
-    scene->AddImguiWindow(window);
-
-    std::shared_ptr<ImguiButton> createWorldButton = std::make_shared<ImguiButton>(
-      "Create new world",
-      [this]()
-      {
-        srand(time(0));
-        std::shared_ptr<Scene> worldScene_ = CreateWorldScene(std::make_shared<Map>(rand()));
-        RequestScene(worldScene_);
-      }
-    );
-    window->AddElement(createWorldButton);
-
-    std::shared_ptr<ImguiButton> loadWorldButton = std::make_shared<ImguiButton>(
-      "Load world",
-      [this]()
-      {
-        if (!blocks::isPathExist("map"))
-        {
-          return;
-        }
-
-        std::shared_ptr<Map> map = Map::Load();
-        std::shared_ptr<Scene> worldScene_ = CreateWorldScene(map);
-
-        RequestScene(worldScene_);
-      }
-    );
-    window->AddElement(loadWorldButton);
-
-    return scene;
-  }
-
-  std::shared_ptr<Scene> Game::CreateWorldScene(std::shared_ptr<Map> map)
-  {
-    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-
-    scene->SetMap(map);
-
-    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Statistics");
-    scene->AddImguiWindow(window);
-
-    std::shared_ptr<ImguiText> fpsText = std::make_shared<ImguiText>(
-      [this]()
-      {
-        return std::format("Application average {0:.3f} ms/frame ({1:.0f} FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-      }
-    );
-    window->AddElement(fpsText);
-
-    std::shared_ptr<ImguiText> cameraPositionText = std::make_shared<ImguiText>(
-      [this]()
-      {
-        glm::vec3 position = context_.camera->GetPosition();
-        return std::format("Camera position: {0:.2f} {1:.2f} {2:.2f}", position.x, position.y, position.z);
-      }
-    );
-    window->AddElement(cameraPositionText);
-
-    std::shared_ptr<ImguiText> cameraDirectionText = std::make_shared<ImguiText>(
-      [this]()
-      {
-        glm::vec3 direction = context_.camera->GetForward();
-        return  std::format("Camera direction: {0:.2f} {1:.2f} {2:.2f}", direction.x, direction.y, direction.z);
-      }
-    );
-    window->AddElement(cameraDirectionText);
-
-    std::shared_ptr<ImguiText> seedText = std::make_shared<ImguiText>(
-      [this]()
-      {
-        return  std::format("Map seed: {}", context_.scene->GetMap()->GetSeed());
-      }
-    );
-    window->AddElement(seedText);
-
-    std::shared_ptr<ImguiButton> saveButton = std::make_shared<ImguiButton>(
-      "Save world",
-      [this]()
-      {
-        if (!blocks::isPathExist("map"))
-        {
-          blocks::createDirectory("map");
-        }
-        else
-        {
-          for (const std::string& path : blocks::getFilesInDirectory("map"))
-          {
-            blocks::removePath(path);
-          }
-        }
-
-        Map::Save(context_.scene->GetMap());
-      }
-    );
-    window->AddElement(saveButton);
-
-    return scene;
   }
 }

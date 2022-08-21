@@ -24,6 +24,9 @@ namespace blocks
     ~Game();
 
     int Run();
+    void RequestScene(std::shared_ptr<Scene> scene);
+
+    GameContext& GetContext();
 
   private:
     void RunSimulationCycle();
@@ -34,10 +37,7 @@ namespace blocks
 
     std::shared_ptr<Scene> requestedScene_ = nullptr;
     std::mutex sceneMutex_;
-    void RequestScene(std::shared_ptr<Scene> scene);
     void SetRequestedScene();
-    std::shared_ptr<Scene> CreateMainMenuScene();
-    std::shared_ptr<Scene> CreateWorldScene(std::shared_ptr<Map> map);
 
     bool isRunning_ = true;
 

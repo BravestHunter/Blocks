@@ -11,15 +11,16 @@
 
 namespace blocks
 {
+  class SceneBuilder;
+
   class Scene
   {
+    friend SceneBuilder;
+
   public:
     Scene();
 
-    void AddImguiWindow(std::shared_ptr<ImguiWindow> window);
-
     bool ContainsMap();
-    void SetMap(std::shared_ptr<Map> map);
     std::shared_ptr<Map> GetMap();
 
     std::pair<std::vector<std::shared_ptr<ImguiWindow>>::iterator, std::vector<std::shared_ptr<ImguiWindow>>::iterator> GetImguiWindowsIterator();

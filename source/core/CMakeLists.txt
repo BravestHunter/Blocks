@@ -52,6 +52,8 @@ set(CORE_SOURCE_FILES
 	scene/map.cpp
 	scene/scene.hpp
 	scene/scene.cpp
+	scene/scene_builder.hpp
+	scene/scene_builder.cpp
 
 	ui/i_imgui_element.hpp
 	ui/imgui_text.hpp
