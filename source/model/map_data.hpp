@@ -2,15 +2,11 @@
 
 #include <cstdint>
 
-#include <glm/glm.hpp>
-
 
 namespace blocks
 {
-  struct World
+  struct MapData
   {
-    char name[32];
     std::int32_t seed;
-    glm::vec3 playerPos;
   };
 }

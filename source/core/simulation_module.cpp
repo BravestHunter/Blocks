@@ -11,24 +11,8 @@ namespace blocks
 
   void SimulationModule::Update(float delta, const InputState& inputState, GameContext& context)
   {
-    //if (world_ == nullptr)
-    //{
-    //  return;
-    //}
-
     playerControlModule_.Update(delta, inputState, context);
     mapLoadingModule_.Update(delta, context);
-  }
-
-
-  void SimulationModule::SetWorld(std::shared_ptr<World> world)
-  {
-    world_ = world;
-  }
-
-  std::shared_ptr<World> SimulationModule::GetWorld() const
-  {
-    return world_;
   }
 
 

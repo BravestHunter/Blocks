@@ -2,7 +2,9 @@ set(SOURCE_FILES
 	block.hpp
 	chunk.hpp
 	chunk_position.hpp
-	world.hpp
+	map_data.hpp
+	player_data.hpp
+	world_data.hpp
 	serialization.hpp
 	serialization.cpp
 )

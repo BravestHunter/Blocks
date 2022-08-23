@@ -22,18 +22,18 @@ namespace blocks
   }
 
 
-  std::vector<unsigned char> serializeWorld(const World* world)
+  std::vector<unsigned char> serializeWorld(const WorldData* world)
   {
-    std::vector<unsigned char> data(sizeof(World));
-    std::memcpy(&data[0], world, sizeof(World));
+    std::vector<unsigned char> data(sizeof(WorldData));
+    std::memcpy(&data[0], world, sizeof(WorldData));
 
     return data;
   }
 
-  World* deserializeWorld(const std::vector<unsigned char>& data)
+  WorldData* deserializeWorld(const std::vector<unsigned char>& data)
   {
-    World* world = new World();
-    std::memcpy(world, &data[0], sizeof(World));
+    WorldData* world = new WorldData();
+    std::memcpy(world, &data[0], sizeof(WorldData));
 
     return world;
   }
