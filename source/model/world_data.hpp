@@ -8,6 +8,7 @@ namespace blocks
 {
   struct WorldData
   {
+    char name[16];
     MapData mapData;
     PlayerData playerData;
   };

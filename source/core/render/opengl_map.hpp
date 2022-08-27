@@ -20,7 +20,7 @@ namespace blocks
   struct ChunksQueueItem
   {
     std::shared_ptr<OpenglRawChunkData> chunkData;
-    std::pair<int, int> position;
+    ChunkPosition position;
   };
 
   class OpenglMap
@@ -34,15 +34,15 @@ namespace blocks
     void SetBlockSet(std::shared_ptr<BlockSet> blockSet);
     bool HasBlockSet();
 
-    bool ContainsChunk(std::pair<int, int> position);
-    void EnqueueChunkAdd(std::shared_ptr<Map> map, std::pair<int, int> position);
-    void EnqueueChunkRemove(std::pair<int, int> position);
+    bool ContainsChunk(ChunkPosition position);
+    void EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position);
+    void EnqueueChunkRemove(ChunkPosition position);
     void ProcessQueues();
 
   private:
-    std::map<std::pair<int, int>, std::shared_ptr<OpenglChunk>> chunks_;
+    std::map<ChunkPosition, std::shared_ptr<OpenglChunk>> chunks_;
     std::queue<ChunksQueueItem> addQueue_;
-    std::queue<std::pair<int, int>> removeQueue_;
+    std::queue<ChunkPosition> removeQueue_;
     std::mutex mutex_;
     std::shared_ptr<BlockSet> blockSet_;
     std::shared_ptr<OpenglTexture2DArray> blocksTextureArray_;
@@ -55,6 +55,6 @@ namespace blocks
       std::shared_ptr<Chunk> leftChunk
     );
     void AddChunk(ChunksQueueItem& item);
-    void RemoveChunk(std::pair<int, int> position);
+    void RemoveChunk(ChunkPosition position);
   };
 }

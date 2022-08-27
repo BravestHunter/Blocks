@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+#include "chunk_position.hpp"
+
 
 namespace blocks
 {
@@ -20,7 +22,7 @@ namespace blocks
   struct BlockLookAt
   {
     bool hit = false;
-    std::pair<int, int> chunkPosition;
+    ChunkPosition chunkPosition;
     glm::ivec3 blockPosition;
     Direction loockFromDirection;
   };

@@ -1,5 +1,7 @@
 #include "map.hpp"
 
+#include <format>
+
 #include "FastNoise/FastNoise.h"
 
 #include "io/file_api.hpp"
@@ -8,19 +10,16 @@
 
 namespace blocks
 {
-  Map::Map()
+  Map::Map(MapData mapData, std::string path) : path_(path), seed_(mapData.seed)
   {
-    seed_ = rand();
-  }
-
-  Map::Map(int seed) : seed_(seed)
-  {
-
   }
 
   Map::~Map()
   {
-
+    for (const auto chunkPair : chunks_)
+    {
+      SaveChunk(chunkPair.second, chunkPair.first);
+    }
   }
 
 
@@ -29,32 +28,41 @@ namespace blocks
     return seed_;
   }
 
-  std::shared_ptr<Chunk> Map::GetChunk(std::pair<int, int> position)
+  std::shared_ptr<Chunk> Map::GetChunk(ChunkPosition position)
   {
     std::lock_guard<std::mutex> locker(mutex_);
 
+    // Check if chunk is already loaded
+    auto it = chunks_.find(position);
+    if (it != chunks_.end())
+    {
+      return it->second;
+    }
+    
     std::shared_ptr<Chunk> chunk;
 
-    auto it = chunks_.find(position);
-    if (it == chunks_.end())
+    // check if chunk file exists
+    std::string chunkFilePath = GetChunkFileName(path_, position);
+    if (isPathExist(chunkFilePath))
     {
-      chunk = GenerateChunk(position);
-      chunks_[position] = chunk;
+      chunk = LoadChunk(position);
     }
     else
     {
-      chunk = it->second;
+      chunk = GenerateChunk(position);
     }
+
+    chunks_[position] = chunk;
 
     return chunk;
   }
 
-  std::pair<std::map<std::pair<int, int>, std::shared_ptr<Chunk>>::iterator, std::map<std::pair<int, int>, std::shared_ptr<Chunk>>::iterator> Map::GetChunksIterator()
+  std::pair<std::map<ChunkPosition, std::shared_ptr<Chunk>>::iterator, std::map<ChunkPosition, std::shared_ptr<Chunk>>::iterator> Map::GetChunksIterator()
   {
     return std::make_pair(chunks_.begin(), chunks_.end());
   }
 
-  void Map::AddChunk(std::pair<int, int> position, std::shared_ptr<Chunk> chunk)
+  void Map::SetChunk(ChunkPosition position, std::shared_ptr<Chunk> chunk)
   {
     std::lock_guard<std::mutex> locker(mutex_);
 
@@ -64,7 +72,7 @@ namespace blocks
 
   bool Map::Collides(const blocks::AABB& bounds, glm::vec3 position)
   {
-    std::pair<int, int> chunkPosition = std::make_pair(position.x / Chunk::Length, position.y / Chunk::Width);
+    ChunkPosition chunkPosition = { position.x / Chunk::Length, position.y / Chunk::Width };
     glm::vec3 localPosition = glm::vec3(position.x - chunkPosition.first * (int)Chunk::Length, position.y - chunkPosition.second * (int)Chunk::Width, position.z);
     if (localPosition.x < 0)
     {
@@ -123,7 +131,7 @@ namespace blocks
 
   BlockLookAt Map::GetBlockLookAt(const blocks::Ray& ray)
   {
-    std::pair<int, int> chunkPosition = std::make_pair(ray.origin.x / Chunk::Length, ray.origin.y / Chunk::Width);
+    ChunkPosition chunkPosition = { ray.origin.x / Chunk::Length, ray.origin.y / Chunk::Width };
     glm::vec3 localPosition = glm::vec3(ray.origin.x - chunkPosition.first * (int)Chunk::Length, ray.origin.y - chunkPosition.second * (int)Chunk::Width, ray.origin.z);
     if (localPosition.x < 0)
     {
@@ -217,54 +225,7 @@ namespace blocks
   }
 
 
-  std::shared_ptr<Map> Map::Load()
-  {
-    std::string seedStr = blocks::readTextFile("map/seed.txt");
-    int seed = std::stoi(seedStr);
-
-    std::shared_ptr<Map> map = std::make_shared<Map>(seed);
-
-    for (const std::string& path : blocks::getFilesInDirectory("map"))
-    {
-      if (path == "seed.txt")
-      {
-        continue;
-      }
-
-      std::vector<unsigned char> data = blocks::readBinaryFile("map/" + path);
-      std::shared_ptr<Chunk> chunk(deserializeChunk(data));
-
-      size_t underscorePosition = path.find("_");
-      size_t dotPosition = path.find(".");
-
-      std::string xStr = path.substr(0, underscorePosition);
-      int x = std::stoi(xStr);
-      std::string yStr = path.substr(underscorePosition + 1, dotPosition - underscorePosition - 1);
-      int y = std::stoi(yStr);
-      std::pair<int, int> position = std::make_pair(x, y);
-
-      map->AddChunk(position, chunk);
-    }
-
-    return map;
-  }
-
-  void Map::Save(std::shared_ptr<Map> map)
-  {
-    blocks::saveTextFile("map/seed.txt", std::to_string(map->GetSeed()));
-
-    auto chunksIterator = map->GetChunksIterator();
-    for (auto it = chunksIterator.first; it != chunksIterator.second; it++)
-    {
-      std::string path = std::format("map/{0}_{1}.chunk", it->first.first, it->first.second);
-
-      std::vector<unsigned char> data = serializeChunk(it->second.get());
-      blocks::saveBinaryFile(path, data);
-    }
-  }
-
-
-  std::shared_ptr<Chunk> Map::GenerateChunk(std::pair<int, int> position)
+  std::shared_ptr<Chunk> Map::GenerateChunk(ChunkPosition position)
   {
     Chunk* chunk = new Chunk();
 
@@ -289,5 +250,33 @@ namespace blocks
     }
 
     return std::shared_ptr<Chunk>(chunk);
+  }
+
+  std::shared_ptr<Chunk> Map::LoadChunk(ChunkPosition position)
+  {
+    std::string chunkFilePath = GetChunkFileName(path_, position);
+    std::vector<unsigned char> data = blocks::readBinaryFile(chunkFilePath);
+    std::shared_ptr<Chunk> chunk(deserializeChunk(data));
+
+    return chunk;
+  }
+
+  void Map::SaveChunk(std::shared_ptr<Chunk> chunk, ChunkPosition position)
+  {
+    if (!isPathExist(path_))
+    {
+      createDirectory(path_);
+    }
+
+    std::string chunkFilePath = GetChunkFileName(path_, position);
+
+    std::vector<unsigned char> data = serializeChunk(chunk.get());
+    blocks::saveBinaryFile(chunkFilePath, data);
+  }
+
+
+  std::string Map::GetChunkFileName(std::string mapPath, ChunkPosition position)
+  {
+    return std::format("{0}/{1}_{2}.chunk", mapPath, position.first, position.second);
   }
 }

@@ -4,7 +4,7 @@
 #include <memory>
 #include <utility>
 
-#include "map.hpp"
+#include "world.hpp"
 
 #include "ui/imgui_window.hpp"
 
@@ -20,13 +20,13 @@ namespace blocks
   public:
     Scene();
 
-    bool ContainsMap();
-    std::shared_ptr<Map> GetMap();
+    bool ContainsWorld();
+    std::shared_ptr<World> GetWorld();
 
     std::pair<std::vector<std::shared_ptr<ImguiWindow>>::iterator, std::vector<std::shared_ptr<ImguiWindow>>::iterator> GetImguiWindowsIterator();
 
   private:
-    std::shared_ptr<Map> map_ = nullptr;
+    std::shared_ptr<World> world_ = nullptr;
     std::vector<std::shared_ptr<ImguiWindow>> imguiWindows_;
   };
 }

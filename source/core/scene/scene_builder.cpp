@@ -20,38 +20,36 @@ namespace blocks
       "Create new world",
       [game]()
       {
+        WorldData worldData
+        {
+          .mapData = MapData
+          {
+            .seed = rand()
+          },
+          .playerData = PlayerData
+          {
+            .position = glm::vec3(8.0f, 8.0f, 270.0f)
+          }
+        };
+
+        // Set random name
         srand(time(0));
-        std::shared_ptr<Scene> worldScene_ = BuildWorldScene(game, std::make_shared<Map>(rand()));
+        strcpy(worldData.name, std::to_string(rand()).c_str());
+
+        std::shared_ptr<Scene> worldScene_ = BuildWorldScene(game, std::make_shared<World>(worldData));
         game->RequestScene(worldScene_);
       }
     );
     window->AddElement(createWorldButton);
 
-    std::shared_ptr<ImguiButton> loadWorldButton = std::make_shared<ImguiButton>(
-      "Load world",
-      [game]()
-      {
-        if (!blocks::isPathExist("map"))
-        {
-          return;
-        }
-
-        std::shared_ptr<Map> map = Map::Load();
-        std::shared_ptr<Scene> worldScene_ = BuildWorldScene(game, map);
-
-        game->RequestScene(worldScene_);
-      }
-    );
-    window->AddElement(loadWorldButton);
-
     return scene;
   }
 
-  std::shared_ptr<Scene> SceneBuilder::BuildWorldScene(Game* game, std::shared_ptr<Map> map)
+  std::shared_ptr<Scene> SceneBuilder::BuildWorldScene(Game* game, std::shared_ptr<World> world)
   {
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-    scene->map_ = map;
+    scene->world_ = world;
 
     std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Statistics");
     scene->imguiWindows_.push_back(window);
@@ -82,34 +80,14 @@ namespace blocks
     );
     window->AddElement(cameraDirectionText);
 
+    const int seed = world->GetMap()->GetSeed();
     std::shared_ptr<ImguiText> seedText = std::make_shared<ImguiText>(
-      [game]()
+      [seed]()
       {
-        return  std::format("Map seed: {}", game->GetContext().scene->GetMap()->GetSeed());
+        return  std::format("Map seed: {}", seed);
       }
     );
     window->AddElement(seedText);
-
-    std::shared_ptr<ImguiButton> saveButton = std::make_shared<ImguiButton>(
-      "Save world",
-      [game]()
-      {
-        if (!blocks::isPathExist("map"))
-        {
-          blocks::createDirectory("map");
-        }
-        else
-        {
-          for (const std::string& path : blocks::getFilesInDirectory("map"))
-          {
-            blocks::removePath(path);
-          }
-        }
-
-        Map::Save(game->GetContext().scene->GetMap());
-      }
-    );
-    window->AddElement(saveButton);
 
     return scene;
   }

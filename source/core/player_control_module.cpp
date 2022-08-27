@@ -16,7 +16,7 @@ namespace blocks
 
   void PlayerControlModule::Update(const float delta, const InputState& inputState, GameContext& context)
   {
-    if (context.scene->ContainsMap())
+    if (context.scene->ContainsWorld())
     {
       MovePlayer(delta, inputState, context);
       RotateCamera(delta, inputState, context);
@@ -80,15 +80,15 @@ namespace blocks
   {
     if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_1))
     {
-      if (context.scene->ContainsMap() && !context.isCursorEnabled)
+      if (context.scene->ContainsWorld() && !context.isCursorEnabled)
       {
-        BlockLookAt blockLookAt = context.scene->GetMap()->GetBlockLookAt(blocks::Ray(context.camera->GetPosition(), context.camera->GetForward()));
+        BlockLookAt blockLookAt = context.scene->GetWorld()->GetMap()->GetBlockLookAt(blocks::Ray(context.camera->GetPosition(), context.camera->GetForward()));
         if (!blockLookAt.hit)
         {
           return;
         }
 
-        std::pair<int, int> placeChunkPosition = blockLookAt.chunkPosition;
+        ChunkPosition placeChunkPosition = blockLookAt.chunkPosition;
         glm::ivec3 placeBlockPosition = blockLookAt.blockPosition;
         switch (blockLookAt.loockFromDirection)
         {
@@ -160,24 +160,24 @@ namespace blocks
           break;
         }
 
-        std::shared_ptr<Chunk> chunk = context.scene->GetMap()->GetChunk(placeChunkPosition);
+        std::shared_ptr<Chunk> chunk = context.scene->GetWorld()->GetMap()->GetChunk(placeChunkPosition);
         chunk->blocks[placeBlockPosition.x + placeBlockPosition.y * Chunk::Width + placeBlockPosition.z * Chunk::LayerBlocksNumber] = 1;
-        context.openglScene->GetMap()->EnqueueChunkAdd(context.scene->GetMap(), placeChunkPosition);
+        context.openglScene->GetMap()->EnqueueChunkAdd(context.scene->GetWorld()->GetMap(), placeChunkPosition);
       }
     }
     else if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_2))
     {
-      if (context.scene->ContainsMap() && !context.isCursorEnabled)
+      if (context.scene->ContainsWorld() && !context.isCursorEnabled)
       {
-        BlockLookAt blockLookAt = context.scene->GetMap()->GetBlockLookAt(blocks::Ray(context.camera->GetPosition(), context.camera->GetForward()));
+        BlockLookAt blockLookAt = context.scene->GetWorld()->GetMap()->GetBlockLookAt(blocks::Ray(context.camera->GetPosition(), context.camera->GetForward()));
         if (!blockLookAt.hit)
         {
           return;
         }
 
-        std::shared_ptr<Chunk> chunk = context.scene->GetMap()->GetChunk(blockLookAt.chunkPosition);
+        std::shared_ptr<Chunk> chunk = context.scene->GetWorld()->GetMap()->GetChunk(blockLookAt.chunkPosition);
         chunk->blocks[blockLookAt.blockPosition.x + blockLookAt.blockPosition.y * Chunk::Width + blockLookAt.blockPosition.z * Chunk::LayerBlocksNumber] = 0;
-        context.openglScene->GetMap()->EnqueueChunkAdd(context.scene->GetMap(), blockLookAt.chunkPosition);
+        context.openglScene->GetMap()->EnqueueChunkAdd(context.scene->GetWorld()->GetMap(), blockLookAt.chunkPosition);
       }
     }
   }

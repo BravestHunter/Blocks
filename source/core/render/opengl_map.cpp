@@ -45,18 +45,18 @@ namespace blocks
   }
 
 
-  bool OpenglMap::ContainsChunk(std::pair<int, int> position)
+  bool OpenglMap::ContainsChunk(ChunkPosition position)
   {
     return chunks_.contains(position);
   }
 
-  void OpenglMap::EnqueueChunkAdd(std::shared_ptr<Map> map, std::pair<int, int> position)
+  void OpenglMap::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position)
   {
     std::shared_ptr<Chunk> chunk = map->GetChunk(position);
-    std::shared_ptr<Chunk> frontChunk = map->GetChunk(std::make_pair(position.first + 1, position.second));
-    std::shared_ptr<Chunk> backChunk = map->GetChunk(std::make_pair(position.first - 1, position.second));
-    std::shared_ptr<Chunk> rightChunk = map->GetChunk(std::make_pair(position.first, position.second + 1));
-    std::shared_ptr<Chunk> leftChunk = map->GetChunk(std::make_pair(position.first, position.second - 1));
+    std::shared_ptr<Chunk> frontChunk = map->GetChunk({ position.first + 1, position.second });
+    std::shared_ptr<Chunk> backChunk = map->GetChunk({ position.first - 1, position.second });
+    std::shared_ptr<Chunk> rightChunk = map->GetChunk({ position.first, position.second + 1 });
+    std::shared_ptr<Chunk> leftChunk = map->GetChunk({ position.first, position.second - 1 });
 
     std::shared_ptr<OpenglRawChunkData> rawData = GenerateRawChunkData(chunk, frontChunk, backChunk, rightChunk, leftChunk);
     ChunksQueueItem item(rawData, position);
@@ -65,7 +65,7 @@ namespace blocks
     addQueue_.push(item);
   }
 
-  void OpenglMap::EnqueueChunkRemove(std::pair<int, int> position)
+  void OpenglMap::EnqueueChunkRemove(ChunkPosition position)
   {
     std::lock_guard<std::mutex> locker(mutex_);
     removeQueue_.push(position);
@@ -243,7 +243,7 @@ namespace blocks
     delete item.chunkData->data;
   }
 
-  void OpenglMap::RemoveChunk(std::pair<int, int> position)
+  void OpenglMap::RemoveChunk(ChunkPosition position)
   {
     chunks_.erase(position);
   }

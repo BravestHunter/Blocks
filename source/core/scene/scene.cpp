@@ -9,14 +9,14 @@ namespace blocks
   }
 
 
-  bool Scene::ContainsMap()
+  bool Scene::ContainsWorld()
   {
-    return map_ != nullptr;
+    return world_ != nullptr;
   }
 
-  std::shared_ptr<Map> Scene::GetMap()
+  std::shared_ptr<World> Scene::GetWorld()
   {
-    return map_;
+    return world_;
   }
 
 

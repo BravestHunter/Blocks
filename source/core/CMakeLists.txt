@@ -50,6 +50,8 @@ set(CORE_SOURCE_FILES
 	scene/block_look_at.hpp
 	scene/map.hpp
 	scene/map.cpp
+	scene/world.hpp
+	scene/world.cpp
 	scene/scene.hpp
 	scene/scene.cpp
 	scene/scene_builder.hpp

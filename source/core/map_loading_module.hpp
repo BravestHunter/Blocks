@@ -2,7 +2,7 @@
 
 #include <mutex>
 #include <utility>
-#include <vector>
+#include <deque>
 
 #include "glm/glm.hpp"
 
@@ -38,7 +38,7 @@ namespace blocks
 
     int loadingRadius_ = 3;
     glm::ivec2 lastCenterChunkCoords_;
-    std::vector<std::pair<int, int>> chunksToAdd_;
+    std::deque<ChunkPosition> chunksToAdd_;
     std::mutex addMutex_;
     OpenglRenderModule* renderModule_ = nullptr;
   };
