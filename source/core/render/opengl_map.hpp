@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <map>
 #include <queue>
 #include <memory>
@@ -19,7 +20,7 @@ namespace blocks
 
   struct ChunksQueueItem
   {
-    std::shared_ptr<OpenglRawChunkData> chunkData;
+    std::vector<OpenglChunkVertex> chunkData;
     ChunkPosition position;
   };
 
@@ -47,7 +48,7 @@ namespace blocks
     std::shared_ptr<BlockSet> blockSet_;
     std::shared_ptr<OpenglTexture2DArray> blocksTextureArray_;
 
-    std::shared_ptr<OpenglRawChunkData> GenerateRawChunkData(
+    std::vector<OpenglChunkVertex> GenerateRawChunkData(
       std::shared_ptr<Chunk> chunk, 
       std::shared_ptr<Chunk> frontChunk, 
       std::shared_ptr<Chunk> backChunk, 
