@@ -5,12 +5,24 @@ namespace blocks
 {
   PresentationModule::PresentationModule()
   {
+    mapLoadingModule_.SetRenderModule(&renderModule_);
   }
 
 
-  void PresentationModule::Update(float delta, GameContext& contex)
+  void PresentationModule::Update(float delta, GameContext& context)
   {
-    renderModule_.Update(delta, contex);
+    mapLoadingModule_.Update(delta, context);
+    renderModule_.Update(delta, context);
+  }
+
+  void PresentationModule::ProcessModelUpdate(const ModelUpdateEvent& e, GameContext& context)
+  {
+    mapLoadingModule_.ProcessModelUpdate(e, context);
+  }
+
+  void PresentationModule::OnSceneChanged(GameContext& context)
+  {
+    mapLoadingModule_.OnSceneChanged(context);
   }
 
 
@@ -29,6 +41,11 @@ namespace blocks
     renderModule_.FreeResources();
   }
 
+
+  MapLoadingModule& PresentationModule::GetMapLoadingModule()
+  {
+    return mapLoadingModule_;
+  }
 
   OpenglRenderModule& PresentationModule::GetRenderModule()
   {

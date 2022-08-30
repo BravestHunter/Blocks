@@ -10,6 +10,8 @@ set(SOURCE_FILES
 	geometry/ray_intersection_point.hpp
 	geometry/collisions_api.hpp
 	geometry/collisions_api.cpp
+
+	collections/concurrent_queue.hpp
 )
 
 add_library(BlocksUtils STATIC ${SOURCE_FILES})

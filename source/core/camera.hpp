@@ -11,14 +11,6 @@ namespace blocks
 {
   class Camera
   {
-  public:
-    enum Camera_Movement {
-      FORWARD,
-      BACKWARD,
-      LEFT,
-      RIGHT
-    };
-
   private:
     static const float defaultYaw;
     static const float defaultPitch;

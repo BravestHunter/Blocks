@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include "simulation/model_update_event.hpp"
+
+
 namespace blocks
 {
   PlayerControlModule::PlayerControlModule()
@@ -52,6 +55,12 @@ namespace blocks
 
     position += shift;
     context.camera->SetPosition(position);
+
+    if (shift.x != 0 || shift.y != 0 || shift.z != 0)
+    {
+      context.modelUpdateEventsQueue.Push(ModelUpdateEvent::PlayerPositionChanged);
+    }
+
     //if (!context.scene->GetMap()->Collides(context.playerBounds, position))
     //{
     //  context.camera->SetPosition(position);

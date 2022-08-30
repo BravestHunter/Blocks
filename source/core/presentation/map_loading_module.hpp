@@ -25,7 +25,9 @@ namespace blocks
     ~MapLoadingModule() override;
 
     virtual void Update(float delta, GameContext& context) override;
-    void ProcessChunksToAdd(float delta, GameContext& context);
+    void ProcessModelUpdate(const ModelUpdateEvent& e, GameContext& context);
+
+    void ProcessChunksToAdd(GameContext& context);
 
     void SetRenderModule(OpenglRenderModule* renderModule);
 

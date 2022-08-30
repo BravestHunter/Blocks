@@ -16,6 +16,16 @@ namespace blocks
 
   void MapLoadingModule::Update(float delta, GameContext& context)
   {
+    
+  }
+
+  void MapLoadingModule::ProcessModelUpdate(const ModelUpdateEvent& e, GameContext& context)
+  {
+    if (e != ModelUpdateEvent::PlayerPositionChanged)
+    {
+      return;
+    }
+
     if (context.scene->ContainsWorld())
     {
       glm::ivec2 centerChunk = CalculateChunkCenter(context.camera->GetPosition());
@@ -30,7 +40,7 @@ namespace blocks
     }
   }
 
-  void MapLoadingModule::ProcessChunksToAdd(float delta, GameContext& context)
+  void MapLoadingModule::ProcessChunksToAdd(GameContext& context)
   {
     if (context.scene->ContainsWorld())
     {

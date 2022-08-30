@@ -7,7 +7,7 @@
 #include "environment.hpp"
 #include "game_context.hpp"
 #include "input/input_module.hpp"
-#include "simulation_module.hpp"
+#include "simulation/simulation_module.hpp"
 #include "presentation/presentation_module.hpp"
 
 

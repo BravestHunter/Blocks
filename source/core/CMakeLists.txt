@@ -3,13 +3,9 @@ set(CORE_SOURCE_FILES
 	game_module_interface.hpp
 	player_control_module.hpp
 	player_control_module.cpp
-	map_loading_module.hpp
-	map_loading_module.cpp
 	camera.hpp
 	camera.cpp
 	block_side.hpp
-	simulation_module.hpp
-	simulation_module.cpp
 	game.hpp
 	game.cpp
 
@@ -18,6 +14,12 @@ set(CORE_SOURCE_FILES
 	input/input_module.hpp
 	input/input_module.cpp
 
+	simulation/model_update_event.hpp
+	simulation/simulation_module.hpp
+	simulation/simulation_module.cpp
+
+	presentation/map_loading_module.hpp
+	presentation/map_loading_module.cpp
 	presentation/presentation_module.hpp
 	presentation/presentation_module.cpp
 

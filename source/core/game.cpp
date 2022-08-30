@@ -120,8 +120,6 @@ namespace blocks
     presentationModule_.InitResources();
     context_.openglScene = presentationModule_.GetRenderModule().GetOpenglScene();
 
-    simulationModule_.SetRenderModule(&presentationModule_.GetRenderModule());
-
     float lastTime = (float)platform.GetTime();
     while (isRunning_)
     {
@@ -155,7 +153,13 @@ namespace blocks
       mut.unlock();
 
       {
-        simulationModule_.ProcessChunksToAdd(deltaF, context_);
+        while (context_.modelUpdateEventsQueue.IsEmpty() == false)
+        {
+          const ModelUpdateEvent e = context_.modelUpdateEventsQueue.Pop();
+          presentationModule_.ProcessModelUpdate(e, context_);
+        }
+
+        presentationModule_.GetMapLoadingModule().ProcessChunksToAdd(context_);
       }
 
       mut.lock();
@@ -187,7 +191,7 @@ namespace blocks
     context_.scene = requestedScene_;
     requestedScene_ = nullptr;
 
-    simulationModule_.OnSceneChanged(context_);
+    presentationModule_.OnSceneChanged(context_);
 
     sceneMutex_.unlock();
   }
