@@ -16,6 +16,13 @@ namespace blocks
 {
   class MapLoadingModule : public GameModuleInterface
   {
+    struct ChunksQueueItem
+    {
+      std::vector<OpenglChunkVertex> chunkData;
+      ChunkPosition position;
+      bool add;
+    };
+
   public:
     MapLoadingModule();
     MapLoadingModule(const MapLoadingModule&) = delete;
@@ -24,12 +31,13 @@ namespace blocks
     MapLoadingModule& operator=(MapLoadingModule&& other) = delete;
     ~MapLoadingModule() override;
 
-    virtual void Update(float delta, GameContext& context) override;
-    void ProcessModelUpdate(const ModelUpdateEvent& e, GameContext& context);
+    void InitResources();
 
-    void ProcessChunksToAdd(GameContext& context);
+    virtual void Update(float delta, GameContext& context) override;
+    void ProcessModelUpdate(BaseModelUpdateEvent* e, GameContext& context);
 
     void SetRenderModule(OpenglRenderModule* renderModule);
+    void SetBlockSet(std::shared_ptr<BlockSet> blockSet);
 
     void OnSceneChanged(GameContext& context);
 
@@ -38,10 +46,23 @@ namespace blocks
     void RemoveChunks(glm::ivec2 centerChunkCoords, glm::ivec2 lastCenterChunkCoords);
     inline glm::ivec2 CalculateChunkCenter(glm::vec3 position);
 
+    OpenglRenderModule* renderModule_ = nullptr;
+    std::shared_ptr<BlockSet> blockSet_;
+
     int loadingRadius_ = 3;
     glm::ivec2 lastCenterChunkCoords_;
-    std::deque<ChunkPosition> chunksToAdd_;
-    std::mutex addMutex_;
-    OpenglRenderModule* renderModule_ = nullptr;
+
+    std::queue<ChunksQueueItem> chunksActionQueue_;
+    std::mutex queueMutex_;
+
+    void EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position);
+    void EnqueueChunkRemove(ChunkPosition position);
+    std::vector<OpenglChunkVertex> GenerateRawChunkData(
+      std::shared_ptr<Chunk> chunk,
+      std::shared_ptr<Chunk> frontChunk,
+      std::shared_ptr<Chunk> backChunk,
+      std::shared_ptr<Chunk> rightChunk,
+      std::shared_ptr<Chunk> leftChunk
+    );
   };
 }

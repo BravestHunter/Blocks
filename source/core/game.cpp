@@ -155,11 +155,9 @@ namespace blocks
       {
         while (context_.modelUpdateEventsQueue.IsEmpty() == false)
         {
-          const ModelUpdateEvent e = context_.modelUpdateEventsQueue.Pop();
-          presentationModule_.ProcessModelUpdate(e, context_);
+          std::shared_ptr<BaseModelUpdateEvent> e = context_.modelUpdateEventsQueue.Pop();
+          presentationModule_.ProcessModelUpdate(e.get(), context_);
         }
-
-        presentationModule_.GetMapLoadingModule().ProcessChunksToAdd(context_);
       }
 
       mut.lock();

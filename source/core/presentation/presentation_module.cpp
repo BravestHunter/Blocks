@@ -15,7 +15,7 @@ namespace blocks
     renderModule_.Update(delta, context);
   }
 
-  void PresentationModule::ProcessModelUpdate(const ModelUpdateEvent& e, GameContext& context)
+  void PresentationModule::ProcessModelUpdate(BaseModelUpdateEvent* e, GameContext& context)
   {
     mapLoadingModule_.ProcessModelUpdate(e, context);
   }
@@ -34,6 +34,7 @@ namespace blocks
   void PresentationModule::InitResources()
   {
     renderModule_.InitResources();
+    mapLoadingModule_.InitResources();
   }
 
   void PresentationModule::FreeResources()

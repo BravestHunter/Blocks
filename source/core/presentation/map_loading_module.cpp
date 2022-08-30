@@ -1,5 +1,10 @@
 #include "map_loading_module.hpp"
 
+#include "environment.hpp"
+
+#include "simulation/player_position_changed_event.hpp"
+#include "simulation/chunk_updated_event.hpp"
+
 
 namespace blocks
 {
@@ -14,51 +19,62 @@ namespace blocks
   }
 
 
-  void MapLoadingModule::Update(float delta, GameContext& context)
+  void MapLoadingModule::InitResources()
   {
-    
+    ResourceBase& resourceBase = Environment::GetResource();
+    blockSet_ = resourceBase.LoadBlockSet(resourceBase.GetBlockSetNames()->front());
   }
 
-  void MapLoadingModule::ProcessModelUpdate(const ModelUpdateEvent& e, GameContext& context)
+
+  void MapLoadingModule::Update(float delta, GameContext& context)
   {
-    if (e != ModelUpdateEvent::PlayerPositionChanged)
-    {
-      return;
-    }
+    std::lock_guard<std::mutex> locker(queueMutex_);
 
-    if (context.scene->ContainsWorld())
+    while (!chunksActionQueue_.empty())
     {
-      glm::ivec2 centerChunk = CalculateChunkCenter(context.camera->GetPosition());
-
-      if (centerChunk != lastCenterChunkCoords_)
+      const ChunksQueueItem item = chunksActionQueue_.front();
+      chunksActionQueue_.pop();
+      
+      if (item.add)
       {
-        RemoveChunks(centerChunk, lastCenterChunkCoords_);
-        AddChunks(centerChunk, context.scene->GetWorld()->GetMap());
-
-        lastCenterChunkCoords_ = centerChunk;
+        context.openglScene->GetMap()->AddChunk(item.chunkData, item.position);
+      }
+      else
+      {
+        context.openglScene->GetMap()->RemoveChunk(item.position);
       }
     }
   }
 
-  void MapLoadingModule::ProcessChunksToAdd(GameContext& context)
+  void MapLoadingModule::ProcessModelUpdate(BaseModelUpdateEvent* e, GameContext& context)
   {
-    if (context.scene->ContainsWorld())
+    if (context.scene->ContainsWorld() == false)
     {
-      std::shared_ptr<Map> map = context.scene->GetWorld()->GetMap();
-      std::shared_ptr<OpenglMap> openglMap = context.openglScene->GetMap();
+      return;
+    }
 
-      while (!chunksToAdd_.empty())
+    switch (e->GetType())
+    {
+      case ModelUpdateEventType::PlayerPositionChanged:
       {
-        ChunkPosition position;
+        PlayerPositionChangedEvent* positionChangedEvent = static_cast<PlayerPositionChangedEvent*>(e);
+        glm::ivec2 centerChunk = CalculateChunkCenter(positionChangedEvent->GetPosition());
 
+        if (centerChunk != lastCenterChunkCoords_)
         {
-          std::lock_guard<std::mutex> lock(addMutex_);
+          RemoveChunks(centerChunk, lastCenterChunkCoords_);
+          AddChunks(centerChunk, context.scene->GetWorld()->GetMap());
 
-          position = chunksToAdd_.front();
-          chunksToAdd_.pop_front();
+          lastCenterChunkCoords_ = centerChunk;
         }
+        break;
+      }
 
-        openglMap->EnqueueChunkAdd(map, position);
+      case ModelUpdateEventType::ChunkUpdated:
+      {
+        ChunkUpdatedEvent* positionChangedEvent = static_cast<ChunkUpdatedEvent*>(e);
+        EnqueueChunkAdd(context.scene->GetWorld()->GetMap(), positionChangedEvent->GetPosition());
+        break;
       }
     }
   }
@@ -67,6 +83,11 @@ namespace blocks
   void MapLoadingModule::SetRenderModule(OpenglRenderModule* renderModule)
   {
     renderModule_ = renderModule;
+  }
+
+  void MapLoadingModule::SetBlockSet(std::shared_ptr<BlockSet> blockSet)
+  {
+    blockSet_ = blockSet;
   }
 
 
@@ -82,18 +103,16 @@ namespace blocks
 
   void MapLoadingModule::AddChunks(glm::ivec2 centerChunkCoords, std::shared_ptr<Map> map)
   {
-    std::lock_guard<std::mutex> lock(addMutex_);
-
     std::shared_ptr<OpenglMap> openglMap = renderModule_->GetOpenglScene()->GetMap();
     for (int x = centerChunkCoords.x - loadingRadius_; x <= centerChunkCoords.x + loadingRadius_; x++)
     {
       for (int y = centerChunkCoords.y - loadingRadius_; y <= centerChunkCoords.y + loadingRadius_; y++)
       {
-        ChunkPosition coordinates = { x, y };
+        ChunkPosition position = { x, y };
 
-        if (!openglMap->ContainsChunk(coordinates))
+        if (!openglMap->ContainsChunk(position))
         {
-          chunksToAdd_.push_back(coordinates);
+          EnqueueChunkAdd(map, position);
         }
       }
     }
@@ -101,8 +120,6 @@ namespace blocks
 
   void MapLoadingModule::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunkCoords)
   {
-    std::lock_guard<std::mutex> lock(addMutex_);
-
     std::shared_ptr<OpenglMap> openglMap = renderModule_->GetOpenglScene()->GetMap();
     glm::ivec2 xBorders = glm::ivec2(CenterChunkCoords.x - loadingRadius_, CenterChunkCoords.x + loadingRadius_);
     glm::ivec2 yBorders = glm::ivec2(CenterChunkCoords.y - loadingRadius_, CenterChunkCoords.y + loadingRadius_);
@@ -114,14 +131,8 @@ namespace blocks
         if (x < xBorders.x || x > xBorders.y ||
             y < yBorders.x || y > yBorders.y)
         {
-          ChunkPosition coordinates = { x, y };
-          openglMap->EnqueueChunkRemove(coordinates);
-
-          const auto iter = std::find(chunksToAdd_.begin(), chunksToAdd_.end(), coordinates);
-          if (iter != chunksToAdd_.end())
-          {
-            chunksToAdd_.erase(iter);
-          }
+          ChunkPosition position = { x, y };
+          EnqueueChunkRemove(position);
         }
       }
     }
@@ -130,5 +141,161 @@ namespace blocks
   glm::ivec2 MapLoadingModule::CalculateChunkCenter(glm::vec3 position)
   {
     return glm::ivec2((int)position.x / Chunk::Length, (int)position.y / Chunk::Width);
+  }
+
+
+  void MapLoadingModule::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position)
+  {
+    std::shared_ptr<Chunk> chunk = map->GetChunk(position);
+    std::shared_ptr<Chunk> frontChunk = map->GetChunk({ position.first + 1, position.second });
+    std::shared_ptr<Chunk> backChunk = map->GetChunk({ position.first - 1, position.second });
+    std::shared_ptr<Chunk> rightChunk = map->GetChunk({ position.first, position.second + 1 });
+    std::shared_ptr<Chunk> leftChunk = map->GetChunk({ position.first, position.second - 1 });
+
+    std::vector<OpenglChunkVertex> rawData = GenerateRawChunkData(chunk, frontChunk, backChunk, rightChunk, leftChunk);
+    ChunksQueueItem item
+    {
+      .chunkData = rawData,
+      .position = position,
+      .add = true
+    };
+
+    std::lock_guard<std::mutex> locker(queueMutex_);
+    chunksActionQueue_.push(item);
+  }
+
+  void MapLoadingModule::EnqueueChunkRemove(ChunkPosition position)
+  {
+    ChunksQueueItem item
+    {
+      .position = position,
+      .add = false
+    };
+
+    std::lock_guard<std::mutex> locker(queueMutex_);
+    chunksActionQueue_.push(item);
+  }
+
+  std::vector<OpenglChunkVertex> MapLoadingModule::GenerateRawChunkData(
+    std::shared_ptr<Chunk> chunk,
+    std::shared_ptr<Chunk> frontChunk,
+    std::shared_ptr<Chunk> backChunk,
+    std::shared_ptr<Chunk> rightChunk,
+    std::shared_ptr<Chunk> leftChunk
+  )
+  {
+    static const size_t VerticesPerBlockNumber = 4 * 6;
+    static const size_t verticesPerChunkNumber = Chunk::BlocksNumber * VerticesPerBlockNumber;
+
+    std::vector<OpenglChunkVertex> verticesData;
+    verticesData.reserve(verticesPerChunkNumber);
+
+    BlockInfo testBlock = blockSet_->GetBlockInfo(0);
+
+    for (unsigned int z = 0; z < Chunk::Height; z++)
+    {
+      for (unsigned int y = 0; y < Chunk::Width; y++)
+      {
+        for (unsigned int x = 0; x < Chunk::Length; x++)
+        {
+          size_t blockIndex = x + y * Chunk::Width + z * Chunk::LayerBlocksNumber;
+
+          if (chunk->blocks[blockIndex] == 0)
+          {
+            continue;
+          }
+
+          BlockInfo fBlock = blockSet_->GetBlockInfo(chunk->blocks[blockIndex] - 1);
+
+          glm::vec3 position(x, y, z);
+
+          // Check front face
+          bool isFrontBorder = x == Chunk::Length - 1;
+          if ((isFrontBorder && frontChunk->blocks[blockIndex - Chunk::Length + 1] == 0) || (!isFrontBorder && chunk->blocks[blockIndex + 1] == 0))
+          {
+            // Add front face
+
+            verticesData.push_back(packVertex(x, y, z, 0, 0, fBlock.textures[0]));
+            verticesData.push_back(packVertex(x, y, z, 0, 1, fBlock.textures[0]));
+            verticesData.push_back(packVertex(x, y, z, 0, 2, fBlock.textures[0]));
+            verticesData.push_back(packVertex(x, y, z, 0, 2, fBlock.textures[0]));
+            verticesData.push_back(packVertex(x, y, z, 0, 1, fBlock.textures[0]));
+            verticesData.push_back(packVertex(x, y, z, 0, 3, fBlock.textures[0]));
+          }
+
+          // Check back face
+          bool isBackBorder = x == 0;
+          if ((isBackBorder && backChunk->blocks[blockIndex + Chunk::Length - 1] == 0) || (!isBackBorder && chunk->blocks[blockIndex - 1] == 0))
+          {
+            // Add back face
+
+            verticesData.push_back(packVertex(x, y, z, 1, 0, fBlock.textures[1]));
+            verticesData.push_back(packVertex(x, y, z, 1, 1, fBlock.textures[1]));
+            verticesData.push_back(packVertex(x, y, z, 1, 2, fBlock.textures[1]));
+            verticesData.push_back(packVertex(x, y, z, 1, 2, fBlock.textures[1]));
+            verticesData.push_back(packVertex(x, y, z, 1, 1, fBlock.textures[1]));
+            verticesData.push_back(packVertex(x, y, z, 1, 3, fBlock.textures[1]));
+          }
+
+          // Check right face
+          bool isRightBorder = y == Chunk::Width - 1;
+          if ((isRightBorder && rightChunk->blocks[blockIndex - Chunk::LayerBlocksNumber + Chunk::Length] == 0) || (!isRightBorder && chunk->blocks[blockIndex + Chunk::Length] == 0))
+          {
+            // Add right face
+
+            verticesData.push_back(packVertex(x, y, z, 2, 0, fBlock.textures[2]));
+            verticesData.push_back(packVertex(x, y, z, 2, 1, fBlock.textures[2]));
+            verticesData.push_back(packVertex(x, y, z, 2, 2, fBlock.textures[2]));
+            verticesData.push_back(packVertex(x, y, z, 2, 2, fBlock.textures[2]));
+            verticesData.push_back(packVertex(x, y, z, 2, 1, fBlock.textures[2]));
+            verticesData.push_back(packVertex(x, y, z, 2, 3, fBlock.textures[2]));
+          }
+
+          // Check left face
+          bool isLeftBorder = y == 0;
+          if ((isLeftBorder && leftChunk->blocks[blockIndex + Chunk::LayerBlocksNumber - Chunk::Length] == 0) || (!isLeftBorder && chunk->blocks[blockIndex - Chunk::Length] == 0))
+          {
+            // Add left face
+
+            verticesData.push_back(packVertex(x, y, z, 3, 0, fBlock.textures[3]));
+            verticesData.push_back(packVertex(x, y, z, 3, 1, fBlock.textures[3]));
+            verticesData.push_back(packVertex(x, y, z, 3, 2, fBlock.textures[3]));
+            verticesData.push_back(packVertex(x, y, z, 3, 2, fBlock.textures[3]));
+            verticesData.push_back(packVertex(x, y, z, 3, 1, fBlock.textures[3]));
+            verticesData.push_back(packVertex(x, y, z, 3, 3, fBlock.textures[3]));
+          }
+
+          // Check top face
+          bool isTopBorder = z == Chunk::Height - 1;
+          if (isTopBorder || chunk->blocks[blockIndex + Chunk::LayerBlocksNumber] == 0)
+          {
+            // Add top face
+
+            verticesData.push_back(packVertex(x, y, z, 4, 0, fBlock.textures[4]));
+            verticesData.push_back(packVertex(x, y, z, 4, 1, fBlock.textures[4]));
+            verticesData.push_back(packVertex(x, y, z, 4, 2, fBlock.textures[4]));
+            verticesData.push_back(packVertex(x, y, z, 4, 2, fBlock.textures[4]));
+            verticesData.push_back(packVertex(x, y, z, 4, 1, fBlock.textures[4]));
+            verticesData.push_back(packVertex(x, y, z, 4, 3, fBlock.textures[4]));
+          }
+
+          // Check bottom face
+          bool isBottomBorder = z == 0;
+          if (isBottomBorder || chunk->blocks[blockIndex - Chunk::LayerBlocksNumber] == 0)
+          {
+            // Add bottom face
+
+            verticesData.push_back(packVertex(x, y, z, 5, 0, fBlock.textures[5]));
+            verticesData.push_back(packVertex(x, y, z, 5, 1, fBlock.textures[5]));
+            verticesData.push_back(packVertex(x, y, z, 5, 2, fBlock.textures[5]));
+            verticesData.push_back(packVertex(x, y, z, 5, 2, fBlock.textures[5]));
+            verticesData.push_back(packVertex(x, y, z, 5, 1, fBlock.textures[5]));
+            verticesData.push_back(packVertex(x, y, z, 5, 3, fBlock.textures[5]));
+          }
+        }
+      }
+    }
+
+    return verticesData;
   }
 }

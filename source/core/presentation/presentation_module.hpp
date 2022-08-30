@@ -4,7 +4,7 @@
 #include "game_context.hpp"
 #include "map_loading_module.hpp"
 #include "render/opengl_render_module.hpp"
-#include "simulation/model_update_event.hpp"
+#include "simulation/base_model_update_event.hpp"
 
 
 namespace blocks
@@ -15,7 +15,7 @@ namespace blocks
     PresentationModule();
 
     void Update(float delta, GameContext& context);
-    void ProcessModelUpdate(const ModelUpdateEvent& e, GameContext& contex);
+    void ProcessModelUpdate(BaseModelUpdateEvent* e, GameContext& contex);
     void OnSceneChanged(GameContext& context);
 
     void SetContext(GlfwWindow& window);

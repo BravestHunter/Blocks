@@ -32,8 +32,6 @@ namespace blocks
       return;
     }
 
-    openglScene_->GetMap()->ProcessQueues();
-
     Clear();
 
     glm::ivec2 windowSize = context_->window_.GetSize();

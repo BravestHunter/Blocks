@@ -2,7 +2,8 @@
 
 #include <iostream>
 
-#include "simulation/model_update_event.hpp"
+#include "simulation/player_position_changed_event.hpp"
+#include "simulation/chunk_updated_event.hpp"
 
 
 namespace blocks
@@ -58,7 +59,7 @@ namespace blocks
 
     if (shift.x != 0 || shift.y != 0 || shift.z != 0)
     {
-      context.modelUpdateEventsQueue.Push(ModelUpdateEvent::PlayerPositionChanged);
+      context.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(position));
     }
 
     //if (!context.scene->GetMap()->Collides(context.playerBounds, position))
@@ -171,7 +172,7 @@ namespace blocks
 
         std::shared_ptr<Chunk> chunk = context.scene->GetWorld()->GetMap()->GetChunk(placeChunkPosition);
         chunk->blocks[placeBlockPosition.x + placeBlockPosition.y * Chunk::Width + placeBlockPosition.z * Chunk::LayerBlocksNumber] = 1;
-        context.openglScene->GetMap()->EnqueueChunkAdd(context.scene->GetWorld()->GetMap(), placeChunkPosition);
+        context.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(placeChunkPosition));
       }
     }
     else if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_2))
@@ -186,7 +187,7 @@ namespace blocks
 
         std::shared_ptr<Chunk> chunk = context.scene->GetWorld()->GetMap()->GetChunk(blockLookAt.chunkPosition);
         chunk->blocks[blockLookAt.blockPosition.x + blockLookAt.blockPosition.y * Chunk::Width + blockLookAt.blockPosition.z * Chunk::LayerBlocksNumber] = 0;
-        context.openglScene->GetMap()->EnqueueChunkAdd(context.scene->GetWorld()->GetMap(), blockLookAt.chunkPosition);
+        context.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(blockLookAt.chunkPosition));
       }
     }
   }

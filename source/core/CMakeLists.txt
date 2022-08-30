@@ -14,7 +14,10 @@ set(CORE_SOURCE_FILES
 	input/input_module.hpp
 	input/input_module.cpp
 
-	simulation/model_update_event.hpp
+	simulation/model_update_event_type.hpp
+	simulation/base_model_update_event.hpp
+	simulation/player_position_changed_event.hpp
+	simulation/chunk_updated_event.hpp
 	simulation/simulation_module.hpp
 	simulation/simulation_module.cpp
 
