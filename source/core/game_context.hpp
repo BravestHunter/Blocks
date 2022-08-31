@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "collections/concurrent_queue.hpp"
-#include "camera.hpp"
+#include "simulation/camera.hpp"
 #include "scene/scene.hpp"
 #include "simulation/base_model_update_event.hpp"
 #include "geometry/aabb.hpp"

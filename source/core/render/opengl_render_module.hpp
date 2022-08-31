@@ -8,7 +8,7 @@
 #include "render/opengl_context.hpp"
 #include "render/opengl_program.hpp"
 #include "opengl_scene.hpp"
-#include "camera.hpp"
+#include "simulation/camera.hpp"
 
 
 namespace blocks

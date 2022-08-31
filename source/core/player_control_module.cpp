@@ -24,7 +24,6 @@ namespace blocks
     {
       MovePlayer(delta, inputState, context);
       RotateCamera(delta, inputState, context);
-      ZoomCamera(delta, inputState, context);
       ManageBlockPlacement(delta, inputState, context);
     }
   }
@@ -32,7 +31,7 @@ namespace blocks
 
   void PlayerControlModule::MovePlayer(const float delta, const InputState& inputState, GameContext& context)
   {
-    const float velocity = delta * 32.0f;
+    const float velocity = delta * movementSpeed_;
 
     glm::vec3 position = context.camera->GetPosition();
     glm::vec3 shift = glm::vec3(0.0f);
@@ -73,16 +72,11 @@ namespace blocks
     if (!context.isCursorEnabled)
     {
       const glm::vec2 offset = inputState.GetCursorOffset();
-      context.camera->ProcessMouseMovement(offset.x, -offset.y);
-    }
-  }
 
-  void PlayerControlModule::ZoomCamera(const float delta, const InputState& inputState, GameContext& context)
-  {
-    if (!context.isCursorEnabled)
-    {
-      const glm::vec2 offset = inputState.GetScrollOffset();
-      context.camera->ProcessMouseScroll(offset.y);
+      glm::vec2 actualOffset = offset * mouseSensitivity_;
+
+      context.camera->SetYaw(context.camera->GetYaw() + actualOffset.x);
+      context.camera->SetPitch(context.camera->GetPitch() + actualOffset.y);
     }
   }
 

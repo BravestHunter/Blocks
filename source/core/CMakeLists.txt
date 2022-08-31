@@ -3,8 +3,6 @@ set(CORE_SOURCE_FILES
 	game_module_interface.hpp
 	player_control_module.hpp
 	player_control_module.cpp
-	camera.hpp
-	camera.cpp
 	block_side.hpp
 	game.hpp
 	game.cpp
@@ -18,6 +16,8 @@ set(CORE_SOURCE_FILES
 	simulation/base_model_update_event.hpp
 	simulation/player_position_changed_event.hpp
 	simulation/chunk_updated_event.hpp
+	simulation/camera.hpp
+	simulation/camera.cpp
 	simulation/simulation_module.hpp
 	simulation/simulation_module.cpp
 

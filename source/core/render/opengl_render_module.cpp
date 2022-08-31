@@ -145,7 +145,7 @@ namespace blocks
     mapProgram->Setup();
     mapProgram->SetInt("texture", 0);
 
-    glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), ratio, 0.1f, 1000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), ratio, 0.1f, 1000.0f);
     glm::mat4 view = camera->GetViewMatrix();
 
     for (auto pair : map->chunks_)
