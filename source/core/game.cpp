@@ -24,7 +24,6 @@ namespace blocks
   {
     context_.scene = SceneBuilder::BuildMainMenuScene(this);
     context_.camera = std::make_shared<Camera>(glm::vec3(8.0f, 8.0f, 270.0f));
-    context_.playerBounds = blocks::AABB(glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(0.25f, 0.25f, 0.25f));
 
     inputModule_.SetupWindow(window_);
   }
@@ -118,7 +117,6 @@ namespace blocks
 
     presentationModule_.SetContext(window_);
     presentationModule_.InitResources();
-    context_.openglScene = presentationModule_.GetRenderModule().GetOpenglScene();
 
     float lastTime = (float)platform.GetTime();
     while (isRunning_)

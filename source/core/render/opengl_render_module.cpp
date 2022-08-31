@@ -25,7 +25,7 @@ namespace blocks
   }
 
 
-  void OpenglRenderModule::Update(float delta, GameContext& context)
+  void OpenglRenderModule::Update(float delta, PresentationContext& presentationContext, GameContext& gameContext)
   {
     if (!IsCorrectThread())
     {
@@ -36,13 +36,13 @@ namespace blocks
 
     glm::ivec2 windowSize = context_->window_.GetSize();
     float ratio = (float)windowSize.x / (float)windowSize.y;
-    RenderMap(openglScene_->GetMap(), mapProgram_, context.camera, ratio);
+    RenderMap(presentationContext.openglScene->GetMap(), mapProgram_, gameContext.camera, ratio);
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    auto imguiWindowsIterator = context.scene->GetImguiWindowsIterator();
+    auto imguiWindowsIterator = gameContext.scene->GetImguiWindowsIterator();
     for (auto it = imguiWindowsIterator.first; it != imguiWindowsIterator.second; it++)
     {
       it->get()->Render();
@@ -89,7 +89,7 @@ namespace blocks
     context_ = std::make_unique<OpenglContext>(window, id);
   }
 
-  void OpenglRenderModule::InitResources()
+  void OpenglRenderModule::InitResources(PresentationContext& presentationContext)
   {
     if (!IsCorrectThread())
     {
@@ -103,29 +103,18 @@ namespace blocks
     OpenglShader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
     mapProgram_ = std::make_shared<OpenglProgram>(vertexShader, fragmentShader);
 
-    openglScene_ = std::make_shared<OpenglScene>();
-    openglScene_->InitMap();
+    presentationContext.openglScene = std::make_shared<OpenglScene>();
+    presentationContext.openglScene->InitMap();
 
     ResourceBase& resourceBase = Environment::GetResource();
     std::shared_ptr<BlockSet> blockSet = resourceBase.LoadBlockSet(resourceBase.GetBlockSetNames()->front());
-    openglScene_->GetMap()->SetBlockSet(blockSet);
+    presentationContext.openglScene->GetMap()->SetBlockSet(blockSet);
   }
 
-  void OpenglRenderModule::FreeResources()
+  void OpenglRenderModule::FreeResources(PresentationContext& presentationContext)
   {
     mapProgram_.reset();
-    openglScene_.reset();
-  }
-
-
-  std::shared_ptr<OpenglScene> OpenglRenderModule::GetOpenglScene()
-  {
-    if (!openglScene_)
-    {
-      throw new std::exception("Opengl scene wasn't set");
-    }
-
-    return openglScene_;
+    presentationContext.openglScene.reset();
   }
 
 

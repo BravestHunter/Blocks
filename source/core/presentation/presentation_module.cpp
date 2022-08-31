@@ -1,28 +1,29 @@
 #include "presentation_module.hpp"
 
+#include "environment.hpp"
+
 
 namespace blocks
 {
   PresentationModule::PresentationModule()
   {
-    mapLoadingModule_.SetRenderModule(&renderModule_);
   }
 
 
-  void PresentationModule::Update(float delta, GameContext& context)
+  void PresentationModule::Update(float delta, GameContext& gameContext)
   {
-    mapLoadingModule_.Update(delta, context);
-    renderModule_.Update(delta, context);
+    mapLoadingModule_.Update(delta, presentationContext_, gameContext);
+    renderModule_.Update(delta, presentationContext_, gameContext);
   }
 
-  void PresentationModule::ProcessModelUpdate(BaseModelUpdateEvent* e, GameContext& context)
+  void PresentationModule::ProcessModelUpdate(BaseModelUpdateEvent* e, GameContext& gameContext)
   {
-    mapLoadingModule_.ProcessModelUpdate(e, context);
+    mapLoadingModule_.ProcessModelUpdate(e, presentationContext_, gameContext);
   }
 
-  void PresentationModule::OnSceneChanged(GameContext& context)
+  void PresentationModule::OnSceneChanged(GameContext& gameContext)
   {
-    mapLoadingModule_.OnSceneChanged(context);
+    mapLoadingModule_.OnSceneChanged(presentationContext_, gameContext);
   }
 
 
@@ -33,13 +34,15 @@ namespace blocks
 
   void PresentationModule::InitResources()
   {
-    renderModule_.InitResources();
-    mapLoadingModule_.InitResources();
+    ResourceBase& resourceBase = Environment::GetResource();
+    presentationContext_.blockSet = resourceBase.LoadBlockSet(resourceBase.GetBlockSetNames()->front());
+
+    renderModule_.InitResources(presentationContext_);
   }
 
   void PresentationModule::FreeResources()
   {
-    renderModule_.FreeResources();
+    renderModule_.FreeResources(presentationContext_);
   }
 
 

@@ -21,6 +21,7 @@ set(CORE_SOURCE_FILES
 	simulation/simulation_module.hpp
 	simulation/simulation_module.cpp
 
+	presentation/presentation_context.hpp
 	presentation/map_loading_module.hpp
 	presentation/map_loading_module.cpp
 	presentation/presentation_module.hpp

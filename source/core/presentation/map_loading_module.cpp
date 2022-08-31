@@ -19,14 +19,7 @@ namespace blocks
   }
 
 
-  void MapLoadingModule::InitResources()
-  {
-    ResourceBase& resourceBase = Environment::GetResource();
-    blockSet_ = resourceBase.LoadBlockSet(resourceBase.GetBlockSetNames()->front());
-  }
-
-
-  void MapLoadingModule::Update(float delta, GameContext& context)
+  void MapLoadingModule::Update(float delta, PresentationContext& presentationContext, GameContext& gameContext)
   {
     std::lock_guard<std::mutex> locker(queueMutex_);
 
@@ -37,18 +30,18 @@ namespace blocks
       
       if (item.add)
       {
-        context.openglScene->GetMap()->AddChunk(item.chunkData, item.position);
+        presentationContext.openglScene->GetMap()->AddChunk(item.chunkData, item.position);
       }
       else
       {
-        context.openglScene->GetMap()->RemoveChunk(item.position);
+        presentationContext.openglScene->GetMap()->RemoveChunk(item.position);
       }
     }
   }
 
-  void MapLoadingModule::ProcessModelUpdate(BaseModelUpdateEvent* e, GameContext& context)
+  void MapLoadingModule::ProcessModelUpdate(BaseModelUpdateEvent* e, PresentationContext& presentationContext, GameContext& gameContext)
   {
-    if (context.scene->ContainsWorld() == false)
+    if (gameContext.scene->ContainsWorld() == false)
     {
       return;
     }
@@ -62,8 +55,8 @@ namespace blocks
 
         if (centerChunk != lastCenterChunkCoords_)
         {
-          RemoveChunks(centerChunk, lastCenterChunkCoords_);
-          AddChunks(centerChunk, context.scene->GetWorld()->GetMap());
+          RemoveChunks(centerChunk, lastCenterChunkCoords_, presentationContext);
+          AddChunks(centerChunk, gameContext.scene->GetWorld()->GetMap(), presentationContext);
 
           lastCenterChunkCoords_ = centerChunk;
         }
@@ -73,37 +66,27 @@ namespace blocks
       case ModelUpdateEventType::ChunkUpdated:
       {
         ChunkUpdatedEvent* positionChangedEvent = static_cast<ChunkUpdatedEvent*>(e);
-        EnqueueChunkAdd(context.scene->GetWorld()->GetMap(), positionChangedEvent->GetPosition());
+        EnqueueChunkAdd(gameContext.scene->GetWorld()->GetMap(), positionChangedEvent->GetPosition(), presentationContext.blockSet);
         break;
       }
     }
   }
 
 
-  void MapLoadingModule::SetRenderModule(OpenglRenderModule* renderModule)
+  void MapLoadingModule::OnSceneChanged(PresentationContext& presentationContext, GameContext& gameContext)
   {
-    renderModule_ = renderModule;
-  }
-
-  void MapLoadingModule::SetBlockSet(std::shared_ptr<BlockSet> blockSet)
-  {
-    blockSet_ = blockSet;
-  }
-
-
-  void MapLoadingModule::OnSceneChanged(GameContext& context)
-  {
-    if (context.scene->ContainsWorld())
+    if (gameContext.scene->ContainsWorld())
     {
-      lastCenterChunkCoords_ = CalculateChunkCenter(context.camera->GetPosition());
-      AddChunks(lastCenterChunkCoords_, context.scene->GetWorld()->GetMap());
+      lastCenterChunkCoords_ = CalculateChunkCenter(gameContext.camera->GetPosition());
+      AddChunks(lastCenterChunkCoords_, gameContext.scene->GetWorld()->GetMap(), presentationContext);
     }
   }
 
 
-  void MapLoadingModule::AddChunks(glm::ivec2 centerChunkCoords, std::shared_ptr<Map> map)
+  void MapLoadingModule::AddChunks(glm::ivec2 centerChunkCoords, std::shared_ptr<Map> map, PresentationContext& presentationContext)
   {
-    std::shared_ptr<OpenglMap> openglMap = renderModule_->GetOpenglScene()->GetMap();
+    std::shared_ptr<OpenglMap> openglMap = presentationContext.openglScene->GetMap();
+
     for (int x = centerChunkCoords.x - loadingRadius_; x <= centerChunkCoords.x + loadingRadius_; x++)
     {
       for (int y = centerChunkCoords.y - loadingRadius_; y <= centerChunkCoords.y + loadingRadius_; y++)
@@ -112,15 +95,15 @@ namespace blocks
 
         if (!openglMap->ContainsChunk(position))
         {
-          EnqueueChunkAdd(map, position);
+          EnqueueChunkAdd(map, position, presentationContext.blockSet);
         }
       }
     }
   }
 
-  void MapLoadingModule::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunkCoords)
+  void MapLoadingModule::RemoveChunks(glm::ivec2 CenterChunkCoords, glm::ivec2 lastCenterChunkCoords, PresentationContext& presentationContext)
   {
-    std::shared_ptr<OpenglMap> openglMap = renderModule_->GetOpenglScene()->GetMap();
+    std::shared_ptr<OpenglMap> openglMap = presentationContext.openglScene->GetMap();
     glm::ivec2 xBorders = glm::ivec2(CenterChunkCoords.x - loadingRadius_, CenterChunkCoords.x + loadingRadius_);
     glm::ivec2 yBorders = glm::ivec2(CenterChunkCoords.y - loadingRadius_, CenterChunkCoords.y + loadingRadius_);
 
@@ -144,7 +127,7 @@ namespace blocks
   }
 
 
-  void MapLoadingModule::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position)
+  void MapLoadingModule::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position, std::shared_ptr<BlockSet> blockSet)
   {
     std::shared_ptr<Chunk> chunk = map->GetChunk(position);
     std::shared_ptr<Chunk> frontChunk = map->GetChunk({ position.first + 1, position.second });
@@ -152,7 +135,7 @@ namespace blocks
     std::shared_ptr<Chunk> rightChunk = map->GetChunk({ position.first, position.second + 1 });
     std::shared_ptr<Chunk> leftChunk = map->GetChunk({ position.first, position.second - 1 });
 
-    std::vector<OpenglChunkVertex> rawData = GenerateRawChunkData(chunk, frontChunk, backChunk, rightChunk, leftChunk);
+    std::vector<OpenglChunkVertex> rawData = GenerateRawChunkData(chunk, frontChunk, backChunk, rightChunk, leftChunk, blockSet);
     ChunksQueueItem item
     {
       .chunkData = rawData,
@@ -181,7 +164,8 @@ namespace blocks
     std::shared_ptr<Chunk> frontChunk,
     std::shared_ptr<Chunk> backChunk,
     std::shared_ptr<Chunk> rightChunk,
-    std::shared_ptr<Chunk> leftChunk
+    std::shared_ptr<Chunk> leftChunk,
+    std::shared_ptr<BlockSet> blockSet
   )
   {
     static const size_t VerticesPerBlockNumber = 4 * 6;
@@ -189,8 +173,6 @@ namespace blocks
 
     std::vector<OpenglChunkVertex> verticesData;
     verticesData.reserve(verticesPerChunkNumber);
-
-    BlockInfo testBlock = blockSet_->GetBlockInfo(0);
 
     for (unsigned int z = 0; z < Chunk::Height; z++)
     {
@@ -205,7 +187,7 @@ namespace blocks
             continue;
           }
 
-          BlockInfo fBlock = blockSet_->GetBlockInfo(chunk->blocks[blockIndex] - 1);
+          BlockInfo fBlock = blockSet->GetBlockInfo(chunk->blocks[blockIndex] - 1);
 
           glm::vec3 position(x, y, z);
 

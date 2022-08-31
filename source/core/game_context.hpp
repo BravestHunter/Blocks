@@ -17,10 +17,7 @@ namespace blocks
     std::shared_ptr<Scene> scene;
     ConcurrentQueue<std::shared_ptr<BaseModelUpdateEvent>> modelUpdateEventsQueue;
     std::shared_ptr<Camera> camera;
-    std::shared_ptr<OpenglScene> openglScene;
 
     bool isCursorEnabled = true;
-
-    blocks::AABB playerBounds;
   };
 }
