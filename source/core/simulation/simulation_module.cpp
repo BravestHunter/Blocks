@@ -9,8 +9,9 @@ namespace blocks
   }
 
 
-  void SimulationModule::Update(float delta, const InputState& inputState, GameContext& context)
+  void SimulationModule::Update(float delta, const InputState& inputState, GameContext& gameContext)
   {
-    playerControlModule_.Update(delta, inputState, context);
+    playerControlModule_.Update(delta, inputState, gameContext);
+    physicsModule_.Update(delta, gameContext);
   }
 }

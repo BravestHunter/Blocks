@@ -17,14 +17,14 @@ namespace blocks
     PlayerControlModule& operator=(PlayerControlModule&& other) = delete;
     ~PlayerControlModule();
 
-    virtual void Update(const float delta, const InputState& inputState, GameContext& context);
+    virtual void Update(const float delta, const InputState& inputState, GameContext& gameContext);
 
   private:
     float movementSpeed_ = 32.0f;
     float mouseSensitivity_ = 0.1f;
 
-    void MovePlayer(const float delta, const InputState& inputState, GameContext& context);
-    void RotateCamera(const float delta, const InputState& inputState, GameContext& context);
-    void ManageBlockPlacement(const float delta, const InputState& inputState, GameContext& context);
+    void MovePlayer(const float delta, const InputState& inputState, GameContext& gameContext);
+    void RotateCamera(const float delta, const InputState& inputState, GameContext& gameContext);
+    void ManageBlockPlacement(const float delta, const InputState& inputState, GameContext& gameContext);
   };
 }

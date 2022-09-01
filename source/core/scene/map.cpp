@@ -86,7 +86,7 @@ namespace blocks
     }
     std::shared_ptr<Chunk> chunk = GetChunk(chunkPosition);
 
-    blocks::AABB localBounds(bounds.low + localPosition, bounds.high + localPosition);
+    blocks::AABB localBounds(bounds.center + localPosition, bounds.size);
 
     glm::ivec3 centralBlockPosition = glm::ivec3(localPosition);
 

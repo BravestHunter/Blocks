@@ -6,6 +6,7 @@
 
 #include "game_context.hpp"
 #include "player_control_module.hpp"
+#include "physics_module.hpp"
 
 
 namespace blocks
@@ -15,9 +16,10 @@ namespace blocks
   public:
     SimulationModule();
 
-    void Update(float delta, const InputState& inputState, GameContext& context);
+    void Update(float delta, const InputState& inputState, GameContext& gameContext);
 
   private:
     PlayerControlModule playerControlModule_;
+    PhysicsModule physicsModule_;
   };
 }

@@ -1,8 +1,6 @@
 set(CORE_SOURCE_FILES
 	game_context.hpp
 	game_module_interface.hpp
-	player_control_module.hpp
-	player_control_module.cpp
 	block_side.hpp
 	game.hpp
 	game.cpp
@@ -18,6 +16,10 @@ set(CORE_SOURCE_FILES
 	simulation/chunk_updated_event.hpp
 	simulation/camera.hpp
 	simulation/camera.cpp
+	simulation/player_control_module.hpp
+	simulation/player_control_module.cpp
+	simulation/physics_module.hpp
+	simulation/physics_module.cpp
 	simulation/simulation_module.hpp
 	simulation/simulation_module.cpp
 

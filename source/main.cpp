@@ -18,6 +18,8 @@ void RunGame()
 
 int main()
 {
+  srand(time(0));
+
   std::cout << "Blocks application" << std::endl;
   std::cout << "Version " << Blocks_VERSION_MAJOR << "." << Blocks_VERSION_MINOR << std::endl;
 

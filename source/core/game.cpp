@@ -36,7 +36,7 @@ namespace blocks
   int Game::Run()
   {
     std::thread renderThread(&Game::RunRenderCycle, this);
-    std::thread renderUpdateThread(&Game::RunRenderUpdateCycle, this);
+    std::thread renderUpdateThread(&Game::RunPresentationUpdateCycle, this);
 
     RunSimulationCycle();
 
@@ -135,7 +135,7 @@ namespace blocks
     presentationModule_.FreeResources();
   }
 
-  void Game::RunRenderUpdateCycle()
+  void Game::RunPresentationUpdateCycle()
   {
     std::condition_variable cv;
     std::mutex mut;
