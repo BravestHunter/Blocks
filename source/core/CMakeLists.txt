@@ -68,6 +68,8 @@ set(CORE_SOURCE_FILES
 	ui/imgui_text.cpp
 	ui/imgui_button.hpp
 	ui/imgui_button.cpp
+	ui/imgui_input_text.hpp
+	ui/imgui_input_text.cpp
 	ui/imgui_window.hpp
 	ui/imgui_window.cpp
 )
