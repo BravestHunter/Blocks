@@ -56,6 +56,8 @@ set(CORE_SOURCE_FILES
 	render/opengl_render_module.cpp
 
 	scene/block_look_at.hpp
+	scene/entity.hpp
+	scene/entity.cpp
 	scene/map.hpp
 	scene/map.cpp
 	scene/world.hpp

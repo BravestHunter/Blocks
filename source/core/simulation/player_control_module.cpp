@@ -20,12 +20,9 @@ namespace blocks
 
   void PlayerControlModule::Update(const float delta, const InputState& inputState, GameContext& gameContext)
   {
-    if (gameContext.scene->ContainsWorld())
-    {
-      MovePlayer(delta, inputState, gameContext);
-      RotateCamera(delta, inputState, gameContext);
-      ManageBlockPlacement(delta, inputState, gameContext);
-    }
+    MovePlayer(delta, inputState, gameContext);
+    RotateCamera(delta, inputState, gameContext);
+    ManageBlockPlacement(delta, inputState, gameContext);
   }
 
 
@@ -54,11 +51,11 @@ namespace blocks
     }
 
     position += shift;
-    gameContext.camera->SetPosition(position);
+    //gameContext.camera->SetPosition(position);
 
     if (shift.x != 0 || shift.y != 0 || shift.z != 0)
     {
-      gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(position));
+      //gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(position));
     }
 
     //if (!context.scene->GetMap()->Collides(context.playerBounds, position))

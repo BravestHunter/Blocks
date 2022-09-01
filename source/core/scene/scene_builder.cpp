@@ -144,8 +144,26 @@ namespace blocks
 
     scene->world_ = world;
 
-    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Statistics");
+    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Parameters");
     scene->imguiWindows_.push_back(window);
+
+    const std::string name = world->GetName();
+    std::shared_ptr<ImguiText> nameText = std::make_shared<ImguiText>(
+      [name]()
+      {
+        return  std::format("Map {}", name);
+      }
+    );
+    window->AddElement(nameText);
+
+    const int seed = world->GetMap()->GetSeed();
+    std::shared_ptr<ImguiText> seedText = std::make_shared<ImguiText>(
+      [seed]()
+      {
+        return  std::format("Seed: {}", seed);
+      }
+    );
+    window->AddElement(seedText);
 
     std::shared_ptr<ImguiText> lockCursorHelpText = std::make_shared<ImguiText>("(Press \"L\" to lock/unlock cursor)");
     window->AddElement(lockCursorHelpText);
@@ -176,14 +194,14 @@ namespace blocks
     );
     window->AddElement(cameraDirectionText);
 
-    const int seed = world->GetMap()->GetSeed();
-    std::shared_ptr<ImguiText> seedText = std::make_shared<ImguiText>(
-      [seed]()
+    std::shared_ptr<ImguiText> playerVelocityText = std::make_shared<ImguiText>(
+      [game]()
       {
-        return  std::format("Map seed: {}", seed);
+        glm::vec3 velocity = game->GetContext().scene->GetWorld()->GetPlayer().GetVelocity();
+        return  std::format("Player velocity: {0:.2f} {1:.2f} {2:.2f}", velocity.x, velocity.y, velocity.z);
       }
     );
-    window->AddElement(seedText);
+    window->AddElement(playerVelocityText);
 
     return scene;
   }

@@ -19,5 +19,6 @@ namespace blocks
     std::shared_ptr<Camera> camera;
 
     bool isCursorEnabled = true;
+    bool isPhysicsEnabled = false;
   };
 }
