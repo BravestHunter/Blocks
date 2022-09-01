@@ -28,7 +28,7 @@ namespace blocks
     }
 
     std::string worldDataFilePath = std::format("{0}/world.dat", path_);
-    std::vector<unsigned char> bytes = serializeWorld(&data_);
+    std::vector<unsigned char> bytes = serializeWorld(data_);
     blocks::saveBinaryFile(worldDataFilePath, bytes);
   }
 

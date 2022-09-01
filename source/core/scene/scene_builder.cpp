@@ -3,9 +3,11 @@
 #include <format>
 
 #include "io/file_api.hpp"
+#include "serialization.hpp"
 #include "ui/imgui_button.hpp"
 #include "ui/imgui_text.hpp"
 #include "ui/imgui_input_text.hpp"
+#include "ui/imgui_list_box.hpp"
 
 
 namespace blocks
@@ -26,6 +28,16 @@ namespace blocks
       }
     );
     window->AddElement(createWorldButton);
+
+    std::shared_ptr<ImguiButton> loadWorldButton = std::make_shared<ImguiButton>(
+      "Load world",
+      [game]()
+      {
+        std::shared_ptr<Scene> worldLoadingScene_ = BuildWorldLoadingScene(game);
+        game->RequestScene(worldLoadingScene_);
+      }
+    );
+    window->AddElement(loadWorldButton);
 
     return scene;
   }
@@ -68,6 +80,50 @@ namespace blocks
       }
     );
     window->AddElement(createWorldButton);
+
+    std::shared_ptr<ImguiButton> backButton = std::make_shared<ImguiButton>(
+      "Back",
+      [game]()
+      {
+        std::shared_ptr<Scene> mainMenuScene = BuildMainMenuScene(game);
+        game->RequestScene(mainMenuScene);
+      }
+    );
+    window->AddElement(backButton);
+
+    return scene;
+  }
+
+  std::shared_ptr<Scene> SceneBuilder::BuildWorldLoadingScene(Game* game)
+  {
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+
+    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("World creation menu");
+    scene->imguiWindows_.push_back(window);
+
+    std::shared_ptr<ImguiListBox> worldsListBox = std::make_shared<ImguiListBox>("Worlds", getDirectoriesInDirectory("worlds"));
+    window->AddElement(worldsListBox);
+
+    std::shared_ptr<ImguiButton> loadWorldButton = std::make_shared<ImguiButton>(
+      "Load",
+      [game, worldsListBox]()
+      {
+        std::string selectedWorldName = worldsListBox->GetSelectedItem();
+
+        std::string worldDataPath = std::format("worlds/{0}/world.dat", selectedWorldName);
+        if (isPathExist(worldDataPath) == false)
+        {
+          return;
+        }
+
+        std::vector<unsigned char> bytes = readBinaryFile(worldDataPath);
+        WorldData worldData = deserializeWorld(bytes);
+
+        std::shared_ptr<Scene> worldScene_ = BuildWorldScene(game, std::make_shared<World>(worldData));
+        game->RequestScene(worldScene_);
+      }
+    );
+    window->AddElement(loadWorldButton);
 
     std::shared_ptr<ImguiButton> backButton = std::make_shared<ImguiButton>(
       "Back",

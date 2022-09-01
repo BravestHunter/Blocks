@@ -27,6 +27,21 @@ namespace blocks
     return paths;
   }
 
+  std::vector<std::string> getDirectoriesInDirectory(std::string path)
+  {
+    std::vector<std::string> paths;
+
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+    {
+      if (entry.is_directory())
+      {
+        paths.push_back(entry.path().filename().string());
+      }
+    }
+
+    return paths;
+  }
+
 
   void createDirectory(std::string path)
   {

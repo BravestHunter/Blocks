@@ -8,6 +8,7 @@ namespace blocks
 {
   bool isPathExist(std::string path);
   std::vector<std::string> getFilesInDirectory(std::string path);
+  std::vector<std::string> getDirectoriesInDirectory(std::string path);
 
   void createDirectory(std::string path);
 
