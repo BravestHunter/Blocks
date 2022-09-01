@@ -70,6 +70,8 @@ set(CORE_SOURCE_FILES
 	ui/imgui_button.cpp
 	ui/imgui_input_text.hpp
 	ui/imgui_input_text.cpp
+	ui/imgui_list_box.hpp
+	ui/imgui_list_box.cpp
 	ui/imgui_window.hpp
 	ui/imgui_window.cpp
 )

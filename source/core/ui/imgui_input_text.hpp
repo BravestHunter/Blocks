@@ -15,7 +15,7 @@ namespace blocks
 
     virtual void Render() override;
 
-    std::string GetText();
+    std::string GetText() const;
 
   private:
     char* buffer_;

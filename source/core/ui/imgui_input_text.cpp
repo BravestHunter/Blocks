@@ -21,7 +21,7 @@ namespace blocks
   }
 
 
-  std::string ImguiInputText::GetText()
+  std::string ImguiInputText::GetText() const
   {
     return std::string(buffer_);
   }
