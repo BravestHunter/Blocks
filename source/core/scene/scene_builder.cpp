@@ -5,6 +5,7 @@
 #include "io/file_api.hpp"
 #include "ui/imgui_button.hpp"
 #include "ui/imgui_text.hpp"
+#include "ui/imgui_input_text.hpp"
 
 
 namespace blocks
@@ -20,6 +21,34 @@ namespace blocks
       "Create new world",
       [game]()
       {
+        std::shared_ptr<Scene> worldCreationScene_ = BuildWorldCreationScene(game);
+        game->RequestScene(worldCreationScene_);
+      }
+    );
+    window->AddElement(createWorldButton);
+
+    return scene;
+  }
+
+  std::shared_ptr<Scene> SceneBuilder::BuildWorldCreationScene(Game* game)
+  {
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+
+    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("World creation menu");
+    scene->imguiWindows_.push_back(window);
+
+    std::shared_ptr<ImguiInputText> worldNameInput = std::make_shared<ImguiInputText>(16, "World Name (16 characters max)");
+    window->AddElement(worldNameInput);
+
+    std::shared_ptr<ImguiButton> createWorldButton = std::make_shared<ImguiButton>(
+      "Create",
+      [game, worldNameInput]()
+      {
+        if (worldNameInput->GetText().length() == 0)
+        {
+          return;
+        }
+
         WorldData worldData
         {
           .mapData = MapData
@@ -32,15 +61,23 @@ namespace blocks
           }
         };
 
-        // Set random name
-        srand(time(0));
-        strcpy(worldData.name, std::to_string(rand()).c_str());
+        strcpy(worldData.name, worldNameInput->GetText().c_str());
 
         std::shared_ptr<Scene> worldScene_ = BuildWorldScene(game, std::make_shared<World>(worldData));
         game->RequestScene(worldScene_);
       }
     );
     window->AddElement(createWorldButton);
+
+    std::shared_ptr<ImguiButton> backButton = std::make_shared<ImguiButton>(
+      "Back",
+      [game]()
+      {
+        std::shared_ptr<Scene> mainMenuScene = BuildMainMenuScene(game);
+        game->RequestScene(mainMenuScene);
+      }
+    );
+    window->AddElement(backButton);
 
     return scene;
   }
@@ -53,6 +90,9 @@ namespace blocks
 
     std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Statistics");
     scene->imguiWindows_.push_back(window);
+
+    std::shared_ptr<ImguiText> lockCursorHelpText = std::make_shared<ImguiText>("(Press \"L\" to lock/unlock cursor)");
+    window->AddElement(lockCursorHelpText);
 
     std::shared_ptr<ImguiText> fpsText = std::make_shared<ImguiText>(
       []()

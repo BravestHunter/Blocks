@@ -12,6 +12,7 @@ namespace blocks
   {
   public:
     static std::shared_ptr<Scene> BuildMainMenuScene(Game* game);
+    static std::shared_ptr<Scene> BuildWorldCreationScene(Game* game);
     static std::shared_ptr<Scene> BuildWorldScene(Game* game, std::shared_ptr<World> world);
   };
 }
