@@ -72,6 +72,8 @@ set(CORE_SOURCE_FILES
 	ui/imgui_text.cpp
 	ui/imgui_button.hpp
 	ui/imgui_button.cpp
+	ui/imgui_check_box.hpp
+	ui/imgui_check_box.cpp
 	ui/imgui_input_text.hpp
 	ui/imgui_input_text.cpp
 	ui/imgui_list_box.hpp

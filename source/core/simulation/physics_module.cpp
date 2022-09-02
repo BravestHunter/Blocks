@@ -13,7 +13,7 @@ namespace blocks
 
     glm::vec3 velocity = player.GetVelocity();
 
-    if (gameContext.isPhysicsEnabled)
+    if (gameContext.isGravityEnabled)
     {
       velocity += glm::vec3(0.0f, 0.0f, -1.0f) * gravityConstant * delta;
       player.SetVelocity(velocity);

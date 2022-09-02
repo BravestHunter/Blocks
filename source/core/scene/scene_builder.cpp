@@ -6,6 +6,7 @@
 #include "serialization.hpp"
 #include "ui/imgui_button.hpp"
 #include "ui/imgui_text.hpp"
+#include "ui/imgui_check_box.hpp"
 #include "ui/imgui_input_text.hpp"
 #include "ui/imgui_list_box.hpp"
 
@@ -202,6 +203,16 @@ namespace blocks
       }
     );
     window->AddElement(playerVelocityText);
+
+    std::shared_ptr<ImguiCheckBox> enableGravityCheckBox = std::make_shared<ImguiCheckBox>(
+      game->GetContext().isGravityEnabled,
+      "Gravity",
+      [game](bool checked)
+      {
+        game->GetContext().isGravityEnabled = checked;
+      }
+    );
+    window->AddElement(enableGravityCheckBox);
 
     return scene;
   }
