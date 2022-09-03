@@ -10,6 +10,10 @@
 
 namespace blocks
 {
+  const glm::vec3 halfVector(0.5f);
+  const glm::vec3 oneVector(1.0f);
+
+
   Map::Map(MapData mapData, std::string path) : path_(path), seed_(mapData.seed)
   {
   }
@@ -70,68 +74,9 @@ namespace blocks
   }
 
 
-  bool Map::Collides(const blocks::AABB& bounds, glm::vec3 position)
-  {
-    ChunkPosition chunkPosition = { position.x / Chunk::Length, position.y / Chunk::Width };
-    glm::vec3 localPosition = glm::vec3(position.x - chunkPosition.first * (int)Chunk::Length, position.y - chunkPosition.second * (int)Chunk::Width, position.z);
-    if (localPosition.x < 0)
-    {
-      localPosition.x += Chunk::Length;
-      chunkPosition.first--;
-    }
-    if (localPosition.y < 0)
-    {
-      localPosition.y += Chunk::Width;
-      chunkPosition.second--;
-    }
-    std::shared_ptr<Chunk> chunk = GetChunk(chunkPosition);
-
-    blocks::AABB localBounds(bounds.center + localPosition, bounds.size);
-
-    glm::ivec3 centralBlockPosition = glm::ivec3(localPosition);
-
-    int radius = 2;
-    for (int x = centralBlockPosition.x - radius; x <= centralBlockPosition.x + radius; x++)
-    {
-      if (x < 0 || x >= Chunk::Length)
-      {
-        continue;
-      }
-
-      for (int y = centralBlockPosition.y - radius; y <= centralBlockPosition.y + radius; y++)
-      {
-        if (y < 0 || y >= Chunk::Width)
-        {
-          continue;
-        }
-
-        for (int z = centralBlockPosition.z - radius; z <= centralBlockPosition.z + radius; z++)
-        {
-          if (z < 0 || z >= Chunk::Height)
-          {
-            continue;
-          }
-
-          if (chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] == 0)
-          {
-            continue;
-          }
-
-          blocks::AABB blockBounds(glm::vec3(x, y, z), glm::vec3(x + 1, y + 1, z + 1));
-          if (CheckCollision(blockBounds, localBounds))
-          {
-            return true;
-          }
-        }
-      }
-    }
-
-    return false;
-  }
-
   BlockLookAt Map::GetBlockLookAt(const blocks::Ray& ray)
   {
-    ChunkPosition chunkPosition = { ray.origin.x / Chunk::Length, ray.origin.y / Chunk::Width };
+    ChunkPosition chunkPosition = CalculateChunkPosition(ray.origin);
     glm::vec3 localPosition = glm::vec3(ray.origin.x - chunkPosition.first * (int)Chunk::Length, ray.origin.y - chunkPosition.second * (int)Chunk::Width, ray.origin.z);
     if (localPosition.x < 0)
     {
@@ -178,7 +123,7 @@ namespace blocks
             continue;
           }
 
-          blocks::AABB blockBounds(glm::vec3(x, y, z), glm::vec3(x + 1, y + 1, z + 1));
+          blocks::AABB blockBounds(glm::vec3(x, y, z) + halfVector, oneVector);
           blocks::RayIntersectionPoint intersectionPoint = CheckCollision(localRay, blockBounds);
           if (intersectionPoint.distance != FLT_MAX && closestIntersectionPoint.distance > intersectionPoint.distance)
           {
@@ -222,6 +167,12 @@ namespace blocks
     }
 
     return result;
+  }
+
+
+  ChunkPosition Map::CalculateChunkPosition(glm::vec3 position)
+  {
+    return ChunkPosition(floor(position.x / Chunk::Length), floor(position.y / Chunk::Width));
   }
 
 

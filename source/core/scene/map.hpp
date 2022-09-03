@@ -27,8 +27,9 @@ namespace blocks
 
     void SetChunk(ChunkPosition position, std::shared_ptr<Chunk> chunk);
 
-    bool Collides(const blocks::AABB& bounds, glm::vec3 position);
     BlockLookAt GetBlockLookAt(const blocks::Ray& ray);
+
+    static ChunkPosition CalculateChunkPosition(glm::vec3 position);
 
   private:
     std::string path_;

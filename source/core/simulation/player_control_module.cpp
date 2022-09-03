@@ -28,35 +28,46 @@ namespace blocks
 
   void PlayerControlModule::MovePlayer(const float delta, const InputState& inputState, GameContext& gameContext)
   {
-    const float velocity = delta * movementSpeed_;
+    Entity& player = gameContext.scene->GetWorld()->GetPlayer();
+    if (inputState.IsKeyJustPressed(GLFW_KEY_SPACE))
+    {
+      player.SetVelocity(player.GetVelocity() + glm::vec3(0.0, 0.0, 500.0f) * delta);
+    }
 
-    glm::vec3 position = gameContext.camera->GetPosition();
-    glm::vec3 shift = glm::vec3(0.0f);
+    player.SetVelocity(glm::vec3(0.0f, 0.0f, player.GetVelocity().z));
 
+    glm::vec3 direction = glm::vec3(0.0f);
     if (inputState.IsKeyPressed(GLFW_KEY_W))
     {
-      shift += gameContext.camera->GetForward() * velocity;
+      direction += gameContext.camera->GetForward();
     }
     if (inputState.IsKeyPressed(GLFW_KEY_S))
     {
-      shift -= gameContext.camera->GetForward() * velocity;
+      direction -= gameContext.camera->GetForward();
     }
     if (inputState.IsKeyPressed(GLFW_KEY_A))
     {
-      shift -= gameContext.camera->GetRight() * velocity;
+      direction -= gameContext.camera->GetRight();
     }
     if (inputState.IsKeyPressed(GLFW_KEY_D))
     {
-      shift += gameContext.camera->GetRight() * velocity;
+      direction += gameContext.camera->GetRight();
     }
 
-    position += shift;
+    if (direction.x != 0 || direction.y != 0)
+    {
+      const float velocity = movementSpeed_;
+
+      direction.z = 0.0f;
+      player.SetVelocity(player.GetVelocity() + direction * velocity);
+    }
+
     //gameContext.camera->SetPosition(position);
 
-    if (shift.x != 0 || shift.y != 0 || shift.z != 0)
-    {
-      //gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(position));
-    }
+    //if (shift.x != 0 || shift.y != 0 || shift.z != 0)
+    //{
+    //  //gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(position));
+    //}
 
     //if (!context.scene->GetMap()->Collides(context.playerBounds, position))
     //{

@@ -20,7 +20,7 @@ namespace blocks
     virtual void Update(const float delta, const InputState& inputState, GameContext& gameContext);
 
   private:
-    float movementSpeed_ = 32.0f;
+    float movementSpeed_ = 8.0f;
     float mouseSensitivity_ = 0.1f;
 
     void MovePlayer(const float delta, const InputState& inputState, GameContext& gameContext);

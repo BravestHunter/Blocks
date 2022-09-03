@@ -204,6 +204,16 @@ namespace blocks
     );
     window->AddElement(playerVelocityText);
 
+    std::shared_ptr<ImguiText> centerChunkText = std::make_shared<ImguiText>(
+      [game]()
+      {
+        glm::vec3 position = game->GetContext().scene->GetWorld()->GetPlayer().GetPosition();
+        ChunkPosition chunkPosition = Map::CalculateChunkPosition(position);
+        return  std::format("Center chunk: {0} {1}", chunkPosition.first, chunkPosition.second);
+      }
+    );
+    window->AddElement(centerChunkText);
+
     std::shared_ptr<ImguiCheckBox> enableGravityCheckBox = std::make_shared<ImguiCheckBox>(
       game->GetContext().isGravityEnabled,
       "Gravity",
