@@ -75,6 +75,9 @@ namespace blocks
   void GlfwWindow::InitImgui()
   {
     ImGui_ImplGlfw_InitForOpenGL(windowPtr_, false);
+
+    ImGui::GetIO().IniFilename = NULL; // Disable creation of .ini config file
+
     isImguiInitialized_ = true;
   }
 
