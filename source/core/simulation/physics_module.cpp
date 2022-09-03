@@ -37,6 +37,8 @@ namespace blocks
     bool horizontalMoved = ProcessPlayerVelocity(delta, player, horizontalVelocity, gameContext);
     bool verticalMoved = ProcessPlayerVelocity(delta, player, verticalVelocity, gameContext);
 
+    player.SetGrounded(!verticalMoved);
+
     if (horizontalMoved == false)
     {
       velocity.x = 0.0f;

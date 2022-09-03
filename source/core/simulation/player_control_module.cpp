@@ -29,7 +29,7 @@ namespace blocks
   void PlayerControlModule::MovePlayer(const float delta, const InputState& inputState, GameContext& gameContext)
   {
     Entity& player = gameContext.scene->GetWorld()->GetPlayer();
-    if (inputState.IsKeyJustPressed(GLFW_KEY_SPACE))
+    if (player.IsGrounded() && inputState.IsKeyPressed(GLFW_KEY_SPACE))
     {
       player.SetVelocity(player.GetVelocity() + glm::vec3(0.0, 0.0, 500.0f) * delta);
     }

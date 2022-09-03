@@ -15,14 +15,17 @@ namespace blocks
     inline glm::vec3 GetPosition()const;
     inline glm::vec3 GetVelocity() const;
     inline AABB GetAABB() const;
+    inline bool IsGrounded() const;
 
     inline void SetPosition(glm::vec3 position);
     inline void SetVelocity(glm::vec3 velocity);
+    inline void SetGrounded(bool isGrounded);
 
   private:
     glm::vec3 position_;
     glm::vec3 velocity_;
     AABB aabb_;
+    bool isGrounded_;
   };
 
 
@@ -41,6 +44,11 @@ namespace blocks
     return aabb_;
   }
 
+  bool Entity::IsGrounded() const
+  {
+    return isGrounded_;
+  }
+
 
   void Entity::SetPosition(glm::vec3 position)
   {
@@ -50,5 +58,10 @@ namespace blocks
   void Entity::SetVelocity(glm::vec3 velocity)
   {
     velocity_ = velocity;
+  }
+
+  void Entity::SetGrounded(bool isGrounded)
+  {
+    isGrounded_ = isGrounded;
   }
 }
