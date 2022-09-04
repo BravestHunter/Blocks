@@ -35,6 +35,11 @@ namespace blocks
     Clear();
 
     glm::ivec2 windowSize = context_->window_.GetSize();
+    if (windowSize != context_->viewportSize)
+    {
+      SetViewportSize(windowSize);
+    }
+
     float ratio = (float)windowSize.x / (float)windowSize.y;
     RenderMap(presentationContext.openglScene->GetMap(), mapProgram_, gameContext.camera, ratio);
 
@@ -54,6 +59,18 @@ namespace blocks
   }
 
 
+  void OpenglRenderModule::SetViewportSize(glm::ivec2 size)
+  {
+    if (!IsCorrectThread())
+    {
+      return;
+    }
+
+    glViewport(0, 0, size.x, size.y);
+    context_->viewportSize = size;
+  }
+
+
   void OpenglRenderModule::SetContext(GlfwWindow& window)
   {
     GLenum initResult = glewInit();
@@ -61,6 +78,8 @@ namespace blocks
     {
       throw std::exception("Failed to initialize GLEW");
     }
+
+    SetViewportSize(window.GetSize());
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

@@ -26,6 +26,8 @@ namespace blocks
 
     void Update(float delta, PresentationContext& presentationContext, GameContext& gameContext);
 
+    void SetViewportSize(glm::ivec2 size);
+
     void SetContext(GlfwWindow& window);
     void InitResources(PresentationContext& presentationContext);
     void FreeResources(PresentationContext& presentationContext);

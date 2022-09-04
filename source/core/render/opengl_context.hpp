@@ -2,6 +2,8 @@
 
 #include <thread>
 
+#include <glm/glm.hpp>
+
 #include "platform/glfw_window.hpp"
 
 
@@ -11,5 +13,6 @@ namespace blocks
   {
     GlfwWindow& window_;
     std::thread::id threadId_;
+    glm::ivec2 viewportSize;
   };
 }
