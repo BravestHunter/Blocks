@@ -30,14 +30,15 @@ namespace blocks
 
   private:
     void RunSimulationCycle();
-    void RunRenderCycle();
+    void RunPresentationCycle();
     void RunPresentationUpdateCycle();
 
     void SwitchCursorMode(GlfwWindow& window);
+    void Stop();
+    void SetRequestedScene();
 
     std::shared_ptr<Scene> requestedScene_ = nullptr;
     std::mutex sceneMutex_;
-    void SetRequestedScene();
 
     bool isRunning_ = true;
 

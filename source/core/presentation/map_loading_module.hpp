@@ -38,12 +38,11 @@ namespace blocks
     void OnSceneChanged(PresentationContext& presentationContext, GameContext& gameContext);
 
   private:
-    void AddChunks(glm::ivec2 centerChunkCoords, std::shared_ptr<Map> map, PresentationContext& presentationContext);
-    void RemoveChunks(glm::ivec2 centerChunkCoords, glm::ivec2 lastCenterChunkCoords, PresentationContext& presentationContext);
-    inline glm::ivec2 CalculateChunkCenter(glm::vec3 position);
+    void AddChunks(ChunkPosition centerChunkPosition, std::shared_ptr<Map> map, PresentationContext& presentationContext);
+    void RemoveChunks(ChunkPosition centerChunkPosition, ChunkPosition lastCenterChunkPosition, PresentationContext& presentationContext);
 
     int loadingRadius_ = 3;
-    glm::ivec2 lastCenterChunkCoords_;
+    ChunkPosition lastCenterChunkPosition_;
 
     std::queue<ChunksQueueItem> chunksActionQueue_;
     std::mutex queueMutex_;

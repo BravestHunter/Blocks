@@ -34,7 +34,7 @@ namespace blocks
 
   std::shared_ptr<Chunk> Map::GetChunk(ChunkPosition position)
   {
-    std::lock_guard<std::mutex> locker(mutex_);
+    std::unique_lock<std::mutex> locker(mutex_);
 
     // Check if chunk is already loaded
     auto it = chunks_.find(position);
@@ -43,6 +43,8 @@ namespace blocks
       return it->second;
     }
     
+    locker.unlock();
+
     std::shared_ptr<Chunk> chunk;
 
     // check if chunk file exists
@@ -55,6 +57,8 @@ namespace blocks
     {
       chunk = GenerateChunk(position);
     }
+
+    locker.lock();
 
     chunks_[position] = chunk;
 

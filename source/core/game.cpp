@@ -35,13 +35,13 @@ namespace blocks
 
   int Game::Run()
   {
-    std::thread renderThread(&Game::RunRenderCycle, this);
-    std::thread renderUpdateThread(&Game::RunPresentationUpdateCycle, this);
+    std::thread presentationThread(&Game::RunPresentationCycle, this);
+    std::thread presentationUpdateThread(&Game::RunPresentationUpdateCycle, this);
 
     RunSimulationCycle();
 
-    renderThread.join();
-    renderUpdateThread.join();
+    presentationThread.join();
+    presentationUpdateThread.join();
 
     return 0;
   }
@@ -73,7 +73,7 @@ namespace blocks
     {
       if (window_.IsWindowShouldClose())
       {
-        isRunning_ = false;
+        Stop();
         continue;
       }
 
@@ -91,7 +91,7 @@ namespace blocks
         if (inputState.IsKeyJustPressed(GLFW_KEY_ESCAPE))
         {
           window_.SetWindowShouldClose(true);
-          isRunning_ = false;
+          Stop();
         }
 
         if (inputState.IsKeyJustPressed(GLFW_KEY_L))
@@ -108,7 +108,7 @@ namespace blocks
     }
   }
 
-  void Game::RunRenderCycle()
+  void Game::RunPresentationCycle()
   {
     GlfwPlatform& platform = Environment::GetPlatform();
 
@@ -179,6 +179,12 @@ namespace blocks
     }
   }
 
+  void Game::Stop()
+  {
+    Environment::GetTaskScheduler().Stop();
+
+    isRunning_ = false;
+  }
 
   void Game::SetRequestedScene()
   {

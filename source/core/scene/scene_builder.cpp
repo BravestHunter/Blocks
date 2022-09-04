@@ -209,7 +209,7 @@ namespace blocks
       {
         glm::vec3 position = game->GetContext().scene->GetWorld()->GetPlayer().GetPosition();
         ChunkPosition chunkPosition = Map::CalculateChunkPosition(position);
-        return  std::format("Center chunk: {0} {1}", chunkPosition.first, chunkPosition.second);
+        return  std::format("Current chunk: {0} {1}", chunkPosition.first, chunkPosition.second);
       }
     );
     window->AddElement(centerChunkText);

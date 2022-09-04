@@ -2,6 +2,10 @@ set(SOURCE_FILES
 	environment.hpp
 	environment.cpp
 
+	task/task.hpp
+	task/task_scheduler.hpp
+	task/task_scheduler.cpp
+
 	platform/cursor_mode.hpp
 	platform/glfw_headers.hpp
 	platform/glfw_window.hpp
