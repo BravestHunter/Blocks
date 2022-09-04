@@ -10,6 +10,11 @@ namespace blocks
 
   void ImguiCheckBox::Render()
   {
+    if (isVisible_ == false)
+    {
+      return;
+    }
+
     if (ImGui::Checkbox(label_.c_str(), &checked_))
     {
       callback_(checked_);

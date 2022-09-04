@@ -67,7 +67,7 @@ set(CORE_SOURCE_FILES
 	scene/scene_builder.hpp
 	scene/scene_builder.cpp
 
-	ui/i_imgui_element.hpp
+	ui/base_imgui_element.hpp
 	ui/imgui_text.hpp
 	ui/imgui_text.cpp
 	ui/imgui_button.hpp

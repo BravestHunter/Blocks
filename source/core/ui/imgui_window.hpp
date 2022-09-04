@@ -4,21 +4,23 @@
 #include <vector>
 #include <memory>
 
-#include "i_imgui_element.hpp"
+#include "base_imgui_element.hpp"
+
 
 namespace blocks
 {
-  class ImguiWindow
+  class ImguiWindow : BaseImguiElement
   {
   public:
     ImguiWindow(std::string title);
+    virtual ~ImguiWindow() override {}
 
-    void Render();
+    virtual void Render() override;
 
-    void AddElement(std::shared_ptr<IImguiElement> element);
+    void AddElement(std::shared_ptr<BaseImguiElement> element);
 
   private:
     std::string title_;
-    std::vector<std::shared_ptr<IImguiElement>> elements_;
+    std::vector<std::shared_ptr<BaseImguiElement>> elements_;
   };
 }

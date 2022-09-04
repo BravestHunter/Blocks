@@ -17,6 +17,11 @@ namespace blocks
 
   void ImguiInputText::Render()
   {
+    if (isVisible_ == false)
+    {
+      return;
+    }
+
     ImGui::InputText(label_.c_str(), buffer_, bufferLength_);
   }
 

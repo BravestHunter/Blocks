@@ -226,6 +226,12 @@ namespace blocks
     );
     window->AddElement(enableGravityCheckBox);
 
+    //std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>("Menu");
+    //scene->imguiWindows_.push_back(menuWindow);
+    //
+    //std::shared_ptr<ImguiText> sampleText = std::make_shared<ImguiText>("SomeText");
+    //menuWindow->AddElement(sampleText);
+
     return scene;
   }
 }

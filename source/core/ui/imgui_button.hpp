@@ -3,15 +3,16 @@
 #include <string>
 #include <functional>
 
-#include "i_imgui_element.hpp"
+#include "base_imgui_element.hpp"
 
 
 namespace blocks
 {
-  class ImguiButton : public IImguiElement
+  class ImguiButton : public BaseImguiElement
   {
   public:
     ImguiButton(std::string text, std::function<void()> callback);
+    virtual ~ImguiButton() override {}
 
     virtual void Render() override;
 

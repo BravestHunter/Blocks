@@ -3,15 +3,16 @@
 #include <string>
 #include <functional>
 
-#include "i_imgui_element.hpp"
+#include "base_imgui_element.hpp"
 
 
 namespace blocks
 {
-  class ImguiCheckBox : public IImguiElement
+  class ImguiCheckBox : public BaseImguiElement
   {
   public:
     ImguiCheckBox(bool checked, std::string label, std::function<void(bool)> callback);
+    virtual ~ImguiCheckBox() override {}
 
     virtual void Render() override;
 

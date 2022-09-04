@@ -3,16 +3,16 @@
 #include <string>
 #include <vector>
 
-#include "i_imgui_element.hpp"
+#include "base_imgui_element.hpp"
 
 
 namespace blocks
 {
-  class ImguiListBox : public IImguiElement
+  class ImguiListBox : public BaseImguiElement
   {
   public:
     ImguiListBox(std::string label, std::vector<std::string> items);
-    ~ImguiListBox();
+    virtual ~ImguiListBox() override;
 
     virtual void Render() override;
 

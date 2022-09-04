@@ -2,16 +2,16 @@
 
 #include <string>
 
-#include "i_imgui_element.hpp"
+#include "base_imgui_element.hpp"
 
 
 namespace blocks
 {
-  class ImguiInputText : public IImguiElement
+  class ImguiInputText : public BaseImguiElement
   {
   public:
     ImguiInputText(int maxLength, std::string label);
-    ~ImguiInputText();
+    virtual ~ImguiInputText() override;
 
     virtual void Render() override;
 

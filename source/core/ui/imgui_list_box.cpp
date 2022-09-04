@@ -27,6 +27,11 @@ namespace blocks
 
   void ImguiListBox::Render()
   {
+    if (isVisible_ == false)
+    {
+      return;
+    }
+
     ImGui::ListBox(label_.c_str(), &selectedItem_, items_, itemsNumber_, 4);
   }
 

@@ -16,6 +16,11 @@ namespace blocks
 
   void ImguiText::Render()
   {
+    if (isVisible_ == false)
+    {
+      return;
+    }
+
     if (updateStringCallback_ != nullptr)
     {
       text_ = updateStringCallback_();

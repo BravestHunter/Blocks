@@ -11,6 +11,11 @@ namespace blocks
 
   void ImguiButton::Render()
   {
+    if (isVisible_ == false)
+    {
+      return;
+    }
+
     if (ImGui::SmallButton(text_.c_str()) && callback_)
     {
       callback_();
