@@ -205,9 +205,6 @@ namespace blocks
     std::shared_ptr<ImguiText> mapSeedText = std::make_shared<ImguiText>(std::format("World seed: {}", world->GetMap()->GetSeed()));
     infoWindow->AddElement(mapSeedText);
 
-    std::shared_ptr<ImguiText> lockCursorHelpText = std::make_shared<ImguiText>("(Press \"L\" to lock/unlock cursor)");
-    infoWindow->AddElement(lockCursorHelpText);
-
     std::shared_ptr<ImguiText> fpsText = std::make_shared<ImguiText>(
       []()
       {
