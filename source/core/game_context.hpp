@@ -18,7 +18,7 @@ namespace blocks
     ConcurrentQueue<std::shared_ptr<BaseModelUpdateEvent>> modelUpdateEventsQueue;
     std::shared_ptr<Camera> camera;
 
-    bool isCursorEnabled = true;
+    bool isMenuMode = true;
     bool isGravityEnabled = false;
   };
 }

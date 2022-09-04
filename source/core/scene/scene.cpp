@@ -3,9 +3,18 @@
 
 namespace blocks
 {
-  Scene::Scene()
+  Scene::Scene(bool menuModeOnly) : menuModeOnly_(menuModeOnly)
   {
 
+  }
+
+
+  void Scene::OnMenuModeChanged(bool isMenuMode)
+  {
+    if (menuModeCallbackFunction_ != nullptr)
+    {
+      menuModeCallbackFunction_(isMenuMode);
+    }
   }
 
 

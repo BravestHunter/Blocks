@@ -25,7 +25,9 @@ namespace blocks
 
     int Run();
     void Stop();
+
     void RequestScene(std::shared_ptr<Scene> scene);
+    void SetMenuMode(bool isMenuMode);
 
     GameContext& GetContext();
 
@@ -34,7 +36,6 @@ namespace blocks
     void RunPresentationCycle();
     void RunPresentationUpdateCycle();
 
-    void SwitchCursorMode(GlfwWindow& window);
     void SetRequestedScene();
 
     std::shared_ptr<Scene> requestedScene_ = nullptr;

@@ -53,9 +53,36 @@ namespace blocks
     isRunning_ = false;
   }
 
+
   void Game::RequestScene(std::shared_ptr<Scene> scene)
   {
     requestedScene_ = scene;
+  }
+
+  void Game::SetMenuMode(bool isMenuMode)
+  {
+    if (context_.isMenuMode == isMenuMode)
+    {
+      return;
+    }
+
+    if (!isMenuMode && context_.scene->MenuModeOnlyAllowed())
+    {
+      return;
+    }
+
+    context_.isMenuMode = isMenuMode;
+
+    if (isMenuMode)
+    {
+      window_.SetCursorMode(CursorMode::Normal);
+    }
+    else
+    {
+      window_.SetCursorMode(CursorMode::Disabled);
+    }
+
+    context_.scene->OnMenuModeChanged(isMenuMode);
   }
 
 
@@ -97,16 +124,13 @@ namespace blocks
 
         if (inputState.IsKeyJustPressed(GLFW_KEY_ESCAPE))
         {
-          window_.SetWindowShouldClose(true);
-          Stop();
+          SetMenuMode(!context_.isMenuMode);
         }
 
-        if (inputState.IsKeyJustPressed(GLFW_KEY_L))
+        if (context_.isMenuMode == false)
         {
-          SwitchCursorMode(window_);
+          simulationModule_.Update(deltaF, inputState, context_);
         }
-
-        simulationModule_.Update(deltaF, inputState, context_);
       }
 
       mut.lock();
@@ -172,26 +196,14 @@ namespace blocks
   }
 
 
-  void Game::SwitchCursorMode(GlfwWindow& window)
-  {
-    context_.isCursorEnabled = !context_.isCursorEnabled;
-
-    if (context_.isCursorEnabled)
-    {
-      window.SetCursorMode(CursorMode::Normal);
-    }
-    else
-    {
-      window.SetCursorMode(CursorMode::Disabled);
-    }
-  }
-
   void Game::SetRequestedScene()
   {
     sceneMutex_.lock();
 
     context_.scene = requestedScene_;
     requestedScene_ = nullptr;
+
+    SetMenuMode(context_.scene->MenuModeOnlyAllowed());
 
     simulationModule_.OnSceneChanged(context_);
     presentationModule_.OnSceneChanged(context_);

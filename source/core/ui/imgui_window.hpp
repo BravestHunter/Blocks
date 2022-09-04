@@ -11,7 +11,7 @@
 
 namespace blocks
 {
-  class ImguiWindow : BaseImguiElement
+  class ImguiWindow : public BaseImguiElement
   {
   public:
     ImguiWindow(glm::vec2 anchor = glm::vec2(0.0f, 0.0f), glm::vec2 pivot = glm::vec2(0.0f, 0.0f));

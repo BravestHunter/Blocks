@@ -15,7 +15,7 @@ namespace blocks
 {
   std::shared_ptr<Scene> SceneBuilder::BuildMainMenuScene(Game* game)
   {
-    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>(true);
 
     std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
     scene->imguiWindows_.push_back(menuWindow);
@@ -54,7 +54,7 @@ namespace blocks
 
   std::shared_ptr<Scene> SceneBuilder::BuildWorldCreationScene(Game* game)
   {
-    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>(true);
 
     std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
     scene->imguiWindows_.push_back(menuWindow);
@@ -108,7 +108,7 @@ namespace blocks
 
   std::shared_ptr<Scene> SceneBuilder::BuildWorldLoadingScene(Game* game)
   {
-    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>(true);
 
     std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
     scene->imguiWindows_.push_back(menuWindow);
@@ -152,9 +152,31 @@ namespace blocks
 
   std::shared_ptr<Scene> SceneBuilder::BuildWorldScene(Game* game, std::shared_ptr<World> world)
   {
-    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>(false);
 
     scene->world_ = world;
+
+    std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
+    scene->imguiWindows_.push_back(menuWindow);
+
+    std::shared_ptr<ImguiButton> backButton = std::make_shared<ImguiButton>(
+      "Back to Main Menu",
+      [game]()
+      {
+        std::shared_ptr<Scene> mainMenuScene = BuildMainMenuScene(game);
+        game->RequestScene(mainMenuScene);
+      }
+    );
+    menuWindow->AddElement(backButton);
+
+    std::shared_ptr<ImguiButton> quitButton = std::make_shared<ImguiButton>(
+      "Quit",
+      [game]()
+      {
+        game->Stop();
+      }
+    );
+    menuWindow->AddElement(quitButton);
 
     std::shared_ptr<ImguiWindow> infoWindow = std::make_shared<ImguiWindow>("Info");
     scene->imguiWindows_.push_back(infoWindow);
@@ -223,30 +245,20 @@ namespace blocks
     );
     infoWindow->AddElement(enableGravityCheckBox);
 
-    std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(1.0f, 0.0f), glm::vec2(1.0f, 0.0f));
-    scene->imguiWindows_.push_back(menuWindow);
-    
-    std::shared_ptr<ImguiText> sampleText = std::make_shared<ImguiText>("SomeText");
-    menuWindow->AddElement(sampleText);
-
-    std::shared_ptr<ImguiButton> backButton = std::make_shared<ImguiButton>(
-      "Back to Main Menu",
-      [game]()
+    scene->menuModeCallbackFunction_ =
+      [infoWindow, menuWindow](bool isMenuMode)
       {
-        std::shared_ptr<Scene> mainMenuScene = BuildMainMenuScene(game);
-        game->RequestScene(mainMenuScene);
-      }
-    );
-    menuWindow->AddElement(backButton);
-
-    std::shared_ptr<ImguiButton> quitButton = std::make_shared<ImguiButton>(
-      "Quit",
-      [game]()
-      {
-        game->Stop();
-      }
-    );
-    menuWindow->AddElement(quitButton);
+        if (isMenuMode)
+        {
+          infoWindow->SetVisibility(false);
+          menuWindow->SetVisibility(true);
+        }
+        else
+        {
+          infoWindow->SetVisibility(true);
+          menuWindow->SetVisibility(false);
+        }
+      };
 
     return scene;
   }
