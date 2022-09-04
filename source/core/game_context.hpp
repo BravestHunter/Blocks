@@ -4,6 +4,7 @@
 
 #include "collections/concurrent_queue.hpp"
 #include "simulation/camera.hpp"
+#include "simulation/control_mode.hpp"
 #include "scene/scene.hpp"
 #include "simulation/base_model_update_event.hpp"
 #include "geometry/aabb.hpp"
@@ -19,6 +20,6 @@ namespace blocks
     std::shared_ptr<Camera> camera;
 
     bool isMenuMode = true;
-    bool isGravityEnabled = false;
+    ControlMode controlMode;
   };
 }

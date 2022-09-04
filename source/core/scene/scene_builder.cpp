@@ -113,7 +113,12 @@ namespace blocks
     std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
     scene->imguiWindows_.push_back(menuWindow);
 
-    std::shared_ptr<ImguiListBox> worldsListBox = std::make_shared<ImguiListBox>("Worlds", getDirectoriesInDirectory("worlds"));
+    std::vector<std::string> existingWorlds;
+    if (isPathExist("worlds"))
+    {
+      existingWorlds = getDirectoriesInDirectory("worlds");
+    }
+    std::shared_ptr<ImguiListBox> worldsListBox = std::make_shared<ImguiListBox>("Worlds", existingWorlds);
     menuWindow->AddElement(worldsListBox);
 
     std::shared_ptr<ImguiButton> loadWorldButton = std::make_shared<ImguiButton>(
@@ -178,6 +183,19 @@ namespace blocks
     );
     menuWindow->AddElement(quitButton);
 
+    std::shared_ptr<ImguiWindow> settingsWindow = std::make_shared<ImguiWindow>(glm::vec2(1.0f, 0.0f), glm::vec2(1.0f, 0.0f));
+    scene->imguiWindows_.push_back(settingsWindow);
+
+    std::shared_ptr<ImguiCheckBox> enableFlyModeCheckBox = std::make_shared<ImguiCheckBox>(
+      game->GetContext().controlMode == ControlMode::Fly,
+      "Fly mode",
+      [game](bool checked)
+      {
+        game->GetContext().controlMode = checked ? ControlMode::Fly : ControlMode::Default;
+      }
+    );
+    settingsWindow->AddElement(enableFlyModeCheckBox);
+
     std::shared_ptr<ImguiWindow> infoWindow = std::make_shared<ImguiWindow>("Info");
     scene->imguiWindows_.push_back(infoWindow);
 
@@ -234,16 +252,6 @@ namespace blocks
       }
     );
     infoWindow->AddElement(centerChunkText);
-
-    std::shared_ptr<ImguiCheckBox> enableGravityCheckBox = std::make_shared<ImguiCheckBox>(
-      game->GetContext().isGravityEnabled,
-      "Gravity",
-      [game](bool checked)
-      {
-        game->GetContext().isGravityEnabled = checked;
-      }
-    );
-    infoWindow->AddElement(enableGravityCheckBox);
 
     scene->menuModeCallbackFunction_ =
       [infoWindow, menuWindow](bool isMenuMode)

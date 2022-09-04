@@ -19,39 +19,53 @@ namespace blocks
 
     glm::vec3 velocity = player.GetVelocity();
 
-    if (gameContext.isGravityEnabled)
+    if (gameContext.controlMode == ControlMode::Default)
     {
+      // Add gravity force
       velocity += glm::vec3(0.0f, 0.0f, -1.0f) * gravityConstant * delta;
       player.SetVelocity(velocity);
+
+      if (velocity == zeroVector)
+      {
+        return;
+      }
+
+      // Process horizontal and vertical movement separately
+      glm::vec3 horizontalVelocity(velocity.x, velocity.y, 0.0f);
+      glm::vec3 verticalVelocity(0.0f, 0.0f, velocity.z);
+
+      bool horizontalMoved = ProcessPlayerVelocity(delta, player, horizontalVelocity, gameContext);
+      bool verticalMoved = ProcessPlayerVelocity(delta, player, verticalVelocity, gameContext);
+
+      player.SetGrounded(!verticalMoved);
+
+      if (horizontalMoved == false)
+      {
+        velocity.x = 0.0f;
+        velocity.y = 0.0f;
+      }
+      if (verticalMoved == false)
+      {
+        velocity.z = 0.0f;
+      }
+      player.SetVelocity(velocity);
+
+      if (horizontalMoved || verticalMoved)
+      {
+        gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(player.GetPosition()));
+      }
     }
-
-    if (velocity == zeroVector)
+    else if (gameContext.controlMode == ControlMode::Fly)
     {
-      return;
-    }
+      if (velocity == zeroVector)
+      {
+        return;
+      }
 
-    // Process horizontal and vertical movement separately
-    glm::vec3 horizontalVelocity(velocity.x, velocity.y, 0.0f);
-    glm::vec3 verticalVelocity(0.0f, 0.0f, velocity.z);
+      glm::vec3 newPosition = player.GetPosition() + velocity * delta;
+      player.SetPosition(newPosition);
+      gameContext.camera->SetPosition(newPosition);
 
-    bool horizontalMoved = ProcessPlayerVelocity(delta, player, horizontalVelocity, gameContext);
-    bool verticalMoved = ProcessPlayerVelocity(delta, player, verticalVelocity, gameContext);
-
-    player.SetGrounded(!verticalMoved);
-
-    if (horizontalMoved == false)
-    {
-      velocity.x = 0.0f;
-      velocity.y = 0.0f;
-    }
-    if (verticalMoved == false)
-    {
-      velocity.z = 0.0f;
-    }
-    player.SetVelocity(velocity);
-
-    if (horizontalMoved || verticalMoved)
-    {
       gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(player.GetPosition()));
     }
   }

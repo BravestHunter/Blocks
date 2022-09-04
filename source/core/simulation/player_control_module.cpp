@@ -8,6 +8,8 @@
 
 namespace blocks
 {
+  glm::vec3 zeroVector(0.0f, 0.0f, 0.0f);
+
   PlayerControlModule::PlayerControlModule()
   {
 
@@ -29,50 +31,69 @@ namespace blocks
   void PlayerControlModule::MovePlayer(const float delta, const InputState& inputState, GameContext& gameContext)
   {
     Entity& player = gameContext.scene->GetWorld()->GetPlayer();
-    if (player.IsGrounded() && inputState.IsKeyPressed(GLFW_KEY_SPACE))
+
+    if (gameContext.controlMode == ControlMode::Default)
     {
-      player.SetVelocity(player.GetVelocity() + glm::vec3(0.0, 0.0, 500.0f) * delta);
+      if (player.IsGrounded() && inputState.IsKeyPressed(GLFW_KEY_SPACE))
+      {
+        player.SetVelocity(player.GetVelocity() + glm::vec3(0.0, 0.0, 500.0f) * delta);
+      }
+
+      player.SetVelocity(glm::vec3(0.0f, 0.0f, player.GetVelocity().z));
+
+      glm::vec3 direction = glm::vec3(0.0f);
+      if (inputState.IsKeyPressed(GLFW_KEY_W))
+      {
+        direction += gameContext.camera->GetForward();
+      }
+      if (inputState.IsKeyPressed(GLFW_KEY_S))
+      {
+        direction -= gameContext.camera->GetForward();
+      }
+      if (inputState.IsKeyPressed(GLFW_KEY_A))
+      {
+        direction -= gameContext.camera->GetRight();
+      }
+      if (inputState.IsKeyPressed(GLFW_KEY_D))
+      {
+        direction += gameContext.camera->GetRight();
+      }
+
+      if (direction.x != 0 || direction.y != 0)
+      {
+        direction.z = 0.0f;
+        direction = glm::normalize(direction);
+        player.SetVelocity(player.GetVelocity() + direction * movementSpeed_);
+      }
     }
-
-    player.SetVelocity(glm::vec3(0.0f, 0.0f, player.GetVelocity().z));
-
-    glm::vec3 direction = glm::vec3(0.0f);
-    if (inputState.IsKeyPressed(GLFW_KEY_W))
+    else if (gameContext.controlMode == ControlMode::Fly)
     {
-      direction += gameContext.camera->GetForward();
-    }
-    if (inputState.IsKeyPressed(GLFW_KEY_S))
-    {
-      direction -= gameContext.camera->GetForward();
-    }
-    if (inputState.IsKeyPressed(GLFW_KEY_A))
-    {
-      direction -= gameContext.camera->GetRight();
-    }
-    if (inputState.IsKeyPressed(GLFW_KEY_D))
-    {
-      direction += gameContext.camera->GetRight();
-    }
+      player.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 
-    if (direction.x != 0 || direction.y != 0)
-    {
-      const float velocity = movementSpeed_;
+      glm::vec3 direction = glm::vec3(0.0f);
+      if (inputState.IsKeyPressed(GLFW_KEY_W))
+      {
+        direction += gameContext.camera->GetForward();
+      }
+      if (inputState.IsKeyPressed(GLFW_KEY_S))
+      {
+        direction -= gameContext.camera->GetForward();
+      }
+      if (inputState.IsKeyPressed(GLFW_KEY_A))
+      {
+        direction -= gameContext.camera->GetRight();
+      }
+      if (inputState.IsKeyPressed(GLFW_KEY_D))
+      {
+        direction += gameContext.camera->GetRight();
+      }
 
-      direction.z = 0.0f;
-      player.SetVelocity(player.GetVelocity() + direction * velocity);
+      if (direction != zeroVector)
+      {
+        direction = glm::normalize(direction);
+        player.SetVelocity(direction * flyMovementSpeed_);
+      }
     }
-
-    //gameContext.camera->SetPosition(position);
-
-    //if (shift.x != 0 || shift.y != 0 || shift.z != 0)
-    //{
-    //  //gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(position));
-    //}
-
-    //if (!context.scene->GetMap()->Collides(context.playerBounds, position))
-    //{
-    //  context.camera->SetPosition(position);
-    //}
   }
 
   void PlayerControlModule::RotateCamera(const float delta, const InputState& inputState, GameContext& gameContext)

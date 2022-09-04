@@ -16,6 +16,7 @@ set(CORE_SOURCE_FILES
 	simulation/chunk_updated_event.hpp
 	simulation/camera.hpp
 	simulation/camera.cpp
+	simulation/control_mode.hpp
 	simulation/player_control_module.hpp
 	simulation/player_control_module.cpp
 	simulation/physics_module.hpp

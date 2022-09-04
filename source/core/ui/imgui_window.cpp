@@ -5,7 +5,7 @@ namespace blocks
 {
   ImguiWindow::ImguiWindow(glm::vec2 anchor, glm::vec2 pivot) :
     hasTitle_(false), 
-    title_(" "), // Name shoudn't be empty
+    title_(std::to_string(rand())), // Name shoudn't be empty and should be unique
     anchor_(anchor), 
     pivot_(pivot)
   {

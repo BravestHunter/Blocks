@@ -203,6 +203,8 @@ namespace blocks
     context_.scene = requestedScene_;
     requestedScene_ = nullptr;
 
+    context_.controlMode = ControlMode::Fly;
+
     SetMenuMode(context_.scene->MenuModeOnlyAllowed());
 
     simulationModule_.OnSceneChanged(context_);

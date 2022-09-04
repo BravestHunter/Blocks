@@ -30,6 +30,8 @@ namespace blocks
       }
     };
     
+    strcpy(worldData.name, name_.c_str());
+
     Save(worldData, path_);
   }
 
