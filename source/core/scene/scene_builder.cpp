@@ -62,6 +62,8 @@ namespace blocks
           return;
         }
 
+        srand(time(0));
+
         WorldData worldData
         {
           .mapData = MapData

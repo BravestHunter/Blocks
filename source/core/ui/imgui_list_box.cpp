@@ -33,6 +33,11 @@ namespace blocks
 
   std::string ImguiListBox::GetSelectedItem() const
   {
+    if (itemsNumber_ == 0)
+    {
+      return "";
+    }
+
     return items_[selectedItem_];
   }
 }
