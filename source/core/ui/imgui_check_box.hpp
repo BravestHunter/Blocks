@@ -14,7 +14,7 @@ namespace blocks
     ImguiCheckBox(bool checked, std::string label, std::function<void(bool)> callback);
     virtual ~ImguiCheckBox() override {}
 
-    virtual void Render() override;
+    virtual void Render(const OpenglContext* context) override;
 
   private:
     bool checked_;

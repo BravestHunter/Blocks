@@ -15,7 +15,7 @@ namespace blocks
   }
 
 
-  void ImguiInputText::Render()
+  void ImguiInputText::Render(const OpenglContext* context)
   {
     if (isVisible_ == false)
     {

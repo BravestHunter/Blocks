@@ -2,6 +2,8 @@
 
 #include "imgui.h"
 
+#include "render/opengl_context.hpp"
+
 
 namespace blocks
 {
@@ -11,7 +13,7 @@ namespace blocks
     BaseImguiElement(bool isVisible = true) : isVisible_(isVisible) {}
     virtual ~BaseImguiElement() {}
 
-    virtual void Render() = 0;
+    virtual void Render(const OpenglContext* context) = 0;
 
     inline bool IsVisible();
 

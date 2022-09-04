@@ -8,34 +8,46 @@
 
 namespace blocks
 {
-  World::World(WorldData data) :
-    data_(data),
-    path_(std::format("worlds/{0}", data.name)),
-    player_(data.playerData.position, AABB(glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 2.0f))),
-    map_(std::make_shared<Map>(data.mapData, path_))
+  World::World(WorldData worldData) :
+    path_(std::format("worlds/{0}", worldData.name)),
+    name_(worldData.name),
+    player_(worldData.playerData.position, AABB(glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 2.0f))),
+    map_(std::make_shared<Map>(worldData.mapData, path_))
   {
   }
 
   World::~World()
+  {
+    WorldData worldData
+    {
+      .mapData = MapData
+      {
+        .seed = map_->GetSeed()
+      },
+      .playerData = PlayerData
+      {
+        .position = player_.GetPosition()
+      }
+    };
+    
+    Save(worldData, path_);
+  }
+
+
+  void World::Save(WorldData worldData, std::string path)
   {
     if (!isPathExist("worlds"))
     {
       createDirectory("worlds");
     }
 
-    if (!isPathExist(path_))
+    if (!isPathExist(path))
     {
-      createDirectory(path_);
+      createDirectory(path);
     }
 
-    std::string worldDataFilePath = std::format("{0}/world.dat", path_);
-    std::vector<unsigned char> bytes = serializeWorld(data_);
+    std::string worldDataFilePath = std::format("{0}/world.dat", path);
+    std::vector<unsigned char> bytes = serializeWorld(worldData);
     blocks::saveBinaryFile(worldDataFilePath, bytes);
-  }
-
-
-  std::shared_ptr<Map> World::GetMap()
-  {
-    return map_;
   }
 }

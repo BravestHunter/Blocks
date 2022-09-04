@@ -13,7 +13,7 @@ namespace blocks
     ImguiInputText(int maxLength, std::string label);
     virtual ~ImguiInputText() override;
 
-    virtual void Render() override;
+    virtual void Render(const OpenglContext* context) override;
 
     std::string GetText() const;
 

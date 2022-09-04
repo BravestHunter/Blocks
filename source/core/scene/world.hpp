@@ -12,24 +12,31 @@ namespace blocks
   class World
   {
   public:
-    World(WorldData data);
+    World(WorldData worldData);
     ~World();
 
     inline std::string GetName() const;
+    inline std::shared_ptr<Map> GetMap();
     inline Entity& GetPlayer();
-    std::shared_ptr<Map> GetMap();
 
   private:
-    WorldData data_;
     std::string path_;
-    Entity player_;
+    std::string name_;
     std::shared_ptr<Map> map_;
+    Entity player_;
+
+    static void Save(WorldData worldData, std::string path);
   };
 
 
   std::string World::GetName() const
   {
-    return std::string(data_.name);
+    return name_;
+  }
+
+  std::shared_ptr<Map> World::GetMap()
+  {
+    return map_;
   }
 
   Entity& World::GetPlayer()

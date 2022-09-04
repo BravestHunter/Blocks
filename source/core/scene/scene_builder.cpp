@@ -17,8 +17,8 @@ namespace blocks
   {
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Main menu");
-    scene->imguiWindows_.push_back(window);
+    std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
+    scene->imguiWindows_.push_back(menuWindow);
 
     std::shared_ptr<ImguiButton> createWorldButton = std::make_shared<ImguiButton>(
       "Create new world",
@@ -28,7 +28,7 @@ namespace blocks
         game->RequestScene(worldCreationScene_);
       }
     );
-    window->AddElement(createWorldButton);
+    menuWindow->AddElement(createWorldButton);
 
     std::shared_ptr<ImguiButton> loadWorldButton = std::make_shared<ImguiButton>(
       "Load world",
@@ -38,7 +38,16 @@ namespace blocks
         game->RequestScene(worldLoadingScene_);
       }
     );
-    window->AddElement(loadWorldButton);
+    menuWindow->AddElement(loadWorldButton);
+
+    std::shared_ptr<ImguiButton> quitButton = std::make_shared<ImguiButton>(
+      "Quit",
+      [game]()
+      {
+        game->Stop();
+      }
+    );
+    menuWindow->AddElement(quitButton);
 
     return scene;
   }
@@ -47,11 +56,11 @@ namespace blocks
   {
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("World creation menu");
-    scene->imguiWindows_.push_back(window);
+    std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
+    scene->imguiWindows_.push_back(menuWindow);
 
     std::shared_ptr<ImguiInputText> worldNameInput = std::make_shared<ImguiInputText>(16, "World Name (16 characters max)");
-    window->AddElement(worldNameInput);
+    menuWindow->AddElement(worldNameInput);
 
     std::shared_ptr<ImguiButton> createWorldButton = std::make_shared<ImguiButton>(
       "Create",
@@ -82,7 +91,7 @@ namespace blocks
         game->RequestScene(worldScene_);
       }
     );
-    window->AddElement(createWorldButton);
+    menuWindow->AddElement(createWorldButton);
 
     std::shared_ptr<ImguiButton> backButton = std::make_shared<ImguiButton>(
       "Back",
@@ -92,7 +101,7 @@ namespace blocks
         game->RequestScene(mainMenuScene);
       }
     );
-    window->AddElement(backButton);
+    menuWindow->AddElement(backButton);
 
     return scene;
   }
@@ -101,11 +110,11 @@ namespace blocks
   {
     std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("World creation menu");
-    scene->imguiWindows_.push_back(window);
+    std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
+    scene->imguiWindows_.push_back(menuWindow);
 
     std::shared_ptr<ImguiListBox> worldsListBox = std::make_shared<ImguiListBox>("Worlds", getDirectoriesInDirectory("worlds"));
-    window->AddElement(worldsListBox);
+    menuWindow->AddElement(worldsListBox);
 
     std::shared_ptr<ImguiButton> loadWorldButton = std::make_shared<ImguiButton>(
       "Load",
@@ -126,7 +135,7 @@ namespace blocks
         game->RequestScene(worldScene_);
       }
     );
-    window->AddElement(loadWorldButton);
+    menuWindow->AddElement(loadWorldButton);
 
     std::shared_ptr<ImguiButton> backButton = std::make_shared<ImguiButton>(
       "Back",
@@ -136,7 +145,7 @@ namespace blocks
         game->RequestScene(mainMenuScene);
       }
     );
-    window->AddElement(backButton);
+    menuWindow->AddElement(backButton);
 
     return scene;
   }
@@ -147,29 +156,17 @@ namespace blocks
 
     scene->world_ = world;
 
-    std::shared_ptr<ImguiWindow> window = std::make_shared<ImguiWindow>("Parameters");
-    scene->imguiWindows_.push_back(window);
+    std::shared_ptr<ImguiWindow> infoWindow = std::make_shared<ImguiWindow>("Info");
+    scene->imguiWindows_.push_back(infoWindow);
 
-    const std::string name = world->GetName();
-    std::shared_ptr<ImguiText> nameText = std::make_shared<ImguiText>(
-      [name]()
-      {
-        return  std::format("Map {}", name);
-      }
-    );
-    window->AddElement(nameText);
+    std::shared_ptr<ImguiText> worldNameText = std::make_shared<ImguiText>(std::format("Map {}", world->GetName()));
+    infoWindow->AddElement(worldNameText);
 
-    const int seed = world->GetMap()->GetSeed();
-    std::shared_ptr<ImguiText> seedText = std::make_shared<ImguiText>(
-      [seed]()
-      {
-        return  std::format("Seed: {}", seed);
-      }
-    );
-    window->AddElement(seedText);
+    std::shared_ptr<ImguiText> mapSeedText = std::make_shared<ImguiText>(std::format("World seed: {}", world->GetMap()->GetSeed()));
+    infoWindow->AddElement(mapSeedText);
 
     std::shared_ptr<ImguiText> lockCursorHelpText = std::make_shared<ImguiText>("(Press \"L\" to lock/unlock cursor)");
-    window->AddElement(lockCursorHelpText);
+    infoWindow->AddElement(lockCursorHelpText);
 
     std::shared_ptr<ImguiText> fpsText = std::make_shared<ImguiText>(
       []()
@@ -177,7 +174,7 @@ namespace blocks
         return std::format("Application average {0:.3f} ms/frame ({1:.0f} FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
       }
     );
-    window->AddElement(fpsText);
+    infoWindow->AddElement(fpsText);
 
     std::shared_ptr<ImguiText> cameraPositionText = std::make_shared<ImguiText>(
       [game]()
@@ -186,7 +183,7 @@ namespace blocks
         return std::format("Camera position: {0:.2f} {1:.2f} {2:.2f}", position.x, position.y, position.z);
       }
     );
-    window->AddElement(cameraPositionText);
+    infoWindow->AddElement(cameraPositionText);
 
     std::shared_ptr<ImguiText> cameraDirectionText = std::make_shared<ImguiText>(
       [game]()
@@ -195,7 +192,7 @@ namespace blocks
         return  std::format("Camera direction: {0:.2f} {1:.2f} {2:.2f}", direction.x, direction.y, direction.z);
       }
     );
-    window->AddElement(cameraDirectionText);
+    infoWindow->AddElement(cameraDirectionText);
 
     std::shared_ptr<ImguiText> playerVelocityText = std::make_shared<ImguiText>(
       [game]()
@@ -204,7 +201,7 @@ namespace blocks
         return  std::format("Player velocity: {0:.2f} {1:.2f} {2:.2f}", velocity.x, velocity.y, velocity.z);
       }
     );
-    window->AddElement(playerVelocityText);
+    infoWindow->AddElement(playerVelocityText);
 
     std::shared_ptr<ImguiText> centerChunkText = std::make_shared<ImguiText>(
       [game]()
@@ -214,7 +211,7 @@ namespace blocks
         return  std::format("Current chunk: {0} {1}", chunkPosition.first, chunkPosition.second);
       }
     );
-    window->AddElement(centerChunkText);
+    infoWindow->AddElement(centerChunkText);
 
     std::shared_ptr<ImguiCheckBox> enableGravityCheckBox = std::make_shared<ImguiCheckBox>(
       game->GetContext().isGravityEnabled,
@@ -224,13 +221,32 @@ namespace blocks
         game->GetContext().isGravityEnabled = checked;
       }
     );
-    window->AddElement(enableGravityCheckBox);
+    infoWindow->AddElement(enableGravityCheckBox);
 
-    //std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>("Menu");
-    //scene->imguiWindows_.push_back(menuWindow);
-    //
-    //std::shared_ptr<ImguiText> sampleText = std::make_shared<ImguiText>("SomeText");
-    //menuWindow->AddElement(sampleText);
+    std::shared_ptr<ImguiWindow> menuWindow = std::make_shared<ImguiWindow>(glm::vec2(1.0f, 0.0f), glm::vec2(1.0f, 0.0f));
+    scene->imguiWindows_.push_back(menuWindow);
+    
+    std::shared_ptr<ImguiText> sampleText = std::make_shared<ImguiText>("SomeText");
+    menuWindow->AddElement(sampleText);
+
+    std::shared_ptr<ImguiButton> backButton = std::make_shared<ImguiButton>(
+      "Back to Main Menu",
+      [game]()
+      {
+        std::shared_ptr<Scene> mainMenuScene = BuildMainMenuScene(game);
+        game->RequestScene(mainMenuScene);
+      }
+    );
+    menuWindow->AddElement(backButton);
+
+    std::shared_ptr<ImguiButton> quitButton = std::make_shared<ImguiButton>(
+      "Quit",
+      [game]()
+      {
+        game->Stop();
+      }
+    );
+    menuWindow->AddElement(quitButton);
 
     return scene;
   }

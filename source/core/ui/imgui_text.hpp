@@ -15,7 +15,7 @@ namespace blocks
     ImguiText(std::function<std::string()> updateStringCallback);
     virtual ~ImguiText() override {}
 
-    virtual void Render() override;
+    virtual void Render(const OpenglContext* context) override;
 
   private:
     std::string text_;

@@ -8,7 +8,7 @@ namespace blocks
   }
 
 
-  void ImguiCheckBox::Render()
+  void ImguiCheckBox::Render(const OpenglContext* context)
   {
     if (isVisible_ == false)
     {

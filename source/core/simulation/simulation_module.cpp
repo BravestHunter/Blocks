@@ -19,4 +19,13 @@ namespace blocks
     playerControlModule_.Update(delta, inputState, gameContext);
     physicsModule_.Update(delta, gameContext);
   }
+
+
+  void SimulationModule::OnSceneChanged(GameContext& gameContext)
+  {
+    if (gameContext.scene->ContainsWorld())
+    {
+      gameContext.camera->SetPosition(gameContext.scene->GetWorld()->GetPlayer().GetPosition());
+    }
+  }
 }

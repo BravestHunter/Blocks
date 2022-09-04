@@ -25,7 +25,7 @@ namespace blocks
   }
 
 
-  void ImguiListBox::Render()
+  void ImguiListBox::Render(const OpenglContext* context)
   {
     if (isVisible_ == false)
     {

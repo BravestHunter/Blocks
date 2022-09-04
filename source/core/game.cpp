@@ -46,6 +46,13 @@ namespace blocks
     return 0;
   }
 
+  void Game::Stop()
+  {
+    Environment::GetTaskScheduler().Stop();
+
+    isRunning_ = false;
+  }
+
   void Game::RequestScene(std::shared_ptr<Scene> scene)
   {
     requestedScene_ = scene;
@@ -179,13 +186,6 @@ namespace blocks
     }
   }
 
-  void Game::Stop()
-  {
-    Environment::GetTaskScheduler().Stop();
-
-    isRunning_ = false;
-  }
-
   void Game::SetRequestedScene()
   {
     sceneMutex_.lock();
@@ -193,6 +193,7 @@ namespace blocks
     context_.scene = requestedScene_;
     requestedScene_ = nullptr;
 
+    simulationModule_.OnSceneChanged(context_);
     presentationModule_.OnSceneChanged(context_);
 
     sceneMutex_.unlock();

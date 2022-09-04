@@ -64,4 +64,9 @@ namespace blocks
   {
     chunks_.erase(position);
   }
+
+  void OpenglMap::Clear()
+  {
+    chunks_.clear();
+  }
 }

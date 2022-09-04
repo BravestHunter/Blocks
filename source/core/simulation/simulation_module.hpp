@@ -18,6 +18,8 @@ namespace blocks
 
     void Update(float delta, const InputState& inputState, GameContext& gameContext);
 
+    void OnSceneChanged(GameContext& gameContext);
+
   private:
     PlayerControlModule playerControlModule_;
     PhysicsModule physicsModule_;

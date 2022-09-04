@@ -14,7 +14,7 @@ namespace blocks
     ImguiButton(std::string text, std::function<void()> callback);
     virtual ~ImguiButton() override {}
 
-    virtual void Render() override;
+    virtual void Render(const OpenglContext* context) override;
 
   private:
     std::string text_;

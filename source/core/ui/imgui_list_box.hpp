@@ -14,7 +14,7 @@ namespace blocks
     ImguiListBox(std::string label, std::vector<std::string> items);
     virtual ~ImguiListBox() override;
 
-    virtual void Render() override;
+    virtual void Render(const OpenglContext* context) override;
 
     std::string GetSelectedItem() const;
 

@@ -15,6 +15,8 @@
 
 namespace blocks
 {
+  glm::vec4 skyColor = glm::vec4(0.5f, 0.5f, 0.92f, 1.0f);
+
   OpenglRenderModule::OpenglRenderModule()
   {
   }
@@ -32,7 +34,7 @@ namespace blocks
       return;
     }
 
-    Clear();
+    Clear(skyColor);
 
     glm::ivec2 windowSize = context_->window_.GetSize();
     if (windowSize != context_->viewportSize)
@@ -50,7 +52,7 @@ namespace blocks
     auto imguiWindowsIterator = gameContext.scene->GetImguiWindowsIterator();
     for (auto it = imguiWindowsIterator.first; it != imguiWindowsIterator.second; it++)
     {
-      it->get()->Render();
+      it->get()->Render(context_.get());
     }
 
     // Render imgui ui

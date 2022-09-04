@@ -32,6 +32,7 @@ namespace blocks
 
     void AddChunk(std::vector<OpenglChunkVertex> chunkData, ChunkPosition position);
     void RemoveChunk(ChunkPosition position);
+    void Clear();
 
   private:
     std::map<ChunkPosition, std::shared_ptr<OpenglChunk>> chunks_;

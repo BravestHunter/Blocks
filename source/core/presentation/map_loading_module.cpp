@@ -75,6 +75,8 @@ namespace blocks
 
   void MapLoadingModule::OnSceneChanged(PresentationContext& presentationContext, GameContext& gameContext)
   {
+    presentationContext.openglScene->GetMap()->Clear();
+
     if (gameContext.scene->ContainsWorld())
     {
       lastCenterChunkPosition_ = Map::CalculateChunkPosition(gameContext.camera->GetPosition());

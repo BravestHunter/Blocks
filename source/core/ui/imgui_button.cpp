@@ -9,7 +9,7 @@ namespace blocks
   }
 
 
-  void ImguiButton::Render()
+  void ImguiButton::Render(const OpenglContext* context)
   {
     if (isVisible_ == false)
     {

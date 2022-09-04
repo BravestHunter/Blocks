@@ -3,28 +3,50 @@
 
 namespace blocks
 {
-  ImguiWindow::ImguiWindow(std::string title) : title_(title)
+  ImguiWindow::ImguiWindow(glm::vec2 anchor, glm::vec2 pivot) :
+    hasTitle_(false), 
+    title_(" "), // Name shoudn't be empty
+    anchor_(anchor), 
+    pivot_(pivot)
+  {
+
+  }
+
+  ImguiWindow::ImguiWindow(std::string title, glm::vec2 anchor, glm::vec2 pivot) :
+    hasTitle_(true), 
+    title_(title), 
+    anchor_(anchor), 
+    pivot_(pivot)
   {
 
   }
 
 
-  void ImguiWindow::Render()
+  void ImguiWindow::Render(const OpenglContext* context)
   {
     if (isVisible_ == false)
     {
       return;
     }
 
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImVec2(0, 0));
+    ImVec2 position(context->viewportSize.x * anchor_.x, context->viewportSize.y * anchor_.y);
+    ImVec2 pivot(pivot_.x, pivot_.y);
+    ImGui::SetNextWindowPos(position, 0, pivot);
+    ImVec2 size(0.0f, 0.0f);
+    ImGui::SetNextWindowSize(size);
 
-    ImGui::Begin(title_.c_str());
+    ImGuiWindowFlags flags = 0;
+    if (hasTitle_ == false)
+    {
+      flags |= ImGuiWindowFlags_NoTitleBar;
+    }
+
+    ImGui::Begin(title_.c_str(), nullptr, flags);
     if (elements_.size() > 0)
     {
       for (std::shared_ptr<BaseImguiElement> element : elements_)
       {
-        element->Render();
+        element->Render(context);
       }
     }
     ImGui::End();

@@ -14,7 +14,7 @@ namespace blocks
   }
 
 
-  void ImguiText::Render()
+  void ImguiText::Render(const OpenglContext* context)
   {
     if (isVisible_ == false)
     {
