@@ -1,4 +1,4 @@
-#include "opengl_vertex_array_object.hpp"
+#include "vertex_array_object.hpp"
 
 #include <utility>
 

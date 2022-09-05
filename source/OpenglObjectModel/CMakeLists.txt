@@ -1,17 +1,17 @@
 set(SOURCE_FILES
 	glew_headers.hpp
-	opengl_shader.hpp
-	opengl_shader.cpp
-	opengl_program.hpp
-	opengl_program.cpp
-	opengl_buffer.hpp
-	opengl_buffer.cpp
-	opengl_vertex_array_object.hpp
-	opengl_vertex_array_object.cpp
-	opengl_texture_2d.hpp
-	opengl_texture_2d.cpp
-	opengl_texture_2d_array.hpp
-	opengl_texture_2d_array.cpp
+	buffer.cpp
+	vertex_array_object.hpp
+	vertex_array_object.cpp
+	texture_2d.hpp
+	texture_2d.cpp
+	texture_2d_array.hpp
+	texture_2d_array.cpp
+	shader.hpp
+	shader.cpp
+	shader_program.hpp
+	shader_program.cpp
+	buffer.hpp
 )
 
 add_library(OpenglObjectModel STATIC ${SOURCE_FILES})

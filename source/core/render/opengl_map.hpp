@@ -8,7 +8,7 @@
 
 #include "opengl_chunk.hpp"
 #include "opengl_raw_chunk_data.hpp"
-#include "opengl_texture_2d_array.hpp"
+#include "texture_2d_array.hpp"
 #include "chunk.hpp"
 #include "scene/map.hpp"
 #include "resource/block_set.hpp"

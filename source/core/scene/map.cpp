@@ -195,6 +195,7 @@ namespace blocks
       for (int y = 0; y < Chunk::Width; y++)
       {
         float height = (highMap[x + y * Chunk::Length] + 1.0f) / 2.0f; // (0.0 - 1.0) range
+        //int highBorder = (int)(height * Chunk::Height / 3.0f);
         int highBorder = (int)(height * Chunk::Height);
 
         for (int z = 0; z < highBorder; z++)

@@ -6,7 +6,7 @@
 #include "platform/glfw_window.hpp"
 #include "glew_headers.hpp"
 #include "render/opengl_context.hpp"
-#include "opengl_program.hpp"
+#include "shader_program.hpp"
 #include "opengl_scene.hpp"
 #include "simulation/camera.hpp"
 #include "presentation/presentation_context.hpp"

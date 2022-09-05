@@ -1,4 +1,4 @@
-#include "opengl_texture_2d.hpp"
+#include "texture_2d.hpp"
 
 #include <iostream>
 

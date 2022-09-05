@@ -1,4 +1,4 @@
-#include "opengl_texture_2d_array.hpp"
+#include "texture_2d_array.hpp"
 
 #include <iostream>
 

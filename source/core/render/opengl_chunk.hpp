@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "opengl_buffer.hpp"
-#include "opengl_vertex_array_object.hpp"
+#include "buffer.hpp"
+#include "vertex_array_object.hpp"
 
 
 namespace blocks
