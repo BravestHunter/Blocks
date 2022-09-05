@@ -1,11 +1,12 @@
 #pragma once
 
 #include "glew_headers.hpp"
+#include "object.hpp"
 
 
 namespace opengl
 {
-  class VertexArrayObject
+  class VertexArrayObject : public Object
   {
   public:
     VertexArrayObject();
@@ -13,13 +14,11 @@ namespace opengl
     VertexArrayObject(VertexArrayObject&& other);
     VertexArrayObject& operator=(const VertexArrayObject&) = delete;
     VertexArrayObject& operator=(VertexArrayObject&& other);
-    ~VertexArrayObject();
+    virtual ~VertexArrayObject() override;
 
     void Bind();
 
   private:
     void Release();
-
-    GLuint id_;
   };
 }

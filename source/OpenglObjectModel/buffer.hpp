@@ -1,11 +1,12 @@
 #pragma once
 
 #include "glew_headers.hpp"
+#include "object.hpp"
 
 
 namespace opengl
 {
-  class Buffer
+  class Buffer : public Object
   {
   public:
     Buffer(GLuint bufferType);
@@ -13,7 +14,7 @@ namespace opengl
     Buffer(Buffer&& other);
     Buffer& operator=(const Buffer&) = delete;
     Buffer& operator=(Buffer&& other);
-    ~Buffer();
+    virtual ~Buffer() override;
 
     void SetData(GLsizeiptr size, const void* data);
     void Bind();
@@ -21,7 +22,6 @@ namespace opengl
   private:
     void Release();
 
-    GLuint id_;
     GLuint bufferType_;
   };
 }

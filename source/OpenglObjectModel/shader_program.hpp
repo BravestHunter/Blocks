@@ -3,12 +3,13 @@
 #include <glm/glm.hpp>
 
 #include "glew_headers.hpp"
+#include "object.hpp"
 #include "shader.hpp"
 
 
 namespace opengl
 {
-  class ShaderProgram
+  class ShaderProgram : Object
   {
   public:
     ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
@@ -16,7 +17,7 @@ namespace opengl
     ShaderProgram(ShaderProgram&& other);
     ShaderProgram& operator=(const ShaderProgram&) = delete;
     ShaderProgram& operator=(ShaderProgram&& other);
-    ~ShaderProgram();
+    virtual ~ShaderProgram() override;
 
     void Setup();
 
@@ -37,7 +38,5 @@ namespace opengl
   private:
     void Release();
     void CheckErrors();
-
-    GLuint id_;
   };
 }

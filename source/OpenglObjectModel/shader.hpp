@@ -3,11 +3,12 @@
 #include <string>
 
 #include "glew_headers.hpp"
+#include "object.hpp"
 
 
 namespace opengl
 {
-  class Shader
+  class Shader : public Object
   {
   public:
     Shader(const std::string& shaderCode, GLuint shaderType);
@@ -15,16 +16,20 @@ namespace opengl
     Shader(Shader&& other);
     Shader& operator=(const Shader&) = delete;
     Shader& operator=(Shader&& other);
-    ~Shader();
+    virtual ~Shader() override;
 
-    GLuint GetId() const;
-    GLuint GetType() const;
+    inline GLuint GetType() const;
 
   private:
     void Release();
     void CheckErrors();
 
-    GLuint id_;
     GLuint shaderType_;
   };
+
+
+  GLuint Shader::GetType() const
+  {
+    return shaderType_;
+  }
 }

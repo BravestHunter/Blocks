@@ -1,5 +1,8 @@
 set(SOURCE_FILES
 	glew_headers.hpp
+	object.hpp
+	object.cpp
+	buffer.hpp
 	buffer.cpp
 	vertex_array_object.hpp
 	vertex_array_object.cpp
@@ -11,7 +14,6 @@ set(SOURCE_FILES
 	shader.cpp
 	shader_program.hpp
 	shader_program.cpp
-	buffer.hpp
 )
 
 add_library(OpenglObjectModel STATIC ${SOURCE_FILES})

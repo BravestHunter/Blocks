@@ -1,5 +1,6 @@
 #include "shader_program.hpp"
 
+#include <utility>
 #include <iostream>
 
 
@@ -11,21 +12,24 @@ namespace opengl
     glAttachShader(id_, vertexShader.GetId());
     glAttachShader(id_, fragmentShader.GetId());
     glLinkProgram(id_);
+
     CheckErrors();
   }
 
-  ShaderProgram::ShaderProgram(ShaderProgram&& other) : id_(other.id_)
+  ShaderProgram::ShaderProgram(ShaderProgram&& other) : Object(other.id_)
   {
     other.id_ = 0;
   }
 
   ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other)
   {
-    if (this != &other)
+    if (this == &other)
     {
-      Release();
-      std::swap(id_, other.id_);
+      return *this;
     }
+
+    Release();
+    std::swap(id_, other.id_);
 
     return *this;
   }
@@ -108,8 +112,11 @@ namespace opengl
 
   void ShaderProgram::Release()
   {
-    glDeleteProgram(id_);
-    id_ = 0;
+    if (id_ != 0)
+    {
+      glDeleteProgram(id_);
+      id_ = 0;
+    }
   }
 
   void ShaderProgram::CheckErrors()

@@ -10,18 +10,20 @@ namespace opengl
     glGenVertexArrays(1, &id_);
   }
 
-  VertexArrayObject::VertexArrayObject(VertexArrayObject&& other) : id_(other.id_)
+  VertexArrayObject::VertexArrayObject(VertexArrayObject&& other) : Object(other.id_)
   {
     other.id_ = 0;
   }
 
   VertexArrayObject& VertexArrayObject::operator=(VertexArrayObject&& other)
   {
-    if (this != &other)
+    if (this == &other)
     {
-      Release();
-      std::swap(id_, other.id_);
+      return *this;
     }
+
+    Release();
+    std::swap(id_, other.id_);
 
     return *this;
   }
@@ -40,7 +42,10 @@ namespace opengl
 
   void VertexArrayObject::Release()
   {
-    glDeleteVertexArrays(1, &id_);
-    id_ = 0;
+    if (id_ != 0)
+    {
+      glDeleteVertexArrays(1, &id_);
+      id_ = 0;
+    }
   }
 }

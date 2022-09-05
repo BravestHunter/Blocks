@@ -1,5 +1,6 @@
 #include "texture_2d_array.hpp"
 
+#include <utility>
 #include <iostream>
 
 #include "io/file_api.hpp"
@@ -35,18 +36,20 @@ namespace opengl
     glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   }
 
-  Texture2DArray::Texture2DArray(Texture2DArray&& other) : id_(other.id_)
+  Texture2DArray::Texture2DArray(Texture2DArray&& other) : Object(other.id_)
   {
     other.id_ = 0;
   }
 
   Texture2DArray& Texture2DArray::operator=(Texture2DArray&& other)
   {
-    if (this != &other)
+    if (this == &other)
     {
-      Release();
-      std::swap(id_, other.id_);
+      return *this;
     }
+
+    Release();
+    std::swap(id_, other.id_);
 
     return *this;
   }
@@ -66,7 +69,10 @@ namespace opengl
 
   void Texture2DArray::Release()
   {
-    glDeleteTextures(1, &id_);
-    id_ = 0;
+    if (id_ != 0)
+    {
+      glDeleteTextures(1, &id_);
+      id_ = 0;
+    }
   }
 }

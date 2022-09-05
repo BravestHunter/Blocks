@@ -10,18 +10,20 @@ namespace opengl
     glGenBuffers(1, &id_);
   }
 
-  Buffer::Buffer(Buffer&& other) : id_(other.id_)
+  Buffer::Buffer(Buffer&& other) : Object(other.id_)
   {
     other.id_ = 0;
   }
 
   Buffer& Buffer::operator=(Buffer&& other)
   {
-    if (this != &other)
+    if (this == &other)
     {
-      Release();
-      std::swap(id_, other.id_);
+      return *this;
     }
+
+    Release();
+    std::swap(id_, other.id_);
 
     return *this;
   }
@@ -45,7 +47,10 @@ namespace opengl
 
   void Buffer::Release()
   {
-    glDeleteBuffers(1, &id_);
-    id_ = 0;
+    if (id_ != 0)
+    {
+      glDeleteBuffers(1, &id_);
+      id_ = 0;
+    }
   }
 }

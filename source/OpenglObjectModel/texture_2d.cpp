@@ -1,5 +1,6 @@
 #include "texture_2d.hpp"
 
+#include <utility>
 #include <iostream>
 
 #include "io/file_api.hpp"
@@ -31,18 +32,20 @@ namespace opengl
     }
   }
 
-  Texture2D::Texture2D(Texture2D&& other) : id_(other.id_)
+  Texture2D::Texture2D(Texture2D&& other) : Object(other.id_)
   {
     other.id_ = 0;
   }
 
   Texture2D& Texture2D::operator=(Texture2D&& other)
   {
-    if (this != &other)
+    if (this == &other)
     {
-      Release();
-      std::swap(id_, other.id_);
+      return *this;
     }
+
+    Release();
+    std::swap(id_, other.id_);
 
     return *this;
   }
@@ -62,7 +65,10 @@ namespace opengl
 
   void Texture2D::Release()
   {
-    glDeleteTextures(1, &id_);
-    id_ = 0;
+    if (id_ != 0)
+    {
+      glDeleteTextures(1, &id_);
+      id_ = 0;
+    }
   }
 }

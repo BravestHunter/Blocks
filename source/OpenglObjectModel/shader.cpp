@@ -1,5 +1,6 @@
 #include "shader.hpp"
 
+#include <utility>
 #include <iostream>
 
 
@@ -12,21 +13,24 @@ namespace opengl
     id_ = glCreateShader(shaderType);
     glShaderSource(id_, 1, &cShaderCode, NULL);
     glCompileShader(id_);
+
     CheckErrors();
   }
 
-  Shader::Shader(Shader&& other) : id_(other.id_)
+  Shader::Shader(Shader&& other) : Object(other.id_)
   {
     other.id_ = 0;
   }
 
   Shader& Shader::operator=(Shader&& other)
   {
-    if (this != &other)
+    if (this == &other)
     {
-      Release();
-      std::swap(id_, other.id_);
+      return *this;
     }
+
+    Release();
+    std::swap(id_, other.id_);
 
     return *this;
   }
@@ -37,21 +41,13 @@ namespace opengl
   }
 
 
-  GLuint Shader::GetId() const
-  {
-    return id_;
-  }
-
-  GLuint Shader::GetType() const
-  {
-    return shaderType_;
-  }
-
-
   void Shader::Release()
   {
-    glDeleteShader(id_);
-    id_ = 0;
+    if (id_ != 0)
+    {
+      glDeleteShader(id_);
+      id_ = 0;
+    }
   }
 
   void Shader::CheckErrors()
@@ -65,8 +61,8 @@ namespace opengl
     case GL_VERTEX_SHADER:
       shaderTypeName = "VERTEX SHADER";
       break;
-    case GL_GEOMETRY_SHADER:
-      shaderTypeName = "GEOMETRY SHADER";
+    case GL_FRAGMENT_SHADER:
+      shaderTypeName = "FRAGMENT SHADER";
       break;
     default:
       shaderTypeName = "";
