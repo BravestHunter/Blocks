@@ -6,17 +6,17 @@
 #include "opengl_shader.hpp"
 
 
-namespace blocks
+namespace opengl
 {
-  class OpenglProgram
+  class ShaderProgram
   {
   public:
-    OpenglProgram(const OpenglShader& vertexShader, const OpenglShader& fragmentShader);
-    OpenglProgram(const OpenglProgram&) = delete;
-    OpenglProgram(OpenglProgram&& other);
-    OpenglProgram& operator=(const OpenglProgram&) = delete;
-    OpenglProgram& operator=(OpenglProgram&& other);
-    ~OpenglProgram();
+    ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
+    ShaderProgram(const ShaderProgram&) = delete;
+    ShaderProgram(ShaderProgram&& other);
+    ShaderProgram& operator=(const ShaderProgram&) = delete;
+    ShaderProgram& operator=(ShaderProgram&& other);
+    ~ShaderProgram();
 
     void Setup();
 

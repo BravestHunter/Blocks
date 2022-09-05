@@ -30,19 +30,6 @@ set(CORE_SOURCE_FILES
 	presentation/presentation_module.hpp
 	presentation/presentation_module.cpp
 
-	render/glew_headers.hpp
-	render/opengl_shader.hpp
-	render/opengl_shader.cpp
-	render/opengl_program.hpp
-	render/opengl_program.cpp
-	render/opengl_buffer.hpp
-	render/opengl_buffer.cpp
-	render/opengl_vertex_array_object.hpp
-	render/opengl_vertex_array_object.cpp
-	render/opengl_texture_2d.hpp
-	render/opengl_texture_2d.cpp
-	render/opengl_texture_2d_array.hpp
-	render/opengl_texture_2d_array.cpp
 	render/opengl_chunk_vertex.hpp
 	render/opengl_chunk_vertex.cpp
 	render/opengl_context.hpp
@@ -92,6 +79,7 @@ target_include_directories(BlocksCore
 target_link_libraries(BlocksCore
 	PUBLIC
 		BlocksUtils
+		OpenglObjectModel
 		BlocksEnviroment
 		BlocksModel
 		

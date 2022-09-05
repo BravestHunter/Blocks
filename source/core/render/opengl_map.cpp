@@ -6,7 +6,7 @@
 
 #include "environment.hpp"
 #include "chunk.hpp"
-#include "resource/image.hpp"
+#include "image.hpp"
 
 
 namespace blocks
@@ -33,7 +33,7 @@ namespace blocks
     }
 
     int resolution = blockSet->GetResolution();
-    blocksTextureArray_ = std::make_shared<OpenglTexture2DArray>(images, resolution, resolution);
+    blocksTextureArray_ = std::make_shared<opengl::Texture2DArray>(images, resolution, resolution);
     blocksTextureArray_->Bind(0);
   }
 
@@ -46,8 +46,8 @@ namespace blocks
 
   void OpenglMap::AddChunk(std::vector<OpenglChunkVertex> chunkData, ChunkPosition position)
   {
-    std::shared_ptr<OpenglBuffer> vbo = std::make_shared<OpenglBuffer>(GL_ARRAY_BUFFER);
-    std::shared_ptr<OpenglVertexArrayObject> vao = std::make_shared<OpenglVertexArrayObject>();
+    std::shared_ptr<opengl::Buffer> vbo = std::make_shared<opengl::Buffer>(GL_ARRAY_BUFFER);
+    std::shared_ptr<opengl::VertexArrayObject> vao = std::make_shared<opengl::VertexArrayObject>();
 
     vao->Bind();
     vbo->Bind();

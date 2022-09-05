@@ -8,7 +8,7 @@
 
 #include "opengl_chunk.hpp"
 #include "opengl_raw_chunk_data.hpp"
-#include "render/opengl_texture_2d_array.hpp"
+#include "opengl_texture_2d_array.hpp"
 #include "chunk.hpp"
 #include "scene/map.hpp"
 #include "resource/block_set.hpp"
@@ -36,6 +36,6 @@ namespace blocks
 
   private:
     std::map<ChunkPosition, std::shared_ptr<OpenglChunk>> chunks_;
-    std::shared_ptr<OpenglTexture2DArray> blocksTextureArray_;
+    std::shared_ptr<opengl::Texture2DArray> blocksTextureArray_;
   };
 }

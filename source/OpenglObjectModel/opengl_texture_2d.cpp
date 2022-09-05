@@ -5,9 +5,9 @@
 #include "io/file_api.hpp"
 
 
-namespace blocks
+namespace opengl
 {
-  OpenglTexture2D::OpenglTexture2D(const Image& image)
+  Texture2D::Texture2D(const blocks::Image& image)
   {
     glGenTextures(1, &id_);
     glBindTexture(GL_TEXTURE_2D, id_);
@@ -31,12 +31,12 @@ namespace blocks
     }
   }
 
-  OpenglTexture2D::OpenglTexture2D(OpenglTexture2D&& other) : id_(other.id_)
+  Texture2D::Texture2D(Texture2D&& other) : id_(other.id_)
   {
     other.id_ = 0;
   }
 
-  OpenglTexture2D& OpenglTexture2D::operator=(OpenglTexture2D&& other)
+  Texture2D& Texture2D::operator=(Texture2D&& other)
   {
     if (this != &other)
     {
@@ -47,20 +47,20 @@ namespace blocks
     return *this;
   }
 
-  OpenglTexture2D::~OpenglTexture2D()
+  Texture2D::~Texture2D()
   {
     Release();
   }
 
 
-  void OpenglTexture2D::Bind(int slot)
+  void Texture2D::Bind(int slot)
   {
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D, id_);
   }
 
 
-  void OpenglTexture2D::Release()
+  void Texture2D::Release()
   {
     glDeleteTextures(1, &id_);
     id_ = 0;

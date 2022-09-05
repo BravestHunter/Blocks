@@ -13,7 +13,6 @@ set(SOURCE_FILES
 	platform/glfw_platform.hpp
 	platform/glfw_platform.cpp
 
-	resource/image.hpp
 	resource/block_info.hpp
 	resource/block_set.hpp
 	resource/block_set.cpp
@@ -32,9 +31,6 @@ target_link_libraries(BlocksEnviroment
 	PUBLIC
 		BlocksUtils
 
-		OpenGL::GL
-		OpenGL::GLU
-		glew
 		glfw3
 		stb
 		Freetype::Freetype

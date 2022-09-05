@@ -3,9 +3,9 @@
 #include <iostream>
 
 
-namespace blocks
+namespace opengl
 {
-  OpenglShader::OpenglShader(const std::string& shaderCode, GLuint shaderType) : shaderType_(shaderType)
+  Shader::Shader(const std::string& shaderCode, GLuint shaderType) : shaderType_(shaderType)
   {
     const char* cShaderCode = shaderCode.c_str();
 
@@ -15,12 +15,12 @@ namespace blocks
     CheckErrors();
   }
 
-  OpenglShader::OpenglShader(OpenglShader&& other) : id_(other.id_)
+  Shader::Shader(Shader&& other) : id_(other.id_)
   {
     other.id_ = 0;
   }
 
-  OpenglShader& OpenglShader::operator=(OpenglShader&& other)
+  Shader& Shader::operator=(Shader&& other)
   {
     if (this != &other)
     {
@@ -31,30 +31,30 @@ namespace blocks
     return *this;
   }
 
-  OpenglShader::~OpenglShader()
+  Shader::~Shader()
   {
     Release();
   }
 
 
-  GLuint OpenglShader::GetId() const
+  GLuint Shader::GetId() const
   {
     return id_;
   }
 
-  GLuint OpenglShader::GetType() const
+  GLuint Shader::GetType() const
   {
     return shaderType_;
   }
 
 
-  void OpenglShader::Release()
+  void Shader::Release()
   {
     glDeleteShader(id_);
     id_ = 0;
   }
 
-  void OpenglShader::CheckErrors()
+  void Shader::CheckErrors()
   {
     GLint success;
     GLchar infoLog[1024];

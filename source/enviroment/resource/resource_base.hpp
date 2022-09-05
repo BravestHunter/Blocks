@@ -6,7 +6,7 @@
 
 #include "export.h"
 #include "block_set.hpp"
-#include "resource/image.hpp"
+#include "image.hpp"
 
 
 namespace blocks

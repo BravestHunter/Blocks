@@ -1,6 +1,7 @@
 set(SOURCE_FILES
 	export.h
 	compile_utils.hpp
+	image.hpp
 
 	io/file_api.hpp
 	io/file_api.cpp

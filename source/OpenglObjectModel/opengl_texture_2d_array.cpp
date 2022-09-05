@@ -5,9 +5,9 @@
 #include "io/file_api.hpp"
 
 
-namespace blocks
+namespace opengl
 {
-  OpenglTexture2DArray::OpenglTexture2DArray(const std::vector<Image>& images, const int resolutionX, const int resolutionY)
+  Texture2DArray::Texture2DArray(const std::vector<blocks::Image>& images, const int resolutionX, const int resolutionY)
   {
     glGenTextures(1, &id_);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id_);
@@ -15,7 +15,7 @@ namespace blocks
 
     for (int i = 0; i < images.size(); i++)
     {
-      const Image& image = images[i];
+      const blocks::Image& image = images[i];
       if (!image.data.empty())
       {
         GLuint channelsMode = GL_RGB;
@@ -35,12 +35,12 @@ namespace blocks
     glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   }
 
-  OpenglTexture2DArray::OpenglTexture2DArray(OpenglTexture2DArray&& other) : id_(other.id_)
+  Texture2DArray::Texture2DArray(Texture2DArray&& other) : id_(other.id_)
   {
     other.id_ = 0;
   }
 
-  OpenglTexture2DArray& OpenglTexture2DArray::operator=(OpenglTexture2DArray&& other)
+  Texture2DArray& Texture2DArray::operator=(Texture2DArray&& other)
   {
     if (this != &other)
     {
@@ -51,20 +51,20 @@ namespace blocks
     return *this;
   }
 
-  OpenglTexture2DArray::~OpenglTexture2DArray()
+  Texture2DArray::~Texture2DArray()
   {
     Release();
   }
 
 
-  void OpenglTexture2DArray::Bind(int slot)
+  void Texture2DArray::Bind(int slot)
   {
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id_);
   }
 
 
-  void OpenglTexture2DArray::Release()
+  void Texture2DArray::Release()
   {
     glDeleteTextures(1, &id_);
     id_ = 0;

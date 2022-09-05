@@ -120,9 +120,9 @@ namespace blocks
     // Load map shader program
     std::string vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER));
     std::string fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
-    OpenglShader vertexShader(vertexCode, GL_VERTEX_SHADER);
-    OpenglShader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
-    mapProgram_ = std::make_shared<OpenglProgram>(vertexShader, fragmentShader);
+    opengl::Shader vertexShader(vertexCode, GL_VERTEX_SHADER);
+    opengl::Shader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
+    mapProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
 
     presentationContext.openglScene = std::make_shared<OpenglScene>();
     presentationContext.openglScene->InitMap();
@@ -150,7 +150,7 @@ namespace blocks
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
-  void OpenglRenderModule::RenderMap(std::shared_ptr<OpenglMap> map, std::shared_ptr<OpenglProgram> mapProgram, std::shared_ptr<Camera> camera, float ratio)
+  void OpenglRenderModule::RenderMap(std::shared_ptr<OpenglMap> map, std::shared_ptr<opengl::ShaderProgram> mapProgram, std::shared_ptr<Camera> camera, float ratio)
   {
     mapProgram->Setup();
     mapProgram->SetInt("texture", 0);

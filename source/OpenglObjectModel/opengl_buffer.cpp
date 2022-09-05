@@ -3,19 +3,19 @@
 #include <utility>
 
 
-namespace blocks
+namespace opengl
 {
-  OpenglBuffer::OpenglBuffer(GLuint bufferType) : bufferType_(bufferType)
+  Buffer::Buffer(GLuint bufferType) : bufferType_(bufferType)
   {
     glGenBuffers(1, &id_);
   }
 
-  OpenglBuffer::OpenglBuffer(OpenglBuffer&& other) : id_(other.id_)
+  Buffer::Buffer(Buffer&& other) : id_(other.id_)
   {
     other.id_ = 0;
   }
 
-  OpenglBuffer& OpenglBuffer::operator=(OpenglBuffer&& other)
+  Buffer& Buffer::operator=(Buffer&& other)
   {
     if (this != &other)
     {
@@ -26,24 +26,24 @@ namespace blocks
     return *this;
   }
 
-  OpenglBuffer::~OpenglBuffer()
+  Buffer::~Buffer()
   {
     Release();
   }
 
 
-  void OpenglBuffer::SetData(GLsizeiptr size, const void* data)
+  void Buffer::SetData(GLsizeiptr size, const void* data)
   {
     glBufferData(bufferType_, size, data, GL_STATIC_DRAW);
   }
 
-  void OpenglBuffer::Bind()
+  void Buffer::Bind()
   {
     glBindBuffer(bufferType_, id_);
   }
 
 
-  void OpenglBuffer::Release()
+  void Buffer::Release()
   {
     glDeleteBuffers(1, &id_);
     id_ = 0;
