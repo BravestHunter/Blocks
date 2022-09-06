@@ -14,7 +14,7 @@ namespace blocks
   class TaskScheduler
   {
   private:
-    const int ThreadsNumber = 2;
+    const int ThreadsNumber = 4;
 
   public:
     TaskScheduler();

@@ -134,8 +134,12 @@ namespace blocks
         std::shared_ptr<Chunk> backChunk = map->GetChunk({ position.first - 1, position.second });
         std::shared_ptr<Chunk> rightChunk = map->GetChunk({ position.first, position.second + 1 });
         std::shared_ptr<Chunk> leftChunk = map->GetChunk({ position.first, position.second - 1 });
+        std::shared_ptr<Chunk> frontRightChunk = map->GetChunk({ position.first + 1, position.second + 1 });
+        std::shared_ptr<Chunk> frontLeftChunk = map->GetChunk({ position.first + 1, position.second - 1 });
+        std::shared_ptr<Chunk> backRightChunk = map->GetChunk({ position.first - 1, position.second + 1 });
+        std::shared_ptr<Chunk> backLeftChunk = map->GetChunk({ position.first - 1, position.second - 1});
 
-        std::vector<OpenglChunkVertex> rawData = GenerateRawChunkData(chunk, frontChunk, backChunk, rightChunk, leftChunk, blockSet);
+        std::vector<OpenglChunkVertex> rawData = GenerateRawChunkData(chunk, frontChunk, backChunk, rightChunk, leftChunk, frontRightChunk, frontLeftChunk, backRightChunk, backLeftChunk, blockSet);
         ChunksQueueItem item
         {
           .chunkData = rawData,
@@ -167,6 +171,10 @@ namespace blocks
     std::shared_ptr<Chunk> backChunk,
     std::shared_ptr<Chunk> rightChunk,
     std::shared_ptr<Chunk> leftChunk,
+    std::shared_ptr<Chunk> frontRightChunk,
+    std::shared_ptr<Chunk> frontLeftChunk,
+    std::shared_ptr<Chunk> backRightChunk,
+    std::shared_ptr<Chunk> backLeftChunk,
     std::shared_ptr<BlockSet> blockSet
   )
   {
@@ -175,6 +183,13 @@ namespace blocks
 
     std::vector<OpenglChunkVertex> verticesData;
     verticesData.reserve(verticesPerChunkNumber);
+
+    std::shared_ptr<Chunk> chunksGrid[3][3] =
+    {
+      { backLeftChunk, backChunk, backRightChunk },
+      { leftChunk, chunk, rightChunk },
+      { frontLeftChunk, frontChunk, frontRightChunk }
+    };
 
     for (unsigned int z = 0; z < Chunk::Height; z++)
     {
@@ -199,12 +214,14 @@ namespace blocks
           {
             // Add front face
 
-            verticesData.push_back(packVertex(x, y, z, 0, 0, fBlock.textures[0]));
-            verticesData.push_back(packVertex(x, y, z, 0, 1, fBlock.textures[0]));
-            verticesData.push_back(packVertex(x, y, z, 0, 2, fBlock.textures[0]));
-            verticesData.push_back(packVertex(x, y, z, 0, 2, fBlock.textures[0]));
-            verticesData.push_back(packVertex(x, y, z, 0, 1, fBlock.textures[0]));
-            verticesData.push_back(packVertex(x, y, z, 0, 3, fBlock.textures[0]));
+            std::array<int, 4> adjacentBlocks = GetAdjacentBlocks(position, BlockSide::Front, chunksGrid);
+
+            verticesData.push_back(packVertex(x, y, z, 0, 0, fBlock.textures[0], adjacentBlocks[0]));
+            verticesData.push_back(packVertex(x, y, z, 0, 1, fBlock.textures[0], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 0, 2, fBlock.textures[0], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 0, 2, fBlock.textures[0], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 0, 1, fBlock.textures[0], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 0, 3, fBlock.textures[0], adjacentBlocks[3]));
           }
 
           // Check back face
@@ -213,12 +230,14 @@ namespace blocks
           {
             // Add back face
 
-            verticesData.push_back(packVertex(x, y, z, 1, 0, fBlock.textures[1]));
-            verticesData.push_back(packVertex(x, y, z, 1, 1, fBlock.textures[1]));
-            verticesData.push_back(packVertex(x, y, z, 1, 2, fBlock.textures[1]));
-            verticesData.push_back(packVertex(x, y, z, 1, 2, fBlock.textures[1]));
-            verticesData.push_back(packVertex(x, y, z, 1, 1, fBlock.textures[1]));
-            verticesData.push_back(packVertex(x, y, z, 1, 3, fBlock.textures[1]));
+            std::array<int, 4> adjacentBlocks = GetAdjacentBlocks(position, BlockSide::Back, chunksGrid);
+
+            verticesData.push_back(packVertex(x, y, z, 1, 0, fBlock.textures[1], adjacentBlocks[0]));
+            verticesData.push_back(packVertex(x, y, z, 1, 1, fBlock.textures[1], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 1, 2, fBlock.textures[1], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 1, 2, fBlock.textures[1], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 1, 1, fBlock.textures[1], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 1, 3, fBlock.textures[1], adjacentBlocks[3]));
           }
 
           // Check right face
@@ -227,12 +246,14 @@ namespace blocks
           {
             // Add right face
 
-            verticesData.push_back(packVertex(x, y, z, 2, 0, fBlock.textures[2]));
-            verticesData.push_back(packVertex(x, y, z, 2, 1, fBlock.textures[2]));
-            verticesData.push_back(packVertex(x, y, z, 2, 2, fBlock.textures[2]));
-            verticesData.push_back(packVertex(x, y, z, 2, 2, fBlock.textures[2]));
-            verticesData.push_back(packVertex(x, y, z, 2, 1, fBlock.textures[2]));
-            verticesData.push_back(packVertex(x, y, z, 2, 3, fBlock.textures[2]));
+            std::array<int, 4> adjacentBlocks = GetAdjacentBlocks(position, BlockSide::Right, chunksGrid);
+
+            verticesData.push_back(packVertex(x, y, z, 2, 0, fBlock.textures[2], adjacentBlocks[0]));
+            verticesData.push_back(packVertex(x, y, z, 2, 1, fBlock.textures[2], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 2, 2, fBlock.textures[2], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 2, 2, fBlock.textures[2], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 2, 1, fBlock.textures[2], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 2, 3, fBlock.textures[2], adjacentBlocks[3]));
           }
 
           // Check left face
@@ -241,12 +262,14 @@ namespace blocks
           {
             // Add left face
 
-            verticesData.push_back(packVertex(x, y, z, 3, 0, fBlock.textures[3]));
-            verticesData.push_back(packVertex(x, y, z, 3, 1, fBlock.textures[3]));
-            verticesData.push_back(packVertex(x, y, z, 3, 2, fBlock.textures[3]));
-            verticesData.push_back(packVertex(x, y, z, 3, 2, fBlock.textures[3]));
-            verticesData.push_back(packVertex(x, y, z, 3, 1, fBlock.textures[3]));
-            verticesData.push_back(packVertex(x, y, z, 3, 3, fBlock.textures[3]));
+            std::array<int, 4> adjacentBlocks = GetAdjacentBlocks(position, BlockSide::Left, chunksGrid);
+
+            verticesData.push_back(packVertex(x, y, z, 3, 0, fBlock.textures[3], adjacentBlocks[0]));
+            verticesData.push_back(packVertex(x, y, z, 3, 1, fBlock.textures[3], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 3, 2, fBlock.textures[3], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 3, 2, fBlock.textures[3], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 3, 1, fBlock.textures[3], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 3, 3, fBlock.textures[3], adjacentBlocks[3]));
           }
 
           // Check top face
@@ -255,12 +278,14 @@ namespace blocks
           {
             // Add top face
 
-            verticesData.push_back(packVertex(x, y, z, 4, 0, fBlock.textures[4]));
-            verticesData.push_back(packVertex(x, y, z, 4, 1, fBlock.textures[4]));
-            verticesData.push_back(packVertex(x, y, z, 4, 2, fBlock.textures[4]));
-            verticesData.push_back(packVertex(x, y, z, 4, 2, fBlock.textures[4]));
-            verticesData.push_back(packVertex(x, y, z, 4, 1, fBlock.textures[4]));
-            verticesData.push_back(packVertex(x, y, z, 4, 3, fBlock.textures[4]));
+            std::array<int, 4> adjacentBlocks = GetAdjacentBlocks(position, BlockSide::Top, chunksGrid);
+
+            verticesData.push_back(packVertex(x, y, z, 4, 0, fBlock.textures[4], adjacentBlocks[0]));
+            verticesData.push_back(packVertex(x, y, z, 4, 1, fBlock.textures[4], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 4, 2, fBlock.textures[4], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 4, 2, fBlock.textures[4], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 4, 1, fBlock.textures[4], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 4, 3, fBlock.textures[4], adjacentBlocks[3]));
           }
 
           // Check bottom face
@@ -269,17 +294,88 @@ namespace blocks
           {
             // Add bottom face
 
-            verticesData.push_back(packVertex(x, y, z, 5, 0, fBlock.textures[5]));
-            verticesData.push_back(packVertex(x, y, z, 5, 1, fBlock.textures[5]));
-            verticesData.push_back(packVertex(x, y, z, 5, 2, fBlock.textures[5]));
-            verticesData.push_back(packVertex(x, y, z, 5, 2, fBlock.textures[5]));
-            verticesData.push_back(packVertex(x, y, z, 5, 1, fBlock.textures[5]));
-            verticesData.push_back(packVertex(x, y, z, 5, 3, fBlock.textures[5]));
+            std::array<int, 4> adjacentBlocks = GetAdjacentBlocks(position, BlockSide::Bottom, chunksGrid);
+
+            verticesData.push_back(packVertex(x, y, z, 5, 0, fBlock.textures[5], adjacentBlocks[0]));
+            verticesData.push_back(packVertex(x, y, z, 5, 1, fBlock.textures[5], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 5, 2, fBlock.textures[5], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 5, 2, fBlock.textures[5], adjacentBlocks[2]));
+            verticesData.push_back(packVertex(x, y, z, 5, 1, fBlock.textures[5], adjacentBlocks[1]));
+            verticesData.push_back(packVertex(x, y, z, 5, 3, fBlock.textures[5], adjacentBlocks[3]));
           }
         }
       }
     }
 
     return verticesData;
+  }
+
+  glm::ivec3 offsets[6][8] =
+  {
+    { glm::ivec3(1, -1, 0), glm::ivec3(1, -1, -1), glm::ivec3(1, 0, -1), glm::ivec3(1, 1, -1), glm::ivec3(1, 1, 0), glm::ivec3(1, 1, 1), glm::ivec3(1, 0, 1), glm::ivec3(1, -1, 1) },
+    { glm::ivec3(-1, 1, 0), glm::ivec3(-1, 1, -1), glm::ivec3(-1, 0, -1), glm::ivec3(-1, -1, -1), glm::ivec3(-1, -1, 0), glm::ivec3(-1, -1, 1), glm::ivec3(-1, 0, 1), glm::ivec3(-1, 1, 1) },
+    { glm::ivec3(1, 1, 0), glm::ivec3(1, 1, -1), glm::ivec3(0, 1, -1), glm::ivec3(-1, 1, -1), glm::ivec3(-1, 1, 0), glm::ivec3(-1, 1, 1), glm::ivec3(0, 1, 1), glm::ivec3(1, 1, 1) },
+    { glm::ivec3(-1, -1, 0), glm::ivec3(-1, -1, -1), glm::ivec3(0, -1, -1), glm::ivec3(1, -1, -1), glm::ivec3(1, -1, 0), glm::ivec3(1, -1, 1), glm::ivec3(0, -1, 1), glm::ivec3(-1, -1, 1) },
+    { glm::ivec3(0, 1, 1), glm::ivec3(-1, 1, 1), glm::ivec3(-1, 0, 1), glm::ivec3(-1, -1, 1), glm::ivec3(0, -1, 1), glm::ivec3(1, -1, 1), glm::ivec3(1, 0, 1), glm::ivec3(1, 1, 1) },
+    { glm::ivec3(0, -1, -1), glm::ivec3(-1, -1, -1), glm::ivec3(-1, 0, -1), glm::ivec3(-1, 1, -1), glm::ivec3(0, 1, -1), glm::ivec3(1, 1, -1), glm::ivec3(1, 0, -1), glm::ivec3(1, -1, -1) }
+  };
+
+  std::array<int, 4> MapLoadingModule::GetAdjacentBlocks(glm::ivec3 position, BlockSide side, std::shared_ptr<Chunk> chunksGrid[3][3])
+  {
+    int sideIndex = static_cast<int>(side);
+
+    int blocks[8]{};
+    for (int i = 0; i < 8; i++)
+    {
+      glm::ivec3 offset = offsets[sideIndex][i];
+      blocks[i] = GetBlock(position + offset, chunksGrid);
+    }
+
+    return 
+    { 
+      blocks[0] + blocks[2] == 0 ? 0 : blocks[0] + blocks[1] + blocks[2],
+      blocks[2] + blocks[4] == 0 ? 0 : blocks[2] + blocks[3] + blocks[4],
+      blocks[6] + blocks[0] == 0 ? 0 : blocks[6] + blocks[7] + blocks[0],
+      blocks[4] + blocks[6] == 0 ? 0 : blocks[4] + blocks[5] + blocks[6]
+    };
+  }
+
+  int MapLoadingModule::GetBlock(glm::ivec3 position, std::shared_ptr<Chunk> chunksGrid[3][3])
+  {
+    if (position.z < 0 || position.z >= Chunk::Height)
+    {
+      return 1;
+    }
+
+    glm::ivec2 chunkPosition(1, 1);
+
+    if (position.x < 0)
+    {
+      position.x += Chunk::Length;
+      chunkPosition.x = 0;
+    }
+    else if (position.x >= Chunk::Length)
+    {
+      position.x -= Chunk::Length;
+      chunkPosition.x = 2;
+    }
+    if (position.y < 0)
+    {
+      position.y += Chunk::Width;
+      chunkPosition.y = 0;
+    }
+    else if (position.y >= Chunk::Width)
+    {
+      position.y -= Chunk::Width;
+      chunkPosition.y = 2;
+    }
+
+    size_t blockIndex = position.x + position.y * Chunk::Width + position.z * Chunk::LayerBlocksNumber;
+    if (chunksGrid[chunkPosition.x][chunkPosition.y]->blocks[blockIndex] == 0)
+    {
+      return 1;
+    }
+
+    return 0;
   }
 }

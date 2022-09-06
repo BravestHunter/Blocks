@@ -2,10 +2,12 @@
 
 #include <mutex>
 #include <utility>
-#include <deque>
+#include <queue>
+#include <array>
 
 #include "glm/glm.hpp"
 
+#include "block_side.hpp"
 #include "game_module_interface.hpp"
 #include "scene/map.hpp"
 #include "render/opengl_map.hpp"
@@ -55,7 +57,13 @@ namespace blocks
       std::shared_ptr<Chunk> backChunk,
       std::shared_ptr<Chunk> rightChunk,
       std::shared_ptr<Chunk> leftChunk,
+      std::shared_ptr<Chunk> frontRightChunk,
+      std::shared_ptr<Chunk> frontLeftChunk,
+      std::shared_ptr<Chunk> backRightChunk,
+      std::shared_ptr<Chunk> backLeftChunk,
       std::shared_ptr<BlockSet> blockSet
     );
+    inline std::array<int, 4> GetAdjacentBlocks(glm::ivec3 position, BlockSide side, std::shared_ptr<Chunk> chunksGrid[3][3]);
+    inline int GetBlock(glm::ivec3 position, std::shared_ptr<Chunk> chunksGrid[3][3]);
   };
 }

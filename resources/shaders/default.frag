@@ -3,6 +3,7 @@ out vec4 FragColor;
 
 in vec3 Normal;
 in vec3 TexCoord;
+in float AO;
 
 uniform sampler2DArray texture0;
 
@@ -14,4 +15,7 @@ void main()
 
 	// Apply light
 	FragColor = FragColor * (max(dot(Normal, lightDir), 0.0) * 0.5 + 0.5);
+
+	// Apply AO
+	FragColor = FragColor * AO;
 }

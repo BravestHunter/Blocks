@@ -1,7 +1,6 @@
 set(SOURCE_FILES
 	glew_headers.hpp
 	object.hpp
-	object.cpp
 	buffer.hpp
 	buffer.cpp
 	vertex_array_object.hpp

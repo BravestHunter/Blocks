@@ -97,7 +97,7 @@ namespace blocks
     // Configure
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
+    glCullFace(GL_BACK);
 
     window.SetFramebufferCallback(
       [this](int width, int height)
