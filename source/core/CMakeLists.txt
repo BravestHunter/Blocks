@@ -30,6 +30,8 @@ set(CORE_SOURCE_FILES
 	presentation/presentation_module.hpp
 	presentation/presentation_module.cpp
 
+	render/opengl_sprite.hpp
+	render/opengl_sprite.cpp
 	render/opengl_chunk_vertex.hpp
 	render/opengl_chunk_vertex.cpp
 	render/opengl_context.hpp

@@ -4,9 +4,9 @@
 
 #include "game_context.hpp"
 #include "platform/glfw_window.hpp"
-#include "glew_headers.hpp"
-#include "render/opengl_context.hpp"
 #include "shader_program.hpp"
+#include "opengl_sprite.hpp"
+#include "render/opengl_context.hpp"
 #include "opengl_scene.hpp"
 #include "simulation/camera.hpp"
 #include "presentation/presentation_context.hpp"
@@ -35,9 +35,12 @@ namespace blocks
   private:
     bool IsCorrectThread();
     void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    void RenderMap(std::shared_ptr<OpenglMap> map, std::shared_ptr<opengl::ShaderProgram> mapProgram, std::shared_ptr<Camera> camera, float ratio);
+    void RenderChunks(std::shared_ptr<OpenglMap> map, std::shared_ptr<Camera> camera, float ratio);
+    void RenderHUD();
 
     std::unique_ptr<OpenglContext> context_;
-    std::shared_ptr<opengl::ShaderProgram> mapProgram_;
+    std::shared_ptr<opengl::ShaderProgram> chunkProgram_;
+    std::shared_ptr<opengl::ShaderProgram> spriteProgram_;
+    std::unique_ptr<OpenglSprite> crosshairSprite_;
   };
 }

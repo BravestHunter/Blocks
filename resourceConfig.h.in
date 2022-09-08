@@ -1,6 +1,9 @@
 #define SHADERS_DIR "@SHADERS_DIR@/"
 
-#define DEFAULT_VERTEX_SHADER "default.vert"
-#define DEFAULT_FRAGMENT_SHADER "default.frag"
+#define CHUNK_VERTEX_SHADER "chunk.vert"
+#define CHUNK_FRAGMENT_SHADER "chunk.frag"
+
+#define SPRITE_VERTEX_SHADER "sprite.vert"
+#define SPRITE_FRAGMENT_SHADER "sprite.frag"
 
 #define RESOURCE_BASE_PATH "resources/CommonResourceBase/CommonResourceBase.rb"

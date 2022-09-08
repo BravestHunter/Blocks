@@ -42,8 +42,13 @@ namespace blocks
       SetViewportSize(windowSize);
     }
 
-    float ratio = (float)windowSize.x / (float)windowSize.y;
-    RenderMap(presentationContext.openglScene->GetMap(), mapProgram_, gameContext.camera, ratio);
+    if (gameContext.scene->ContainsWorld())
+    {
+      float ratio = (float)windowSize.x / (float)windowSize.y;
+      RenderChunks(presentationContext.openglScene->GetMap(), gameContext.camera, ratio);
+
+      RenderHUD();
+    }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -117,24 +122,37 @@ namespace blocks
       return;
     }
 
-    // Load map shader program
-    std::string vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, DEFAULT_VERTEX_SHADER));
-    std::string fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, DEFAULT_FRAGMENT_SHADER));
-    opengl::Shader vertexShader(vertexCode, GL_VERTEX_SHADER);
-    opengl::Shader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
-    mapProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
-
     presentationContext.openglScene = std::make_shared<OpenglScene>();
     presentationContext.openglScene->InitMap();
 
     ResourceBase& resourceBase = Environment::GetResource();
     std::shared_ptr<BlockSet> blockSet = resourceBase.LoadBlockSet(resourceBase.GetBlockSetNames()->front());
     presentationContext.openglScene->GetMap()->SetBlockSet(blockSet);
+
+    // Load chunk shader program
+    std::string vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, CHUNK_VERTEX_SHADER));
+    std::string fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, CHUNK_FRAGMENT_SHADER));
+    opengl::Shader vertexShader(vertexCode, GL_VERTEX_SHADER);
+    opengl::Shader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
+    chunkProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
+
+    // Load sprite shader program
+    vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, SPRITE_VERTEX_SHADER));
+    fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, SPRITE_FRAGMENT_SHADER));
+    vertexShader = opengl::Shader(vertexCode, GL_VERTEX_SHADER);
+    fragmentShader = opengl::Shader(fragmentCode, GL_FRAGMENT_SHADER);
+    spriteProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
+
+    // Load crosshair
+    Image crosshairImage = resourceBase.ReadImage("resources/textures/crosshair.png");
+    //Image crosshairImage = resourceBase.ReadImage("resources/textures/atlas.png");
+    crosshairSprite_ = std::make_unique<OpenglSprite>(crosshairImage);
   }
 
   void OpenglRenderModule::FreeResources(PresentationContext& presentationContext)
   {
-    mapProgram_.reset();
+    chunkProgram_.reset();
+    spriteProgram_.reset();
     presentationContext.openglScene.reset();
   }
 
@@ -150,10 +168,9 @@ namespace blocks
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
-  void OpenglRenderModule::RenderMap(std::shared_ptr<OpenglMap> map, std::shared_ptr<opengl::ShaderProgram> mapProgram, std::shared_ptr<Camera> camera, float ratio)
+  void OpenglRenderModule::RenderChunks(std::shared_ptr<OpenglMap> map, std::shared_ptr<Camera> camera, float ratio)
   {
-    mapProgram->Setup();
-    mapProgram->SetInt("texture", 0);
+    chunkProgram_->Setup();
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), ratio, 0.1f, 1000.0f);
     glm::mat4 view = camera->GetViewMatrix();
@@ -166,10 +183,28 @@ namespace blocks
       glm::vec3 chunkOffset(position.first * (int)Chunk::Length, position.second * (int)Chunk::Width, 0.0f);
       glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), chunkOffset);
       glm::mat4 mvp = projection * view * modelTransform;
-      mapProgram->SetMat4("MVP", mvp);
+      chunkProgram_->SetMat4("MVP", mvp);
 
       chunk->vao_->Bind();
       glDrawArrays(GL_TRIANGLES, 0, chunk->verticesNumber_);
     }
+  }
+
+  void OpenglRenderModule::RenderHUD()
+  {
+    spriteProgram_->Setup();
+
+    glm::ivec2 viewportSize = context_->viewportSize;
+    glm::mat4 modelTransform = glm::mat4(1.0f);
+    modelTransform = glm::translate(modelTransform, glm::vec3(viewportSize.x / 2, viewportSize.y / 2, 0.0f));
+    modelTransform = glm::scale(modelTransform, glm::vec3(32.0f, 32.0f, 1.0f));
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(viewportSize.x), static_cast<float>(viewportSize.y), 0.0f, -1.0f, 1.0f);
+    glm::mat4 mvp = projection * modelTransform;
+    spriteProgram_->SetMat4("MVP", mvp);
+
+    crosshairSprite_->GetVao()->Bind();
+    crosshairSprite_->GetTexture()->Bind(0);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 }
