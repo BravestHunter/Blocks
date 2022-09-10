@@ -48,6 +48,8 @@ set(CORE_SOURCE_FILES
 	scene/block_look_at.hpp
 	scene/entity.hpp
 	scene/entity.cpp
+	scene/map_generator.hpp
+	scene/map_generator.cpp
 	scene/map.hpp
 	scene/map.cpp
 	scene/world.hpp

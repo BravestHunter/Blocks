@@ -14,7 +14,7 @@ namespace blocks
   const glm::vec3 oneVector(1.0f);
 
 
-  Map::Map(MapData mapData, std::string path) : path_(path), seed_(mapData.seed)
+  Map::Map(MapData mapData, std::string path) : path_(path), seed_(mapData.seed), mapGenerator_(seed_)
   {
   }
 
@@ -55,7 +55,8 @@ namespace blocks
     }
     else
     {
-      chunk = GenerateChunk(position);
+      Chunk* chunkPtr = mapGenerator_.GenerateChunk(position);
+      chunk = std::shared_ptr<Chunk>(chunkPtr);
     }
 
     locker.lock();
@@ -180,35 +181,6 @@ namespace blocks
     return ChunkPosition(floor(position.x / Chunk::Length), floor(position.y / Chunk::Width));
   }
 
-
-  std::shared_ptr<Chunk> Map::GenerateChunk(ChunkPosition position)
-  {
-    Chunk* chunk = new Chunk();
-
-    float* highMap = new float[Chunk::LayerBlocksNumber];
-
-    auto perlinNoise = FastNoise::New<FastNoise::Perlin>();
-    auto minMax = perlinNoise->GenUniformGrid2D(highMap, position.first * Chunk::Length, position.second * Chunk::Width, Chunk::Length, Chunk::Width, 0.01f, seed_);
-
-    Block blockType = (rand() % 4) + 1;
-    for (unsigned int x = 0; x < Chunk::Length; x++)
-    {
-      for (unsigned int y = 0; y < Chunk::Width; y++)
-      {
-        float height = (highMap[x + y * Chunk::Length] + 1.0f) / 2.0f; // (0.0 - 1.0) range
-        //int highBorder = (int)(height * Chunk::Height);
-        int highBorder = (int)(height * Chunk::Height / 3.0f);
-
-        for (unsigned int z = 0; z < highBorder; z++)
-        {
-          size_t blockIndex = Chunk::CalculateBlockIndex(x, y, z);
-          chunk->blocks[blockIndex] = blockType;
-        }
-      }
-    }
-
-    return std::shared_ptr<Chunk>(chunk);
-  }
 
   std::shared_ptr<Chunk> Map::LoadChunk(ChunkPosition position)
   {
