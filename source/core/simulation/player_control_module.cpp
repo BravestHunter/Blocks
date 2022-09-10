@@ -110,7 +110,9 @@ namespace blocks
   {
     if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_1))
     {
-      BlockLookAt blockLookAt = gameContext.scene->GetWorld()->GetMap()->GetBlockLookAt(blocks::Ray(gameContext.camera->GetPosition(), gameContext.camera->GetForward()));
+      Ray selectionRay(gameContext.camera->GetPosition(), gameContext.camera->GetForward());
+      BlockLookAt blockLookAt = gameContext.scene->GetWorld()->GetMap()->GetBlockLookAt(selectionRay);
+
       if (!blockLookAt.hit)
       {
         return;
@@ -189,19 +191,23 @@ namespace blocks
       }
 
       std::shared_ptr<Chunk> chunk = gameContext.scene->GetWorld()->GetMap()->GetChunk(placeChunkPosition);
-      chunk->blocks[placeBlockPosition.x + placeBlockPosition.y * Chunk::Width + placeBlockPosition.z * Chunk::LayerBlocksNumber] = 1;
+      size_t blockIndex = Chunk::CalculateBlockIndex(blockLookAt.blockPosition);
+      chunk->blocks[blockIndex] = 1;
       gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(placeChunkPosition));
     }
     else if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_2))
     {
-      BlockLookAt blockLookAt = gameContext.scene->GetWorld()->GetMap()->GetBlockLookAt(blocks::Ray(gameContext.camera->GetPosition(), gameContext.camera->GetForward()));
+      Ray selectionRay(gameContext.camera->GetPosition(), gameContext.camera->GetForward());
+      BlockLookAt blockLookAt = gameContext.scene->GetWorld()->GetMap()->GetBlockLookAt(selectionRay);
+
       if (!blockLookAt.hit)
       {
         return;
       }
 
       std::shared_ptr<Chunk> chunk = gameContext.scene->GetWorld()->GetMap()->GetChunk(blockLookAt.chunkPosition);
-      chunk->blocks[blockLookAt.blockPosition.x + blockLookAt.blockPosition.y * Chunk::Width + blockLookAt.blockPosition.z * Chunk::LayerBlocksNumber] = 0;
+      size_t blockIndex = Chunk::CalculateBlockIndex(blockLookAt.blockPosition);
+      chunk->blocks[blockIndex] = 0;
       gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(blockLookAt.chunkPosition));
     }
   }

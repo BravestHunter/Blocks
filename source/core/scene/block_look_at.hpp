@@ -23,7 +23,7 @@ namespace blocks
   {
     bool hit = false;
     ChunkPosition chunkPosition;
-    glm::ivec3 blockPosition;
+    glm::uvec3 blockPosition;
     Direction loockFromDirection;
   };
 }

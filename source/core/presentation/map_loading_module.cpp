@@ -197,7 +197,7 @@ namespace blocks
       {
         for (unsigned int x = 0; x < Chunk::Length; x++)
         {
-          size_t blockIndex = x + y * Chunk::Width + z * Chunk::LayerBlocksNumber;
+          size_t blockIndex = Chunk::CalculateBlockIndex(x, y, z);
 
           if (chunk->blocks[blockIndex] == 0)
           {
@@ -370,7 +370,7 @@ namespace blocks
       chunkPosition.y = 2;
     }
 
-    size_t blockIndex = position.x + position.y * Chunk::Width + position.z * Chunk::LayerBlocksNumber;
+    size_t blockIndex = Chunk::CalculateBlockIndex(static_cast<glm::uvec3>(position));
     if (chunksGrid[chunkPosition.x][chunkPosition.y]->blocks[blockIndex] == 0)
     {
       return 1;

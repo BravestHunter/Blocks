@@ -99,7 +99,7 @@ namespace blocks
     glm::ivec3 centralBlockPosition = glm::ivec3(localPosition);
 
     blocks::RayIntersectionPoint closestIntersectionPoint;
-    glm::ivec3 intersectedBlock;
+    glm::uvec3 intersectedBlock;
     int radius = 3;
     for (int x = centralBlockPosition.x - radius; x <= centralBlockPosition.x + radius; x++)
     {
@@ -122,7 +122,8 @@ namespace blocks
             continue;
           }
 
-          if (chunk->blocks[x + y * Chunk::Width + z * Chunk::LayerBlocksNumber] == 0)
+          size_t blockIndex = Chunk::CalculateBlockIndex(static_cast<unsigned int>(x), static_cast<unsigned int>(y), static_cast<unsigned int>(z));
+          if (chunk->blocks[blockIndex] == 0)
           {
             continue;
           }
@@ -132,7 +133,7 @@ namespace blocks
           if (intersectionPoint.distance != FLT_MAX && closestIntersectionPoint.distance > intersectionPoint.distance)
           {
             closestIntersectionPoint = intersectionPoint;
-            intersectedBlock = glm::ivec3(x, y, z);
+            intersectedBlock = glm::uvec3(static_cast<unsigned int>(x), static_cast<unsigned int>(y), static_cast<unsigned int>(z));
           }
         }
       }
@@ -190,17 +191,18 @@ namespace blocks
     auto minMax = perlinNoise->GenUniformGrid2D(highMap, position.first * Chunk::Length, position.second * Chunk::Width, Chunk::Length, Chunk::Width, 0.01f, seed_);
 
     Block blockType = (rand() % 4) + 1;
-    for (int x = 0; x < Chunk::Length; x++)
+    for (unsigned int x = 0; x < Chunk::Length; x++)
     {
-      for (int y = 0; y < Chunk::Width; y++)
+      for (unsigned int y = 0; y < Chunk::Width; y++)
       {
         float height = (highMap[x + y * Chunk::Length] + 1.0f) / 2.0f; // (0.0 - 1.0) range
-        //int highBorder = (int)(height * Chunk::Height / 3.0f);
-        int highBorder = (int)(height * Chunk::Height);
+        //int highBorder = (int)(height * Chunk::Height);
+        int highBorder = (int)(height * Chunk::Height / 3.0f);
 
-        for (int z = 0; z < highBorder; z++)
+        for (unsigned int z = 0; z < highBorder; z++)
         {
-          chunk->blocks[x + y * Chunk::Length + z * Chunk::LayerBlocksNumber] = blockType;
+          size_t blockIndex = Chunk::CalculateBlockIndex(x, y, z);
+          chunk->blocks[blockIndex] = blockType;
         }
       }
     }

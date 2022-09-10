@@ -2,6 +2,8 @@
 
 #include <cstring>
 
+#include <glm/glm.hpp>
+
 #include "block.hpp"
 
 
@@ -18,6 +20,16 @@ namespace blocks
     inline bool operator==(const Chunk& other) const
     {
       return std::memcmp(&blocks, &other.blocks, sizeof(Chunk)) == 0;
+    }
+
+    static inline size_t CalculateBlockIndex(glm::uvec3 position)
+    {
+      return CalculateBlockIndex(position.x, position.y, position.z);
+    }
+
+    static inline size_t CalculateBlockIndex(unsigned int x, unsigned int y, unsigned int z)
+    {
+      return x + y * Chunk::Length + z * Chunk::LayerBlocksNumber;
     }
 
     Block blocks[BlocksNumber];

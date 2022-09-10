@@ -107,13 +107,17 @@ namespace blocks
     if (highBorderBlock.y >= Chunk::Width) highBorderBlock.y = Chunk::Width - 1;
     if (highBorderBlock.z >= Chunk::Height) highBorderBlock.z = Chunk::Height - 1;
 
-    for (int x = lowBorderBlock.x; x <= highBorderBlock.x; x++)
+    glm::uvec3 lowBorderBlockUnsigned = static_cast<glm::uvec3>(lowBorderBlock);
+    glm::uvec3 highBorderBlockUnsigned = static_cast<glm::uvec3>(highBorderBlock);
+
+    for (unsigned int x = lowBorderBlockUnsigned.x; x <= highBorderBlockUnsigned.x; x++)
     {
-      for (int y = lowBorderBlock.y; y <= highBorderBlock.y; y++)
+      for (unsigned int y = lowBorderBlockUnsigned.y; y <= highBorderBlockUnsigned.y; y++)
       {
-        for (int z = lowBorderBlock.z; z <= highBorderBlock.z; z++)
+        for (unsigned int z = lowBorderBlockUnsigned.z; z <= highBorderBlockUnsigned.z; z++)
         {
-          if (chunk->blocks[x + y * Chunk::Length + z * Chunk::LayerBlocksNumber] == 0)
+          size_t blockIndex = Chunk::CalculateBlockIndex(x, y, z);
+          if (chunk->blocks[blockIndex] == 0)
           {
             continue;
           }
