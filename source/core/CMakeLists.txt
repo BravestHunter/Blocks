@@ -30,14 +30,15 @@ set(CORE_SOURCE_FILES
 	presentation/presentation_module.hpp
 	presentation/presentation_module.cpp
 
+	render/opengl_context.hpp
 	render/opengl_sprite.hpp
 	render/opengl_sprite.cpp
 	render/opengl_chunk_vertex.hpp
 	render/opengl_chunk_vertex.cpp
-	render/opengl_context.hpp
-	render/opengl_raw_chunk_data.hpp
 	render/opengl_chunk.hpp
 	render/opengl_chunk.cpp
+	render/opengl_chunk_builder.hpp
+	render/opengl_chunk_builder.cpp
 	render/opengl_map.hpp
 	render/opengl_map.cpp
 	render/opengl_scene.hpp

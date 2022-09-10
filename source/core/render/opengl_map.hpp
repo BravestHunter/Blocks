@@ -6,8 +6,8 @@
 #include <memory>
 #include <mutex>
 
+#include "opengl_chunk_vertex.hpp"
 #include "opengl_chunk.hpp"
-#include "opengl_raw_chunk_data.hpp"
 #include "texture_2d_array.hpp"
 #include "chunk.hpp"
 #include "scene/map.hpp"
