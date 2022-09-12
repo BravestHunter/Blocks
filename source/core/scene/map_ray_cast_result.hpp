@@ -1,7 +1,5 @@
 #pragma once
 
-#include <utility>
-
 #include <glm/glm.hpp>
 
 #include "chunk_position.hpp"
@@ -10,11 +8,12 @@
 
 namespace blocks
 {
-  struct BlockLookAt
+  struct MapRayCastResult
   {
-    bool hit = false;
+    bool hit;
     ChunkPosition chunkPosition;
     glm::uvec3 blockPosition;
-    BlockSide intersectionSide;
+    glm::vec3 intersectionPoint;
+    BlockSide intersectedSide;
   };
 }

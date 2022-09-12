@@ -46,7 +46,7 @@ set(CORE_SOURCE_FILES
 	render/opengl_render_module.hpp
 	render/opengl_render_module.cpp
 
-	scene/block_look_at.hpp
+	scene/map_ray_cast_result.hpp
 	scene/entity.hpp
 	scene/entity.cpp
 	scene/map_generator.hpp

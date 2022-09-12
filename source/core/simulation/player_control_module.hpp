@@ -3,7 +3,6 @@
 #include "game_module_interface.hpp"
 #include "platform/glfw_window.hpp"
 #include "input/input_state.hpp"
-#include "scene/block_look_at.hpp"
 
 
 namespace blocks

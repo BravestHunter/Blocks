@@ -1,7 +1,5 @@
 #include "player_control_module.hpp"
 
-#include <iostream>
-
 #include "simulation/player_position_changed_event.hpp"
 #include "simulation/chunk_updated_event.hpp"
 
@@ -115,21 +113,21 @@ namespace blocks
     if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_2))
     {
       Ray selectionRay(gameContext.camera->GetPosition(), gameContext.camera->GetForward());
-      BlockLookAt blockLookAt = gameContext.scene->GetWorld()->GetMap()->GetBlockLookAt(selectionRay);
+      MapRayCastResult raycastResult = gameContext.scene->GetWorld()->GetMap()->RayCast(selectionRay, 8.0f);
 
-      if (!blockLookAt.hit)
+      if (!raycastResult.hit)
       {
         return;
       }
 
       chunkChanged = true;
-      changedChunkPosition = blockLookAt.chunkPosition;
-      changedBlockPosition = blockLookAt.blockPosition;
+      changedChunkPosition = raycastResult.chunkPosition;
+      changedBlockPosition = raycastResult.blockPosition;
 
-      switch (blockLookAt.intersectionSide)
+      switch (raycastResult.intersectedSide)
       {
       case BlockSide::Front:
-        if (blockLookAt.blockPosition.x == Chunk::Length - 1)
+        if (raycastResult.blockPosition.x == Chunk::Length - 1)
         {
           changedChunkPosition.first += 1;
           changedBlockPosition.x = 0;
@@ -140,7 +138,7 @@ namespace blocks
         }
         break;
       case BlockSide::Back:
-        if (blockLookAt.blockPosition.x == 0)
+        if (raycastResult.blockPosition.x == 0)
         {
           changedChunkPosition.first -= 1;
           changedBlockPosition.x = 15;
@@ -152,7 +150,7 @@ namespace blocks
         break;
 
       case BlockSide::Right:
-        if (blockLookAt.blockPosition.y == Chunk::Width - 1)
+        if (raycastResult.blockPosition.y == Chunk::Width - 1)
         {
           changedChunkPosition.second += 1;
           changedBlockPosition.y = 0;
@@ -163,7 +161,7 @@ namespace blocks
         }
         break;
       case BlockSide::Left:
-        if (blockLookAt.blockPosition.y == 0)
+        if (raycastResult.blockPosition.y == 0)
         {
           changedChunkPosition.second -= 1;
           changedBlockPosition.y = 15;
@@ -175,7 +173,7 @@ namespace blocks
         break;
 
       case BlockSide::Top:
-        if (blockLookAt.blockPosition.z == Chunk::Height - 1)
+        if (raycastResult.blockPosition.z == Chunk::Height - 1)
         {
           return;
         }
@@ -185,7 +183,7 @@ namespace blocks
         }
         break;
       case BlockSide::Bottom:
-        if (blockLookAt.blockPosition.z == 0)
+        if (raycastResult.blockPosition.z == 0)
         {
           return;
         }
@@ -203,16 +201,16 @@ namespace blocks
     else if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_1))
     {
       Ray selectionRay(gameContext.camera->GetPosition(), gameContext.camera->GetForward());
-      BlockLookAt blockLookAt = gameContext.scene->GetWorld()->GetMap()->GetBlockLookAt(selectionRay);
+      MapRayCastResult raycastResult = gameContext.scene->GetWorld()->GetMap()->RayCast(selectionRay, 8.0f);
 
-      if (!blockLookAt.hit)
+      if (!raycastResult.hit)
       {
         return;
       }
 
       chunkChanged = true;
-      changedChunkPosition = blockLookAt.chunkPosition;
-      changedBlockPosition = blockLookAt.blockPosition;
+      changedChunkPosition = raycastResult.chunkPosition;
+      changedBlockPosition = raycastResult.blockPosition;
 
       std::shared_ptr<Chunk> chunk = gameContext.scene->GetWorld()->GetMap()->GetChunk(changedChunkPosition);
       size_t blockIndex = Chunk::CalculateBlockIndex(changedBlockPosition);

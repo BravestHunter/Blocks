@@ -27,10 +27,11 @@ namespace blocks
   }
 
 
-  int Map::GetSeed()
+  ChunkPosition Map::CalculateChunkPosition(glm::vec3 position)
   {
-    return seed_;
+    return ChunkPosition(floor(position.x / Chunk::Length), floor(position.y / Chunk::Width));
   }
+
 
   std::shared_ptr<Chunk> Map::GetChunk(ChunkPosition position)
   {
@@ -79,106 +80,178 @@ namespace blocks
   }
 
 
-  BlockLookAt Map::GetBlockLookAt(const blocks::Ray& ray)
+  MapRayCastResult Map::RayCast(const Ray& ray, float maxDistance)
   {
-    ChunkPosition chunkPosition = CalculateChunkPosition(ray.origin);
-    glm::vec3 localPosition = glm::vec3(ray.origin.x - chunkPosition.first * (int)Chunk::Length, ray.origin.y - chunkPosition.second * (int)Chunk::Width, ray.origin.z);
-    if (localPosition.x < 0)
+    ChunkPosition currentChunkPosition = CalculateChunkPosition(ray.origin);
+    std::shared_ptr<Chunk> currentChunk = GetChunk(currentChunkPosition);
+
+    glm::vec3 localRayOrigin = glm::vec3
+    (
+      ray.origin.x - currentChunkPosition.first * static_cast<int>(Chunk::Length), 
+      ray.origin.y - currentChunkPosition.second * static_cast<int>(Chunk::Width), 
+      ray.origin.z
+    );
+    glm::ivec3 currentBlockPosition(localRayOrigin);
+    if (currentBlockPosition.z < 0)
     {
-      localPosition.x += Chunk::Length;
-      chunkPosition.first--;
+      currentBlockPosition.z = 0;
     }
-    if (localPosition.y < 0)
+    else if (currentBlockPosition.z >= Chunk::Height)
     {
-      localPosition.y += Chunk::Width;
-      chunkPosition.second--;
-    }
-
-    std::shared_ptr<Chunk> chunk = GetChunk(chunkPosition);
-    blocks::Ray localRay(localPosition, ray.direction);
-
-    glm::ivec3 centralBlockPosition = glm::ivec3(localPosition);
-
-    blocks::RayIntersectionPoint closestIntersectionPoint;
-    glm::uvec3 intersectedBlock;
-    int radius = 3;
-    for (int x = centralBlockPosition.x - radius; x <= centralBlockPosition.x + radius; x++)
-    {
-      if (x < 0 || x >= Chunk::Length)
-      {
-        continue;
-      }
-
-      for (int y = centralBlockPosition.y - radius; y <= centralBlockPosition.y + radius; y++)
-      {
-        if (y < 0 || y >= Chunk::Width)
-        {
-          continue;
-        }
-
-        for (int z = centralBlockPosition.z - radius; z <= centralBlockPosition.z + radius; z++)
-        {
-          if (z < 0 || z >= Chunk::Height)
-          {
-            continue;
-          }
-
-          size_t blockIndex = Chunk::CalculateBlockIndex(static_cast<unsigned int>(x), static_cast<unsigned int>(y), static_cast<unsigned int>(z));
-          if (chunk->blocks[blockIndex] == 0)
-          {
-            continue;
-          }
-
-          blocks::AABB blockBounds(glm::vec3(x, y, z) + halfVector, oneVector);
-          blocks::RayIntersectionPoint intersectionPoint = CheckCollision(localRay, blockBounds);
-          if (intersectionPoint.distance != FLT_MAX && closestIntersectionPoint.distance > intersectionPoint.distance)
-          {
-            closestIntersectionPoint = intersectionPoint;
-            intersectedBlock = glm::uvec3(static_cast<unsigned int>(x), static_cast<unsigned int>(y), static_cast<unsigned int>(z));
-          }
-        }
-      }
+      currentBlockPosition.z = Chunk::Height - 1;
     }
 
-    BlockLookAt result;
-    result.chunkPosition = chunkPosition;
-    result.blockPosition = intersectedBlock;
-    if (closestIntersectionPoint.distance != FLT_MAX)
+    glm::vec3 sidesSquared(ray.direction.x * ray.direction.x, ray.direction.y * ray.direction.y, ray.direction.z * ray.direction.z);
+
+    glm::vec3 unitStep
+    (
+      sqrt(1.0f + sidesSquared.y / sidesSquared.x + sidesSquared.z / sidesSquared.x),
+      sqrt(1.0f + sidesSquared.x / sidesSquared.y + sidesSquared.z / sidesSquared.y),
+      sqrt(1.0f + sidesSquared.x / sidesSquared.z + sidesSquared.y / sidesSquared.z)
+    );
+    glm::ivec3 step;
+    glm::vec3 rayLength1D; // Lengths along different dimensions
+    if (ray.direction.x < 0.0f)
     {
-      result.hit = true;
-      if (closestIntersectionPoint.point.x == (float)intersectedBlock.x)
+      step.x = -1;
+      rayLength1D.x = (localRayOrigin.x - static_cast<float>(currentBlockPosition.x)) * unitStep.x;
+    }
+    else
+    {
+      step.x = 1;
+      rayLength1D.x = (static_cast<float>(currentBlockPosition.x + 1) - localRayOrigin.x) * unitStep.x;
+    }
+    if (ray.direction.y < 0.0f)
+    {
+      step.y = -1;
+      rayLength1D.y = (localRayOrigin.y - static_cast<float>(currentBlockPosition.y)) * unitStep.y;
+    }
+    else
+    {
+      step.y = 1;
+      rayLength1D.y = (static_cast<float>(currentBlockPosition.y + 1) - localRayOrigin.y) * unitStep.y;
+    }
+    if (ray.direction.z < 0.0f)
+    {
+      step.z = -1;
+      rayLength1D.z = (localRayOrigin.z - static_cast<float>(currentBlockPosition.z)) * unitStep.z;
+    }
+    else
+    {
+      step.z = 1;
+      rayLength1D.z = (static_cast<float>(currentBlockPosition.z + 1) - localRayOrigin.z) * unitStep.z;
+    }
+
+    bool hit = false;
+    float distance = 0.0f;
+    while (hit == false && distance < maxDistance)
+    {
+      if (rayLength1D.x < rayLength1D.y && rayLength1D.x < rayLength1D.z)
       {
-        result.intersectionSide = BlockSide::Back;
+        currentBlockPosition.x += step.x;
+        distance = rayLength1D.x;
+        rayLength1D.x += unitStep.x;
       }
-      else if (closestIntersectionPoint.point.x == (float)(intersectedBlock.x + 1))
+      else if (rayLength1D.y < rayLength1D.z)
       {
-        result.intersectionSide = BlockSide::Front;
+        currentBlockPosition.y += step.y;
+        distance = rayLength1D.y;
+        rayLength1D.y += unitStep.y;
       }
-      else if (closestIntersectionPoint.point.y == (float)intersectedBlock.y)
+      else
       {
-        result.intersectionSide = BlockSide::Left;
+        currentBlockPosition.z += step.z;
+        distance = rayLength1D.z;
+        rayLength1D.z += unitStep.z;
       }
-      else if (closestIntersectionPoint.point.y == (float)(intersectedBlock.y + 1))
+
+      ChunkPosition newChunkPosition = currentChunkPosition;
+      if (currentBlockPosition.x < 0)
       {
-        result.intersectionSide = BlockSide::Right;
+        currentBlockPosition.x += Chunk::Length;
+        newChunkPosition.first -= 1;
       }
-      else if (closestIntersectionPoint.point.z == (float)intersectedBlock.z)
+      else if (currentBlockPosition.x >= Chunk::Length)
       {
-        result.intersectionSide = BlockSide::Bottom;
+        currentBlockPosition.x -= Chunk::Length;
+        newChunkPosition.first += 1;
       }
-      else if (closestIntersectionPoint.point.z == (float)(intersectedBlock.z + 1))
+      if (currentBlockPosition.y < 0)
       {
-        result.intersectionSide = BlockSide::Top;
+        currentBlockPosition.y += Chunk::Width;
+        newChunkPosition.second -= 1;
+      }
+      else if (currentBlockPosition.y >= Chunk::Width)
+      {
+        currentBlockPosition.y -= Chunk::Width;
+        newChunkPosition.second += 1;
+      }
+      if (currentBlockPosition.z < 0)
+      {
+        currentBlockPosition.z += Chunk::Height;
+      }
+      else if (currentBlockPosition.z >= Chunk::Height)
+      {
+        currentBlockPosition.z -= Chunk::Height;
+      }
+
+      if (currentChunkPosition != newChunkPosition)
+      {
+        currentChunkPosition = newChunkPosition;
+        currentChunk = GetChunk(currentChunkPosition);
+      }
+
+      glm::uvec3 unsignedCurrentBlockPosition(currentBlockPosition);
+      size_t blockIndex = Chunk::CalculateBlockIndex(unsignedCurrentBlockPosition);
+      if (currentChunk->blocks[blockIndex] > 0)
+      {
+        hit = true;
+      }
+    }
+
+    MapRayCastResult result;
+    result.hit = hit;
+    if (hit)
+    {
+      result.chunkPosition = currentChunkPosition;
+      result.blockPosition = glm::uvec3(currentBlockPosition);
+      result.intersectionPoint = ray.origin + ray.direction * distance;
+
+      glm::vec3 localIntersectionPoint = glm::vec3
+      (
+        result.intersectionPoint.x - currentChunkPosition.first * static_cast<int>(Chunk::Length),
+        result.intersectionPoint.y - currentChunkPosition.second * static_cast<int>(Chunk::Width),
+        result.intersectionPoint.z
+      );
+
+      static const float threshold = 1e-4f;
+      if (abs(localIntersectionPoint.x - static_cast<float>(result.blockPosition.x + 1)) < threshold)
+      {
+        result.intersectedSide = BlockSide::Front;
+      }
+      else if (abs(localIntersectionPoint.x - static_cast<float>(result.blockPosition.x)) < threshold)
+      {
+        result.intersectedSide = BlockSide::Back;
+      }
+      else if (abs(localIntersectionPoint.y - static_cast<float>(result.blockPosition.y + 1)) < threshold)
+      {
+        result.intersectedSide = BlockSide::Right;
+      }
+      else if (abs(localIntersectionPoint.y - static_cast<float>(result.blockPosition.y)) < threshold)
+      {
+        result.intersectedSide = BlockSide::Left;
+      }
+      else if (abs(localIntersectionPoint.z - static_cast<float>(result.blockPosition.z + 1)) < threshold)
+      {
+        result.intersectedSide = BlockSide::Top;
+      }
+      else
+      {
+        result.intersectedSide = BlockSide::Bottom;
       }
     }
 
     return result;
-  }
-
-
-  ChunkPosition Map::CalculateChunkPosition(glm::vec3 position)
-  {
-    return ChunkPosition(floor(position.x / Chunk::Length), floor(position.y / Chunk::Width));
   }
 
 

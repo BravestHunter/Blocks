@@ -6,7 +6,7 @@
 #include <memory>
 #include <mutex>
 
-#include "block_look_at.hpp"
+#include "map_ray_cast_result.hpp"
 #include "geometry/collisions_api.hpp"
 #include "chunk.hpp"
 #include "chunk_position.hpp"
@@ -22,15 +22,15 @@ namespace blocks
     Map(MapData mapData, std::string path);
     ~Map();
 
-    int GetSeed();
+    static ChunkPosition CalculateChunkPosition(glm::vec3 position);
+
+    inline int GetSeed() const;
     std::shared_ptr<Chunk> GetChunk(ChunkPosition position);
     std::pair<std::map<ChunkPosition, std::shared_ptr<Chunk>>::iterator, std::map<ChunkPosition, std::shared_ptr<Chunk>>::iterator> GetChunksIterator();
 
     void SetChunk(ChunkPosition position, std::shared_ptr<Chunk> chunk);
 
-    BlockLookAt GetBlockLookAt(const blocks::Ray& ray);
-
-    static ChunkPosition CalculateChunkPosition(glm::vec3 position);
+    MapRayCastResult RayCast(const Ray& ray, float maxDistance);
 
   private:
     std::shared_ptr<Chunk> LoadChunk(ChunkPosition position);
@@ -44,4 +44,10 @@ namespace blocks
     std::mutex mutex_;
     MapGenerator mapGenerator_;
   };
+
+
+  int Map::GetSeed() const
+  {
+    return seed_;
+  }
 }
