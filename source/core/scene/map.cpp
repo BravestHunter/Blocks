@@ -148,27 +148,27 @@ namespace blocks
       result.hit = true;
       if (closestIntersectionPoint.point.x == (float)intersectedBlock.x)
       {
-        result.loockFromDirection = Direction::Back;
+        result.intersectionSide = BlockSide::Back;
       }
       else if (closestIntersectionPoint.point.x == (float)(intersectedBlock.x + 1))
       {
-        result.loockFromDirection = Direction::Forward;
+        result.intersectionSide = BlockSide::Front;
       }
       else if (closestIntersectionPoint.point.y == (float)intersectedBlock.y)
       {
-        result.loockFromDirection = Direction::Left;
+        result.intersectionSide = BlockSide::Left;
       }
       else if (closestIntersectionPoint.point.y == (float)(intersectedBlock.y + 1))
       {
-        result.loockFromDirection = Direction::Right;
+        result.intersectionSide = BlockSide::Right;
       }
       else if (closestIntersectionPoint.point.z == (float)intersectedBlock.z)
       {
-        result.loockFromDirection = Direction::Down;
+        result.intersectionSide = BlockSide::Bottom;
       }
       else if (closestIntersectionPoint.point.z == (float)(intersectedBlock.z + 1))
       {
-        result.loockFromDirection = Direction::Up;
+        result.intersectionSide = BlockSide::Top;
       }
     }
 

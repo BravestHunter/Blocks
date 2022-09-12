@@ -145,7 +145,6 @@ namespace blocks
 
     // Load crosshair
     Image crosshairImage = resourceBase.ReadImage("resources/textures/crosshair.png");
-    //Image crosshairImage = resourceBase.ReadImage("resources/textures/atlas.png");
     crosshairSprite_ = std::make_unique<OpenglSprite>(crosshairImage);
   }
 
