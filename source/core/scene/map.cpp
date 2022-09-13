@@ -101,8 +101,23 @@ namespace blocks
       currentBlockPosition.z = Chunk::Height - 1;
     }
 
-    glm::vec3 sidesSquared(ray.direction.x * ray.direction.x, ray.direction.y * ray.direction.y, ray.direction.z * ray.direction.z);
+    // Check start block
+    size_t startBlockIndex = Chunk::CalculateBlockIndex(currentBlockPosition);
+    if (currentChunk->blocks[startBlockIndex] != 0)
+    {
+      MapRayCastResult result
+      {
+        .hit = true,
+        .chunkPosition = currentChunkPosition,
+        .blockPosition = currentBlockPosition,
+        .intersectionPoint = ray.origin,
+        .intersectedSide = BlockSide::Unknown
+      };
 
+      return result;
+    }
+
+    glm::vec3 sidesSquared(ray.direction.x * ray.direction.x, ray.direction.y * ray.direction.y, ray.direction.z * ray.direction.z);
     glm::vec3 unitStep
     (
       sqrt(1.0f + sidesSquared.y / sidesSquared.x + sidesSquared.z / sidesSquared.x),

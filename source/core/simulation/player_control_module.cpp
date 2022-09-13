@@ -115,7 +115,7 @@ namespace blocks
       Ray selectionRay(gameContext.camera->GetPosition(), gameContext.camera->GetForward());
       MapRayCastResult raycastResult = gameContext.scene->GetWorld()->GetMap()->RayCast(selectionRay, 8.0f);
 
-      if (!raycastResult.hit)
+      if (!raycastResult.hit || raycastResult.intersectedSide == BlockSide::Unknown)
       {
         return;
       }
@@ -196,7 +196,10 @@ namespace blocks
 
       std::shared_ptr<Chunk> chunk = gameContext.scene->GetWorld()->GetMap()->GetChunk(changedChunkPosition);
       size_t blockIndex = Chunk::CalculateBlockIndex(changedBlockPosition);
-      chunk->blocks[blockIndex] = 1;
+      if (chunk->blocks[blockIndex] == 0)
+      {
+        chunk->blocks[blockIndex] = 1;
+      }
     }
     else if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_1))
     {
