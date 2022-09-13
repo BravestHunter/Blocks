@@ -92,29 +92,24 @@ namespace blocks
       ray.origin.z
     );
     glm::ivec3 currentBlockPosition(localRayOrigin);
-    if (currentBlockPosition.z < 0)
-    {
-      currentBlockPosition.z = 0;
-    }
-    else if (currentBlockPosition.z >= Chunk::Height)
-    {
-      currentBlockPosition.z = Chunk::Height - 1;
-    }
 
     // Check start block
-    size_t startBlockIndex = Chunk::CalculateBlockIndex(currentBlockPosition);
-    if (currentChunk->blocks[startBlockIndex] != 0)
+    if (currentBlockPosition.z >= 0 && currentBlockPosition.z < Chunk::Height)
     {
-      MapRayCastResult result
+      size_t startBlockIndex = Chunk::CalculateBlockIndex(currentBlockPosition);
+      if (currentChunk->blocks[startBlockIndex] != 0)
       {
-        .hit = true,
-        .chunkPosition = currentChunkPosition,
-        .blockPosition = currentBlockPosition,
-        .intersectionPoint = ray.origin,
-        .intersectedSide = BlockSide::Unknown
-      };
+        MapRayCastResult result
+        {
+          .hit = true,
+          .chunkPosition = currentChunkPosition,
+          .blockPosition = currentBlockPosition,
+          .intersectionPoint = ray.origin,
+          .intersectedSide = BlockSide::Unknown
+        };
 
-      return result;
+        return result;
+      }
     }
 
     glm::vec3 sidesSquared(ray.direction.x * ray.direction.x, ray.direction.y * ray.direction.y, ray.direction.z * ray.direction.z);
@@ -201,19 +196,17 @@ namespace blocks
         currentBlockPosition.y -= Chunk::Width;
         newChunkPosition.second += 1;
       }
-      if (currentBlockPosition.z < 0)
-      {
-        currentBlockPosition.z += Chunk::Height;
-      }
-      else if (currentBlockPosition.z >= Chunk::Height)
-      {
-        currentBlockPosition.z -= Chunk::Height;
-      }
 
       if (currentChunkPosition != newChunkPosition)
       {
         currentChunkPosition = newChunkPosition;
         currentChunk = GetChunk(currentChunkPosition);
+      }
+
+      if (currentBlockPosition.z < 0 || currentBlockPosition.z >= Chunk::Height)
+      {
+        // Nothing to hit out of chunk bounds
+        continue;
       }
 
       glm::uvec3 unsignedCurrentBlockPosition(currentBlockPosition);
