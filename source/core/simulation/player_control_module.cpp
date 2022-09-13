@@ -194,6 +194,20 @@ namespace blocks
         break;
       }
 
+      const Entity& player = gameContext.scene->GetWorld()->GetPlayer();
+      glm::vec3 localPlayerPosition
+      (
+        player.GetPosition().x - raycastResult.chunkPosition.first * static_cast<float>(Chunk::Length), 
+        player.GetPosition().y - raycastResult.chunkPosition.second * static_cast<float>(Chunk::Width), 
+        player.GetPosition().z
+      );
+      AABB playerBounds = AABB(player.GetAABB().center + localPlayerPosition, player.GetAABB().size);
+      AABB blockBounds(glm::vec3(changedBlockPosition) + glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.0f, 1.0f));
+      if (CheckCollision(playerBounds, blockBounds))
+      {
+        return;
+      }
+
       std::shared_ptr<Chunk> chunk = gameContext.scene->GetWorld()->GetMap()->GetChunk(changedChunkPosition);
       size_t blockIndex = Chunk::CalculateBlockIndex(changedBlockPosition);
       if (chunk->blocks[blockIndex] == 0)
