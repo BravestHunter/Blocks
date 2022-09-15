@@ -11,7 +11,7 @@ namespace blocks
   World::World(WorldData worldData) :
     path_(std::format("worlds/{0}", worldData.name)),
     name_(worldData.name),
-    player_(worldData.playerData.position, AABB(glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 2.0f))),
+    player_(worldData.playerData.position, AABB(glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 1.0f))),
     map_(std::make_shared<Map>(worldData.mapData, path_))
   {
   }

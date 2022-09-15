@@ -5,7 +5,6 @@ namespace blocks
 {
   const float Camera::defaultYaw = 90.0f;
   const float Camera::defaultPitch = 0.0f;
-  const float Camera::defaultSensitivity = 0.1f;
   const glm::vec3 Camera::WorldUp = glm::vec3(0.0f, 0.0f, 1.0f);
 
 

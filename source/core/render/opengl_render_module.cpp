@@ -193,10 +193,12 @@ namespace blocks
   {
     spriteProgram_->Setup();
 
+    glm::vec2 crosshairSize(32.0f, 32.0f);
+
     glm::ivec2 viewportSize = context_->viewportSize;
     glm::mat4 modelTransform = glm::mat4(1.0f);
-    modelTransform = glm::translate(modelTransform, glm::vec3(viewportSize.x / 2, viewportSize.y / 2, 0.0f));
-    modelTransform = glm::scale(modelTransform, glm::vec3(32.0f, 32.0f, 1.0f));
+    modelTransform = glm::translate(modelTransform, glm::vec3(viewportSize.x / 2 - crosshairSize.x / 2, viewportSize.y / 2 - crosshairSize.y / 2, 0.0f));
+    modelTransform = glm::scale(modelTransform, glm::vec3(crosshairSize.x, crosshairSize.y, 1.0f));
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(viewportSize.x), static_cast<float>(viewportSize.y), 0.0f, -1.0f, 1.0f);
     glm::mat4 mvp = projection * modelTransform;
     spriteProgram_->SetMat4("MVP", mvp);

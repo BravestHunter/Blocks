@@ -13,8 +13,6 @@ namespace blocks
   private:
     static const float defaultYaw;
     static const float defaultPitch;
-    static const float defaultSpeed;
-    static const float defaultSensitivity;
 
     static const glm::vec3 WorldUp;
 

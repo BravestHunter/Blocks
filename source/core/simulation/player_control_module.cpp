@@ -113,7 +113,7 @@ namespace blocks
     if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_2))
     {
       Ray selectionRay(gameContext.camera->GetPosition(), gameContext.camera->GetForward());
-      MapRayCastResult raycastResult = gameContext.scene->GetWorld()->GetMap()->RayCast(selectionRay, 8.0f);
+      MapRayCastResult raycastResult = gameContext.scene->GetWorld()->GetMap()->RayCast(selectionRay, 16.0f);
 
       if (!raycastResult.hit || raycastResult.intersectedSide == BlockSide::Unknown)
       {
@@ -218,7 +218,7 @@ namespace blocks
     else if (inputState.IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_1))
     {
       Ray selectionRay(gameContext.camera->GetPosition(), gameContext.camera->GetForward());
-      MapRayCastResult raycastResult = gameContext.scene->GetWorld()->GetMap()->RayCast(selectionRay, 8.0f);
+      MapRayCastResult raycastResult = gameContext.scene->GetWorld()->GetMap()->RayCast(selectionRay, 16.0f);
 
       if (!raycastResult.hit)
       {
