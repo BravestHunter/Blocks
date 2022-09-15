@@ -2,7 +2,7 @@
 
 #include <string>
 #include <utility>
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <mutex>
 
@@ -26,7 +26,6 @@ namespace blocks
 
     inline int GetSeed() const;
     std::shared_ptr<Chunk> GetChunk(ChunkPosition position);
-    std::pair<std::map<ChunkPosition, std::shared_ptr<Chunk>>::iterator, std::map<ChunkPosition, std::shared_ptr<Chunk>>::iterator> GetChunksIterator();
 
     void SetChunk(ChunkPosition position, std::shared_ptr<Chunk> chunk);
 
@@ -40,7 +39,7 @@ namespace blocks
 
     std::string path_;
     int seed_;
-    std::map<ChunkPosition, std::shared_ptr<Chunk>> chunks_;
+    std::unordered_map<ChunkPosition, std::shared_ptr<Chunk>, ChunkPositionHasher> chunks_;
     std::mutex mutex_;
     MapGenerator mapGenerator_;
   };

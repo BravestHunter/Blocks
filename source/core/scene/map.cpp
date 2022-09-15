@@ -67,10 +67,6 @@ namespace blocks
     return chunk;
   }
 
-  std::pair<std::map<ChunkPosition, std::shared_ptr<Chunk>>::iterator, std::map<ChunkPosition, std::shared_ptr<Chunk>>::iterator> Map::GetChunksIterator()
-  {
-    return std::make_pair(chunks_.begin(), chunks_.end());
-  }
 
   void Map::SetChunk(ChunkPosition position, std::shared_ptr<Chunk> chunk)
   {
@@ -87,8 +83,8 @@ namespace blocks
 
     glm::vec3 localRayOrigin = glm::vec3
     (
-      ray.origin.x - currentChunkPosition.first * static_cast<int>(Chunk::Length), 
-      ray.origin.y - currentChunkPosition.second * static_cast<int>(Chunk::Width), 
+      ray.origin.x - currentChunkPosition.x * static_cast<int>(Chunk::Length), 
+      ray.origin.y - currentChunkPosition.y * static_cast<int>(Chunk::Width), 
       ray.origin.z
     );
     glm::ivec3 currentBlockPosition(localRayOrigin);
@@ -179,22 +175,22 @@ namespace blocks
       if (currentBlockPosition.x < 0)
       {
         currentBlockPosition.x += Chunk::Length;
-        newChunkPosition.first -= 1;
+        newChunkPosition.x -= 1;
       }
       else if (currentBlockPosition.x >= Chunk::Length)
       {
         currentBlockPosition.x -= Chunk::Length;
-        newChunkPosition.first += 1;
+        newChunkPosition.x += 1;
       }
       if (currentBlockPosition.y < 0)
       {
         currentBlockPosition.y += Chunk::Width;
-        newChunkPosition.second -= 1;
+        newChunkPosition.y -= 1;
       }
       else if (currentBlockPosition.y >= Chunk::Width)
       {
         currentBlockPosition.y -= Chunk::Width;
-        newChunkPosition.second += 1;
+        newChunkPosition.y += 1;
       }
 
       if (currentChunkPosition != newChunkPosition)
@@ -227,8 +223,8 @@ namespace blocks
 
       glm::vec3 localIntersectionPoint = glm::vec3
       (
-        result.intersectionPoint.x - currentChunkPosition.first * static_cast<int>(Chunk::Length),
-        result.intersectionPoint.y - currentChunkPosition.second * static_cast<int>(Chunk::Width),
+        result.intersectionPoint.x - currentChunkPosition.x * static_cast<int>(Chunk::Length),
+        result.intersectionPoint.y - currentChunkPosition.y * static_cast<int>(Chunk::Width),
         result.intersectionPoint.z
       );
 
@@ -288,6 +284,6 @@ namespace blocks
 
   std::string Map::GetChunkFileName(std::string mapPath, ChunkPosition position)
   {
-    return std::format("{0}/{1}_{2}.chunk", mapPath, position.first, position.second);
+    return std::format("{0}/{1}_{2}.chunk", mapPath, position.x, position.y);
   }
 }

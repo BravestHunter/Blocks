@@ -95,7 +95,7 @@ namespace blocks
     ChunkPosition chunkPosition = Map::CalculateChunkPosition(aabb.center);
     std::shared_ptr<Chunk> chunk = map->GetChunk(chunkPosition);
 
-    glm::vec3 localPosition = aabb.center - glm::vec3(chunkPosition.first * (int)Chunk::Length, chunkPosition.second * (int)Chunk::Width, 0.0f);
+    glm::vec3 localPosition = aabb.center - glm::vec3(chunkPosition.x * (int)Chunk::Length, chunkPosition.y * (int)Chunk::Width, 0.0f);
     AABB localBounds(localPosition, aabb.size);
 
     glm::ivec3 lowBorderBlock(localBounds.lowBorder);

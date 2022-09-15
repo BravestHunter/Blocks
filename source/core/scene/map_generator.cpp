@@ -24,7 +24,7 @@ namespace blocks
     fractalFB->SetOctaveCount(2);
     fractalFB->SetLacunarity(0.5f);
 
-    auto minMax = fractalFB->GenUniformGrid2D(highMap, position.first * Chunk::Length, position.second * Chunk::Width, Chunk::Length, Chunk::Width, 0.01f, seed_);
+    auto minMax = fractalFB->GenUniformGrid2D(highMap, position.x * Chunk::Length, position.y * Chunk::Width, Chunk::Length, Chunk::Width, 0.01f, seed_);
 
     Block blockType = (rand() % 4) + 1;
     for (unsigned int x = 0; x < Chunk::Length; x++)

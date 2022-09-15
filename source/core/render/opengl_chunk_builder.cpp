@@ -6,9 +6,9 @@ namespace blocks
   OpenglChunkBuilder::OpenglChunkBuilder(ChunkPosition position, std::shared_ptr<BlockSet> blockSet, std::shared_ptr<Map> map)
     : position_(position), blockSet_(blockSet), chunksGrid_
         {
-          { map->GetChunk({ position.first - 1, position.second - 1 }), map->GetChunk({ position.first - 1, position.second }), map->GetChunk({ position.first - 1, position.second + 1 }) },
-          { map->GetChunk({ position.first, position.second - 1 }), map->GetChunk(position), map->GetChunk({ position.first, position.second + 1 }) },
-          { map->GetChunk({ position.first + 1, position.second - 1 }), map->GetChunk({ position.first + 1, position.second }), map->GetChunk({ position.first + 1, position.second + 1 }) }
+          { map->GetChunk({ position.x - 1, position.y - 1 }), map->GetChunk({ position.x - 1, position.y }), map->GetChunk({ position.x - 1, position.y + 1 }) },
+          { map->GetChunk({ position.x, position.y - 1 }), map->GetChunk(position), map->GetChunk({ position.x, position.y + 1 }) },
+          { map->GetChunk({ position.x + 1, position.y - 1 }), map->GetChunk({ position.x + 1, position.y }), map->GetChunk({ position.x + 1, position.y + 1 }) }
         }
 
   {

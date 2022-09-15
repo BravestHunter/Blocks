@@ -91,9 +91,9 @@ namespace blocks
   {
     std::shared_ptr<OpenglMap> openglMap = presentationContext.openglScene->GetMap();
 
-    for (int x = centerChunkPosition.first - loadingRadius_; x <= centerChunkPosition.first + loadingRadius_; x++)
+    for (int x = centerChunkPosition.x - loadingRadius_; x <= centerChunkPosition.x + loadingRadius_; x++)
     {
-      for (int y = centerChunkPosition.second - loadingRadius_; y <= centerChunkPosition.second + loadingRadius_; y++)
+      for (int y = centerChunkPosition.y - loadingRadius_; y <= centerChunkPosition.y + loadingRadius_; y++)
       {
         ChunkPosition position = { x, y };
 
@@ -108,12 +108,12 @@ namespace blocks
   void MapLoadingModule::RemoveChunks(ChunkPosition centerChunkPosition, ChunkPosition lastCenterChunkPosition, PresentationContext& presentationContext)
   {
     std::shared_ptr<OpenglMap> openglMap = presentationContext.openglScene->GetMap();
-    glm::ivec2 xBorders = glm::ivec2(centerChunkPosition.first - loadingRadius_, centerChunkPosition.first + loadingRadius_);
-    glm::ivec2 yBorders = glm::ivec2(centerChunkPosition.second - loadingRadius_, centerChunkPosition.second + loadingRadius_);
+    glm::ivec2 xBorders = glm::ivec2(centerChunkPosition.x - loadingRadius_, centerChunkPosition.x + loadingRadius_);
+    glm::ivec2 yBorders = glm::ivec2(centerChunkPosition.y - loadingRadius_, centerChunkPosition.y + loadingRadius_);
 
-    for (int x = lastCenterChunkPosition.first - loadingRadius_; x <= lastCenterChunkPosition.first + loadingRadius_; x++)
+    for (int x = lastCenterChunkPosition.x - loadingRadius_; x <= lastCenterChunkPosition.x + loadingRadius_; x++)
     {
-      for (int y = lastCenterChunkPosition.second - loadingRadius_; y <= lastCenterChunkPosition.second + loadingRadius_; y++)
+      for (int y = lastCenterChunkPosition.y - loadingRadius_; y <= lastCenterChunkPosition.y + loadingRadius_; y++)
       {
         if (x < xBorders.x || x > xBorders.y ||
             y < yBorders.x || y > yBorders.y)

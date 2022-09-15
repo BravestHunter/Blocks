@@ -129,7 +129,7 @@ namespace blocks
       case BlockSide::Front:
         if (raycastResult.blockPosition.x == Chunk::Length - 1)
         {
-          changedChunkPosition.first += 1;
+          changedChunkPosition.x += 1;
           changedBlockPosition.x = 0;
         }
         else
@@ -140,7 +140,7 @@ namespace blocks
       case BlockSide::Back:
         if (raycastResult.blockPosition.x == 0)
         {
-          changedChunkPosition.first -= 1;
+          changedChunkPosition.x -= 1;
           changedBlockPosition.x = 15;
         }
         else
@@ -152,7 +152,7 @@ namespace blocks
       case BlockSide::Right:
         if (raycastResult.blockPosition.y == Chunk::Width - 1)
         {
-          changedChunkPosition.second += 1;
+          changedChunkPosition.y += 1;
           changedBlockPosition.y = 0;
         }
         else
@@ -163,7 +163,7 @@ namespace blocks
       case BlockSide::Left:
         if (raycastResult.blockPosition.y == 0)
         {
-          changedChunkPosition.second -= 1;
+          changedChunkPosition.y -= 1;
           changedBlockPosition.y = 15;
         }
         else
@@ -197,8 +197,8 @@ namespace blocks
       const Entity& player = gameContext.scene->GetWorld()->GetPlayer();
       glm::vec3 localPlayerPosition
       (
-        player.GetPosition().x - raycastResult.chunkPosition.first * static_cast<float>(Chunk::Length), 
-        player.GetPosition().y - raycastResult.chunkPosition.second * static_cast<float>(Chunk::Width), 
+        player.GetPosition().x - raycastResult.chunkPosition.x * static_cast<float>(Chunk::Length), 
+        player.GetPosition().y - raycastResult.chunkPosition.y * static_cast<float>(Chunk::Width), 
         player.GetPosition().z
       );
       AABB playerBounds = AABB(player.GetAABB().center + localPlayerPosition, player.GetAABB().size);
@@ -240,19 +240,19 @@ namespace blocks
 
       if (changedBlockPosition.x == 0)
       {
-        gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(ChunkPosition(changedChunkPosition.first - 1, changedChunkPosition.second)));
+        gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(ChunkPosition(changedChunkPosition.x - 1, changedChunkPosition.y)));
       }
       else if (changedBlockPosition.x == Chunk::Length - 1)
       {
-        gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(ChunkPosition(changedChunkPosition.first + 1, changedChunkPosition.second)));
+        gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(ChunkPosition(changedChunkPosition.x + 1, changedChunkPosition.y)));
       }
       if (changedBlockPosition.y == 0)
       {
-        gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(ChunkPosition(changedChunkPosition.first, changedChunkPosition.second - 1)));
+        gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(ChunkPosition(changedChunkPosition.x, changedChunkPosition.y - 1)));
       }
       else if (changedBlockPosition.y == Chunk::Width - 1)
       {
-        gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(ChunkPosition(changedChunkPosition.first, changedChunkPosition.second + 1)));
+        gameContext.modelUpdateEventsQueue.Push(std::make_shared<ChunkUpdatedEvent>(ChunkPosition(changedChunkPosition.x, changedChunkPosition.y + 1)));
       }
     }
   }

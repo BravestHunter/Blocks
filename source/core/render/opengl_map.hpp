@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <queue>
 #include <memory>
 #include <mutex>
@@ -35,7 +35,7 @@ namespace blocks
     void Clear();
 
   private:
-    std::map<ChunkPosition, std::shared_ptr<OpenglChunk>> chunks_;
+    std::unordered_map<ChunkPosition, std::shared_ptr<OpenglChunk>, ChunkPositionHasher> chunks_;
     std::shared_ptr<opengl::Texture2DArray> blocksTextureArray_;
   };
 }

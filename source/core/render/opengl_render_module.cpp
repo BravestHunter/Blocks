@@ -179,7 +179,7 @@ namespace blocks
       ChunkPosition position = pair.first;
       std::shared_ptr<OpenglChunk> chunk = pair.second;
 
-      glm::vec3 chunkOffset(position.first * (int)Chunk::Length, position.second * (int)Chunk::Width, 0.0f);
+      glm::vec3 chunkOffset(position.x * (int)Chunk::Length, position.y * (int)Chunk::Width, 0.0f);
       glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), chunkOffset);
       glm::mat4 mvp = projection * view * modelTransform;
       chunkProgram_->SetMat4("MVP", mvp);
