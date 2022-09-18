@@ -3,6 +3,7 @@ set(SOURCE_FILES
 	environment.cpp
 
 	task/task.hpp
+	task/task.cpp
 	task/task_scheduler.hpp
 	task/task_scheduler.cpp
 

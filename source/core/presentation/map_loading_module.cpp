@@ -128,7 +128,7 @@ namespace blocks
 
   void MapLoadingModule::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position, std::shared_ptr<BlockSet> blockSet)
   {
-    Environment::GetTaskScheduler().EnqueueTask(
+    std::shared_ptr<Task> task = std::make_shared<Task>(
       [this, map, position, blockSet]()
       {
         std::vector<OpenglChunkVertex> rawData = OpenglChunkBuilder(position, blockSet, map).GenerateRawChunkData();
@@ -143,6 +143,8 @@ namespace blocks
         chunksActionQueue_.push(item);
       }
     );
+
+    Environment::GetTaskScheduler().EnqueueTask(task);
   }
 
   void MapLoadingModule::EnqueueChunkRemove(ChunkPosition position)

@@ -41,7 +41,7 @@ namespace blocks
   }
 
 
-  void TaskScheduler::EnqueueTask(Task task)
+  void TaskScheduler::EnqueueTask(std::shared_ptr<Task> task)
   {
     {
       std::lock_guard<std::mutex> guard(mutex_);
@@ -72,12 +72,15 @@ namespace blocks
         return;
       }
 
-      Task task = queue_.front();
+      std::shared_ptr<Task> task = queue_.front();
       queue_.pop();
 
       lock.unlock();
 
-      task();
+      if (task->IsCanceled() == false)
+      {
+        task->Execute();
+      }
     }
   }
 }

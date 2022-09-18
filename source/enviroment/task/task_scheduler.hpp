@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <queue>
 #include <thread>
@@ -27,13 +28,13 @@ namespace blocks
     void Start();
     void Stop();
 
-    void EnqueueTask(Task task);
+    void EnqueueTask(std::shared_ptr<Task> task);
 
   private:
     void ProcessTasks();
 
     std::vector<std::thread> threads_;
-    std::queue<Task> queue_;
+    std::queue<std::shared_ptr<Task>> queue_;
     std::mutex mutex_;
     std::condition_variable cv_;
     bool stopRequested_ = false ;
