@@ -30,11 +30,14 @@ namespace blocks
       const ChunksQueueItem item = chunksActionQueue_.front();
       chunksActionQueue_.pop();
       
-      if (item.add)
+      bool containsChunk = presentationContext.mapLoadingContext.loadedChunks.contains(item.position);
+      presentationContext.mapLoadingContext.chunkMeshingTasks.erase(item.position);
+
+      if (item.add && containsChunk)
       {
         presentationContext.openglScene->GetMap()->AddChunk(item.chunkData, item.position);
       }
-      else
+      else if (item.add == false && containsChunk == false)
       {
         presentationContext.openglScene->GetMap()->RemoveChunk(item.position);
       }
@@ -68,7 +71,7 @@ namespace blocks
       case ModelUpdateEventType::ChunkUpdated:
       {
         ChunkUpdatedEvent* positionChangedEvent = static_cast<ChunkUpdatedEvent*>(e);
-        EnqueueChunkAdd(gameContext.scene->GetWorld()->GetMap(), positionChangedEvent->GetPosition(), presentationContext.blockSet);
+        EnqueueChunkAdd(gameContext.scene->GetWorld()->GetMap(), positionChangedEvent->GetPosition(), presentationContext);
         break;
       }
     }
@@ -77,6 +80,19 @@ namespace blocks
 
   void MapLoadingModule::OnSceneChanged(PresentationContext& presentationContext, GameContext& gameContext)
   {
+    {
+      std::unique_lock<std::mutex> locker(queueMutex_);
+
+      presentationContext.mapLoadingContext.loadedChunks.clear();
+      for (auto taskPair : presentationContext.mapLoadingContext.chunkMeshingTasks)
+      {
+        taskPair.second->Cancel();
+      }
+      presentationContext.mapLoadingContext.chunkMeshingTasks.clear();
+
+      locker.unlock();
+    }
+
     presentationContext.openglScene->GetMap()->Clear();
 
     if (gameContext.scene->ContainsWorld())
@@ -89,17 +105,15 @@ namespace blocks
 
   void MapLoadingModule::AddChunks(ChunkPosition centerChunkPosition, std::shared_ptr<Map> map, PresentationContext& presentationContext)
   {
-    std::shared_ptr<OpenglMap> openglMap = presentationContext.openglScene->GetMap();
-
     for (int x = centerChunkPosition.x - loadingRadius_; x <= centerChunkPosition.x + loadingRadius_; x++)
     {
       for (int y = centerChunkPosition.y - loadingRadius_; y <= centerChunkPosition.y + loadingRadius_; y++)
       {
         ChunkPosition position = { x, y };
 
-        if (!openglMap->ContainsChunk(position))
+        if (presentationContext.mapLoadingContext.loadedChunks.contains(position) == false)
         {
-          EnqueueChunkAdd(map, position, presentationContext.blockSet);
+          EnqueueChunkAdd(map, position, presentationContext);
         }
       }
     }
@@ -107,7 +121,6 @@ namespace blocks
 
   void MapLoadingModule::RemoveChunks(ChunkPosition centerChunkPosition, ChunkPosition lastCenterChunkPosition, PresentationContext& presentationContext)
   {
-    std::shared_ptr<OpenglMap> openglMap = presentationContext.openglScene->GetMap();
     glm::ivec2 xBorders = glm::ivec2(centerChunkPosition.x - loadingRadius_, centerChunkPosition.x + loadingRadius_);
     glm::ivec2 yBorders = glm::ivec2(centerChunkPosition.y - loadingRadius_, centerChunkPosition.y + loadingRadius_);
 
@@ -115,23 +128,25 @@ namespace blocks
     {
       for (int y = lastCenterChunkPosition.y - loadingRadius_; y <= lastCenterChunkPosition.y + loadingRadius_; y++)
       {
+        ChunkPosition position = { x, y };
+
         if (x < xBorders.x || x > xBorders.y ||
-            y < yBorders.x || y > yBorders.y)
+            y < yBorders.x || y > yBorders.y &&
+            presentationContext.mapLoadingContext.loadedChunks.contains(position))
         {
-          ChunkPosition position = { x, y };
-          EnqueueChunkRemove(position);
+          EnqueueChunkRemove(position, presentationContext);
         }
       }
     }
   }
 
 
-  void MapLoadingModule::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position, std::shared_ptr<BlockSet> blockSet)
+  void MapLoadingModule::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position, PresentationContext& presentationContext)
   {
     std::shared_ptr<Task> task = std::make_shared<Task>(
-      [this, map, position, blockSet]()
+      [this, map, position, presentationContext]()
       {
-        std::vector<OpenglChunkVertex> rawData = OpenglChunkBuilder(position, blockSet, map).GenerateRawChunkData();
+        std::vector<OpenglChunkVertex> rawData = OpenglChunkBuilder(position, presentationContext.blockSet, map).GenerateRawChunkData();
         ChunksQueueItem item
         {
           .chunkData = rawData,
@@ -144,10 +159,28 @@ namespace blocks
       }
     );
 
+    {
+      std::unique_lock<std::mutex> locker(queueMutex_);
+
+      presentationContext.mapLoadingContext.loadedChunks.insert(position);
+      auto taskPair = presentationContext.mapLoadingContext.chunkMeshingTasks.find(position);
+      if (taskPair != presentationContext.mapLoadingContext.chunkMeshingTasks.end())
+      {
+        taskPair->second->Cancel();
+        taskPair->second = task;
+      }
+      else
+      {
+        presentationContext.mapLoadingContext.chunkMeshingTasks[position] = task;
+      }
+
+      locker.unlock();
+    }
+
     Environment::GetTaskScheduler().EnqueueTask(task);
   }
 
-  void MapLoadingModule::EnqueueChunkRemove(ChunkPosition position)
+  void MapLoadingModule::EnqueueChunkRemove(ChunkPosition position, PresentationContext& presentationContext)
   {
     ChunksQueueItem item
     {
@@ -155,7 +188,17 @@ namespace blocks
       .add = false
     };
 
-    std::lock_guard<std::mutex> locker(queueMutex_);
-    chunksActionQueue_.push(item);
+    {
+      std::lock_guard<std::mutex> locker(queueMutex_);
+
+      chunksActionQueue_.push(item);
+      presentationContext.mapLoadingContext.loadedChunks.erase(position);
+      auto taskPair = presentationContext.mapLoadingContext.chunkMeshingTasks.find(position);
+      if (taskPair != presentationContext.mapLoadingContext.chunkMeshingTasks.end())
+      {
+        taskPair->second->Cancel();
+        presentationContext.mapLoadingContext.chunkMeshingTasks.erase(taskPair);
+      }
+    }
   }
 }

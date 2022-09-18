@@ -52,12 +52,12 @@ namespace blocks
     cv_.notify_one();
   }
 
-
   void TaskScheduler::ProcessTasks()
   {
     bool stopped = false;
 
-    while (!stopped) {
+    while (!stopped) 
+    {
       std::unique_lock<std::mutex> lock(mutex_);
 
       cv_.wait(lock, [this, &stopped]()

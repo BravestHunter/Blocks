@@ -1,6 +1,5 @@
 set(CORE_SOURCE_FILES
 	game_context.hpp
-	game_module_interface.hpp
 	block_side.hpp
 	game.hpp
 	game.cpp
@@ -24,6 +23,7 @@ set(CORE_SOURCE_FILES
 	simulation/simulation_module.hpp
 	simulation/simulation_module.cpp
 
+	presentation/map_loading_context.hpp
 	presentation/presentation_context.hpp
 	presentation/map_loading_module.hpp
 	presentation/map_loading_module.cpp

@@ -9,7 +9,6 @@
 #include "glm/glm.hpp"
 
 #include "block_side.hpp"
-#include "game_module_interface.hpp"
 #include "scene/map.hpp"
 #include "render/opengl_chunk_vertex.hpp"
 #include "render/opengl_map.hpp"
@@ -45,13 +44,13 @@ namespace blocks
     void AddChunks(ChunkPosition centerChunkPosition, std::shared_ptr<Map> map, PresentationContext& presentationContext);
     void RemoveChunks(ChunkPosition centerChunkPosition, ChunkPosition lastCenterChunkPosition, PresentationContext& presentationContext);
 
-    int loadingRadius_ = 3;
+    int loadingRadius_ = 8;
     ChunkPosition lastCenterChunkPosition_;
 
     std::queue<ChunksQueueItem> chunksActionQueue_;
     std::mutex queueMutex_;
 
-    void EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position, std::shared_ptr<BlockSet> blockSet);
-    void EnqueueChunkRemove(ChunkPosition position);
+    void EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position, PresentationContext& presentationContext);
+    void EnqueueChunkRemove(ChunkPosition position, PresentationContext& presentationContext);
   };
 }

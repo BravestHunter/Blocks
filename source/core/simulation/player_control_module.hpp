@@ -1,7 +1,7 @@
 #pragma once
 
-#include "game_module_interface.hpp"
 #include "platform/glfw_window.hpp"
+#include "game_context.hpp"
 #include "input/input_state.hpp"
 
 
