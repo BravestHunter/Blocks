@@ -71,7 +71,7 @@ namespace blocks
       case ModelUpdateEventType::ChunkUpdated:
       {
         ChunkUpdatedEvent* positionChangedEvent = static_cast<ChunkUpdatedEvent*>(e);
-        EnqueueChunkAdd(gameContext.scene->GetWorld()->GetMap(), positionChangedEvent->GetPosition(), presentationContext);
+        EnqueueChunkAdd(gameContext.scene->GetWorld()->GetMap(), positionChangedEvent->GetPosition(), presentationContext, false);
         break;
       }
     }
@@ -141,7 +141,7 @@ namespace blocks
   }
 
 
-  void MapLoadingModule::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position, PresentationContext& presentationContext)
+  void MapLoadingModule::EnqueueChunkAdd(std::shared_ptr<Map> map, ChunkPosition position, PresentationContext& presentationContext, bool enqueueTask)
   {
     std::shared_ptr<Task> task = std::make_shared<Task>(
       [this, map, position, presentationContext]()
@@ -177,7 +177,14 @@ namespace blocks
       locker.unlock();
     }
 
-    Environment::GetTaskScheduler().EnqueueTask(task);
+    if (enqueueTask)
+    {
+      Environment::GetTaskScheduler().EnqueueTask(task);
+    }
+    else
+    {
+      task->Execute();
+    }
   }
 
   void MapLoadingModule::EnqueueChunkRemove(ChunkPosition position, PresentationContext& presentationContext)
