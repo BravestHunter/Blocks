@@ -15,3 +15,5 @@ add_subdirectory(imgui)
 set(FastNoise2_DIR "${CMAKE_CURRENT_SOURCE_DIR}/fastNoise2/lib/cmake/FastNoise2" PARENT_SCOPE)
 
 add_subdirectory(njson)
+
+add_subdirectory(entt)

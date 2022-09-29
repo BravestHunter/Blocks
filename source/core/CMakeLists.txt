@@ -89,6 +89,7 @@ target_link_libraries(BlocksCore
 		BlocksModel
 		
 		FastNoise2::FastNoise
+		EnTT::EnTT
 )
 
 
