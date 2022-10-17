@@ -9,6 +9,9 @@ set(CORE_SOURCE_FILES
 	input/input_module.hpp
 	input/input_module.cpp
 
+	ecs/components/transform.hpp
+	ecs/components/physics_body.hpp
+
 	simulation/model_update_event_type.hpp
 	simulation/base_model_update_event.hpp
 	simulation/player_position_changed_event.hpp
@@ -47,8 +50,6 @@ set(CORE_SOURCE_FILES
 	render/opengl_render_module.cpp
 
 	scene/map_ray_cast_result.hpp
-	scene/entity.hpp
-	scene/entity.cpp
 	scene/map_generator.hpp
 	scene/map_generator.cpp
 	scene/map.hpp

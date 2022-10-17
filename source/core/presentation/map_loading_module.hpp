@@ -44,7 +44,7 @@ namespace blocks
     void AddChunks(ChunkPosition centerChunkPosition, std::shared_ptr<Map> map, PresentationContext& presentationContext);
     void RemoveChunks(ChunkPosition centerChunkPosition, ChunkPosition lastCenterChunkPosition, PresentationContext& presentationContext);
 
-    int loadingRadius_ = 12;
+    int loadingRadius_ = 6;
     ChunkPosition lastCenterChunkPosition_;
 
     std::queue<ChunksQueueItem> chunksActionQueue_;

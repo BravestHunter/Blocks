@@ -1,7 +1,6 @@
 #include "physics_module.hpp"
 
 #include "geometry/collisions_api.hpp"
-
 #include "simulation/player_position_changed_event.hpp"
 
 
@@ -15,68 +14,73 @@ namespace blocks
 
   void PhysicsModule::Update(float delta, GameContext& gameContext)
   {
-    Entity& player = gameContext.scene->GetWorld()->GetPlayer();
+    std::shared_ptr<World> world = gameContext.scene->GetWorld();
+    entt::registry& ecsRegistry = world->GetEcsRegistry();
+    auto view = ecsRegistry.view<Transform, PhysicsBody>();
 
-    glm::vec3 velocity = player.GetVelocity();
-
-    if (gameContext.controlMode == ControlMode::Default)
+    for (auto [entity, transform, physicsBody] : view.each())
     {
-      // Add gravity force
-      velocity += glm::vec3(0.0f, 0.0f, -1.0f) * gravityConstant * delta;
-      player.SetVelocity(velocity);
+      glm::vec3 velocity = physicsBody.velocity;
 
-      if (velocity == zeroVector)
+      if (gameContext.controlMode == ControlMode::Default)
       {
-        return;
+        // Add gravity force
+        velocity += glm::vec3(0.0f, 0.0f, -1.0f) * gravityConstant * delta;
+        physicsBody.velocity = velocity;
+
+        if (velocity == zeroVector)
+        {
+          return;
+        }
+
+        // Process horizontal and vertical movement separately
+        glm::vec3 horizontalVelocity(velocity.x, velocity.y, 0.0f);
+        glm::vec3 verticalVelocity(0.0f, 0.0f, velocity.z);
+
+        bool horizontalMoved = ProcessVelocity(delta, transform, physicsBody, horizontalVelocity, gameContext);
+        bool verticalMoved = ProcessVelocity(delta, transform, physicsBody, verticalVelocity, gameContext);
+
+        physicsBody.isGrounded = !verticalMoved;
+
+        if (horizontalMoved == false)
+        {
+          velocity.x = 0.0f;
+          velocity.y = 0.0f;
+        }
+        if (verticalMoved == false)
+        {
+          velocity.z = 0.0f;
+        }
+        physicsBody.velocity = velocity;
+
+        if (horizontalMoved || verticalMoved)
+        {
+          gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(transform.position));
+        }
       }
-
-      // Process horizontal and vertical movement separately
-      glm::vec3 horizontalVelocity(velocity.x, velocity.y, 0.0f);
-      glm::vec3 verticalVelocity(0.0f, 0.0f, velocity.z);
-
-      bool horizontalMoved = ProcessPlayerVelocity(delta, player, horizontalVelocity, gameContext);
-      bool verticalMoved = ProcessPlayerVelocity(delta, player, verticalVelocity, gameContext);
-
-      player.SetGrounded(!verticalMoved);
-
-      if (horizontalMoved == false)
+      else if (gameContext.controlMode == ControlMode::Fly)
       {
-        velocity.x = 0.0f;
-        velocity.y = 0.0f;
-      }
-      if (verticalMoved == false)
-      {
-        velocity.z = 0.0f;
-      }
-      player.SetVelocity(velocity);
+        if (velocity == zeroVector)
+        {
+          return;
+        }
 
-      if (horizontalMoved || verticalMoved)
-      {
-        gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(player.GetPosition()));
-      }
-    }
-    else if (gameContext.controlMode == ControlMode::Fly)
-    {
-      if (velocity == zeroVector)
-      {
-        return;
-      }
+        glm::vec3 newPosition = transform.position + velocity * delta;
+        transform.position = newPosition;
+        gameContext.camera->SetPosition(newPosition);
 
-      glm::vec3 newPosition = player.GetPosition() + velocity * delta;
-      player.SetPosition(newPosition);
-      gameContext.camera->SetPosition(newPosition);
-
-      gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(player.GetPosition()));
+        gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(transform.position));
+      }
     }
   }
 
 
-  bool PhysicsModule::ProcessPlayerVelocity(float delta, Entity& player, glm::vec3 velocity, GameContext& gameContext)
+  bool PhysicsModule::ProcessVelocity(float delta, Transform& transform, PhysicsBody& physicsBody, glm::vec3 velocity, GameContext& gameContext)
   {
-    glm::vec3 newPosition = player.GetPosition() + velocity * delta;
+    glm::vec3 newPosition = transform.position + velocity * delta;
 
     {
-      AABB playerBounds = player.GetAABB();
+      AABB playerBounds = physicsBody.bounds;
       AABB newPlayerBounds(playerBounds.center + newPosition, playerBounds.size);
       if (CollidesMap(newPlayerBounds, gameContext.scene->GetWorld()->GetMap()))
       {
@@ -84,7 +88,7 @@ namespace blocks
       }
     }
 
-    player.SetPosition(newPosition);
+    transform.position = newPosition;
     gameContext.camera->SetPosition(newPosition);
 
     return true;

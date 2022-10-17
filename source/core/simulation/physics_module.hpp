@@ -1,6 +1,8 @@
 #pragma once
 
 #include "game_context.hpp"
+#include "ecs/components/transform.hpp"
+#include "ecs/components/physics_body.hpp"
 
 
 namespace blocks
@@ -11,7 +13,7 @@ namespace blocks
     void Update(float delta, GameContext& gameContext);
 
   private:
-    bool ProcessPlayerVelocity(float delta, Entity& player, glm::vec3 velocity, GameContext& gameContext);
+    bool ProcessVelocity(float delta, Transform& transform, PhysicsBody& physicsBody, glm::vec3 velocity, GameContext& gameContext);
     bool CollidesMap(AABB& aabb, std::shared_ptr<Map> map);
   };
 }

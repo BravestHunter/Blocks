@@ -234,7 +234,7 @@ namespace blocks
     std::shared_ptr<ImguiText> playerVelocityText = std::make_shared<ImguiText>(
       [game]()
       {
-        glm::vec3 velocity = game->GetContext().scene->GetWorld()->GetPlayer().GetVelocity();
+        glm::vec3 velocity = game->GetContext().scene->GetWorld()->GetEcsRegistry().get<PhysicsBody>(game->GetContext().scene->GetWorld()->GetPlayerEntity()).velocity;
         return  std::format("Player velocity: {0:.2f} {1:.2f} {2:.2f}", velocity.x, velocity.y, velocity.z);
       }
     );
@@ -243,7 +243,7 @@ namespace blocks
     std::shared_ptr<ImguiText> centerChunkText = std::make_shared<ImguiText>(
       [game]()
       {
-        glm::vec3 position = game->GetContext().scene->GetWorld()->GetPlayer().GetPosition();
+        glm::vec3 position = game->GetContext().scene->GetWorld()->GetEcsRegistry().get<Transform>(game->GetContext().scene->GetWorld()->GetPlayerEntity()).position;
         ChunkPosition chunkPosition = Map::CalculateChunkPosition(position);
         return  std::format("Current chunk: {0} {1}", chunkPosition.x, chunkPosition.y);
       }

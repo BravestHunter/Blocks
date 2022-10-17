@@ -25,7 +25,7 @@ namespace blocks
   {
     if (gameContext.scene->ContainsWorld())
     {
-      gameContext.camera->SetPosition(gameContext.scene->GetWorld()->GetPlayer().GetPosition());
+      gameContext.camera->SetPosition(gameContext.scene->GetWorld()->GetEcsRegistry().get<Transform>(gameContext.scene->GetWorld()->GetPlayerEntity()).position);
     }
   }
 }

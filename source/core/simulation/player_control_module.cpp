@@ -1,5 +1,7 @@
 #include "player_control_module.hpp"
 
+#include "ecs/components/transform.hpp"
+#include "ecs/components/physics_body.hpp"
 #include "simulation/player_position_changed_event.hpp"
 #include "simulation/chunk_updated_event.hpp"
 
@@ -28,16 +30,19 @@ namespace blocks
 
   void PlayerControlModule::MovePlayer(const float delta, const InputState& inputState, GameContext& gameContext)
   {
-    Entity& player = gameContext.scene->GetWorld()->GetPlayer();
+    std::shared_ptr<World> world = gameContext.scene->GetWorld();
+    entt::registry& ecsRegistry = world->GetEcsRegistry();
+    entt::entity playerEntity = world->GetPlayerEntity();
+    PhysicsBody& physicsBody = ecsRegistry.get<PhysicsBody>(playerEntity);
 
     if (gameContext.controlMode == ControlMode::Default)
     {
-      if (player.IsGrounded() && inputState.IsKeyPressed(GLFW_KEY_SPACE))
+      if (physicsBody.isGrounded && inputState.IsKeyPressed(GLFW_KEY_SPACE))
       {
-        player.SetVelocity(player.GetVelocity() + glm::vec3(0.0, 0.0, 500.0f) * delta);
+        physicsBody.velocity = physicsBody.velocity + glm::vec3(0.0, 0.0, 500.0f) * delta;
       }
 
-      player.SetVelocity(glm::vec3(0.0f, 0.0f, player.GetVelocity().z));
+      physicsBody.velocity = glm::vec3(0.0f, 0.0f, physicsBody.velocity.z);
 
       glm::vec3 direction = glm::vec3(0.0f);
       if (inputState.IsKeyPressed(GLFW_KEY_W))
@@ -61,12 +66,12 @@ namespace blocks
       {
         direction.z = 0.0f;
         direction = glm::normalize(direction);
-        player.SetVelocity(player.GetVelocity() + direction * movementSpeed_);
+        physicsBody.velocity = physicsBody.velocity + direction * movementSpeed_;
       }
     }
     else if (gameContext.controlMode == ControlMode::Fly)
     {
-      player.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+      physicsBody.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 
       glm::vec3 direction = glm::vec3(0.0f);
       if (inputState.IsKeyPressed(GLFW_KEY_W))
@@ -89,7 +94,7 @@ namespace blocks
       if (direction != zeroVector)
       {
         direction = glm::normalize(direction);
-        player.SetVelocity(direction * flyMovementSpeed_);
+        physicsBody.velocity = direction * flyMovementSpeed_;
       }
     }
   }
@@ -106,6 +111,12 @@ namespace blocks
 
   void PlayerControlModule::ManageBlockPlacement(const float delta, const InputState& inputState, GameContext& gameContext)
   {
+    std::shared_ptr<World> world = gameContext.scene->GetWorld();
+    entt::registry& ecsRegistry = world->GetEcsRegistry();
+    entt::entity playerEntity = world->GetPlayerEntity();
+    Transform& transform = ecsRegistry.get<Transform>(playerEntity);
+    PhysicsBody& physicsBody = ecsRegistry.get<PhysicsBody>(playerEntity);
+
     bool chunkChanged = false;
     ChunkPosition changedChunkPosition;
     glm::ivec3 changedBlockPosition;
@@ -194,14 +205,13 @@ namespace blocks
         break;
       }
 
-      const Entity& player = gameContext.scene->GetWorld()->GetPlayer();
       glm::vec3 localPlayerPosition
       (
-        player.GetPosition().x - raycastResult.chunkPosition.x * static_cast<float>(Chunk::Length), 
-        player.GetPosition().y - raycastResult.chunkPosition.y * static_cast<float>(Chunk::Width), 
-        player.GetPosition().z
+        transform.position.x - raycastResult.chunkPosition.x * static_cast<float>(Chunk::Length), 
+        transform.position.y - raycastResult.chunkPosition.y * static_cast<float>(Chunk::Width),
+        transform.position.z
       );
-      AABB playerBounds = AABB(player.GetAABB().center + localPlayerPosition, player.GetAABB().size);
+      AABB playerBounds = AABB(physicsBody.bounds.center + localPlayerPosition, physicsBody.bounds.size);
       AABB blockBounds(glm::vec3(changedBlockPosition) + glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.0f, 1.0f));
       if (CheckCollision(playerBounds, blockBounds))
       {
