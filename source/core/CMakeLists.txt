@@ -15,10 +15,13 @@ set(CORE_SOURCE_FILES
 	simulation/model_update_event_type.hpp
 	simulation/base_model_update_event.hpp
 	simulation/player_position_changed_event.hpp
+	simulation/entity_physics_body_changed_event.hpp
 	simulation/chunk_updated_event.hpp
 	simulation/camera.hpp
 	simulation/camera.cpp
 	simulation/control_mode.hpp
+	simulation/entity_spawn_module.hpp
+	simulation/entity_spawn_module.cpp
 	simulation/player_control_module.hpp
 	simulation/player_control_module.cpp
 	simulation/physics_module.hpp
@@ -44,6 +47,8 @@ set(CORE_SOURCE_FILES
 	render/opengl_chunk_builder.cpp
 	render/opengl_map.hpp
 	render/opengl_map.cpp
+	render/opengl_model.hpp
+	render/opengl_model.cpp
 	render/opengl_scene.hpp
 	render/opengl_scene.cpp
 	render/opengl_render_module.hpp

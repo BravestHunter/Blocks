@@ -20,10 +20,4 @@ namespace blocks
   {
     map_ = std::make_unique<OpenglMap>();
   }
-
-
-  std::shared_ptr<OpenglMap> OpenglScene::GetMap()
-  {
-    return map_;
-  }
 }

@@ -1,6 +1,7 @@
 #include "presentation_module.hpp"
 
 #include "environment.hpp"
+#include "simulation/entity_physics_body_changed_event.hpp"
 
 
 namespace blocks
@@ -19,6 +20,19 @@ namespace blocks
   void PresentationModule::ProcessModelUpdate(BaseModelUpdateEvent* e, GameContext& gameContext)
   {
     mapLoadingModule_.ProcessModelUpdate(e, presentationContext_, gameContext);
+
+    switch (e->GetType())
+    {
+      case ModelUpdateEventType::EntityPhysicsBodyChanged:
+      {
+        EntityPhysicsBodyChangedEvent* physicsBodyChangedEvent = static_cast<EntityPhysicsBodyChangedEvent*>(e);
+
+        std::unordered_map<entt::entity, AABB>& bounds = presentationContext_.openglScene->GetBounds();
+        bounds[physicsBodyChangedEvent->GetEntity()] = physicsBodyChangedEvent->GetBounds();
+
+        break;
+      }
+    }
   }
 
   void PresentationModule::OnSceneChanged(GameContext& gameContext)

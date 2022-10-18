@@ -45,7 +45,14 @@ namespace blocks
     if (gameContext.scene->ContainsWorld())
     {
       float ratio = (float)windowSize.x / (float)windowSize.y;
-      RenderChunks(presentationContext.openglScene->GetMap(), gameContext.camera, ratio);
+
+      glm::mat4 projection = glm::perspective(glm::radians(45.0f), ratio, 0.1f, 1000.0f);
+      glm::mat4 view = gameContext.camera->GetViewMatrix();
+      glm::mat4 viewProjection = projection * view;
+
+      RenderChunks(presentationContext.openglScene->GetMap(), viewProjection);
+
+      RenderPhysicsBounds(presentationContext.openglScene->GetBounds(), viewProjection);
 
       RenderHUD();
     }
@@ -136,6 +143,13 @@ namespace blocks
     opengl::Shader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
     chunkProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
 
+    // Load primitive shader program
+    vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, PRIMITIVE_VERTEX_SHADER));
+    fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, PRIMITIVE_FRAGMENT_SHADER));
+    vertexShader = opengl::Shader(vertexCode, GL_VERTEX_SHADER);
+    fragmentShader = opengl::Shader(fragmentCode, GL_FRAGMENT_SHADER);
+    primitiveProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
+
     // Load sprite shader program
     vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, SPRITE_VERTEX_SHADER));
     fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, SPRITE_FRAGMENT_SHADER));
@@ -146,13 +160,18 @@ namespace blocks
     // Load crosshair
     Image crosshairImage = resourceBase.ReadImage("resources/textures/crosshair.png");
     crosshairSprite_ = std::make_unique<OpenglSprite>(crosshairImage);
+
+    aabbModel_ = CreateAABBPresentationModel();
   }
 
   void OpenglRenderModule::FreeResources(PresentationContext& presentationContext)
   {
     chunkProgram_.reset();
+    primitiveProgram_.reset();
     spriteProgram_.reset();
     presentationContext.openglScene.reset();
+
+    aabbModel_.reset();
   }
 
 
@@ -167,12 +186,9 @@ namespace blocks
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
-  void OpenglRenderModule::RenderChunks(std::shared_ptr<OpenglMap> map, std::shared_ptr<Camera> camera, float ratio)
+  void OpenglRenderModule::RenderChunks(std::shared_ptr<OpenglMap> map, glm::mat4 viewProjection)
   {
     chunkProgram_->Setup();
-
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), ratio, 0.1f, 1000.0f);
-    glm::mat4 view = camera->GetViewMatrix();
 
     for (auto pair : map->chunks_)
     {
@@ -181,7 +197,7 @@ namespace blocks
 
       glm::vec3 chunkOffset(position.x * (int)Chunk::Length, position.y * (int)Chunk::Width, 0.0f);
       glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), chunkOffset);
-      glm::mat4 mvp = projection * view * modelTransform;
+      glm::mat4 mvp = viewProjection * modelTransform;
       chunkProgram_->SetMat4("MVP", mvp);
 
       chunk->vao_->Bind();
@@ -207,5 +223,83 @@ namespace blocks
     crosshairSprite_->GetTexture()->Bind(0);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
+  }
+
+
+  void OpenglRenderModule::RenderPhysicsBounds(std::unordered_map<entt::entity, AABB>& bounds, glm::mat4 viewProjection)
+  {
+    primitiveProgram_->Setup();
+
+    primitiveProgram_->SetVec4("FullColor", glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+
+    for (const auto boundPair : bounds)
+    {
+      const AABB& aabb = boundPair.second;
+
+      //glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), glm::vec3(8.0f, 8.0f, 270.0f));
+      glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), aabb.center);
+      modelTransform = glm::scale(modelTransform, aabb.size);
+      glm::mat4 mvp = viewProjection * modelTransform;
+      primitiveProgram_->SetMat4("MVP", mvp);
+
+      aabbModel_->GetVao()->Bind();
+
+      glDrawElements(GL_LINES, aabbModel_->GetNumber(), GL_UNSIGNED_INT, 0);
+    }
+  }
+
+
+  std::shared_ptr<OpenglModel> OpenglRenderModule::CreateAABBPresentationModel()
+  {
+    static const float unitSize = 1.0f;
+    static const float halfUnitSize = unitSize / 2;
+
+    GLfloat vertices[] = {
+         halfUnitSize,  halfUnitSize, halfUnitSize,
+         -halfUnitSize,  halfUnitSize, halfUnitSize,
+         halfUnitSize,  -halfUnitSize, halfUnitSize,
+         -halfUnitSize,  -halfUnitSize, halfUnitSize,
+         halfUnitSize,  halfUnitSize, -halfUnitSize,
+         -halfUnitSize,  halfUnitSize, -halfUnitSize,
+         halfUnitSize,  -halfUnitSize, -halfUnitSize,
+         -halfUnitSize,  -halfUnitSize, -halfUnitSize
+    };
+    GLuint indices[] = 
+    {
+      // Top
+      0, 1,
+      1, 3,
+      3, 2,
+      2, 0,
+
+      // Bottom
+      4, 5,
+      5, 7,
+      7, 6,
+      6, 4,
+
+      // Sides
+      0, 4,
+      1, 5,
+      2, 6,
+      3, 7,
+    };
+
+    std::shared_ptr<opengl::VertexArrayObject> vao = std::make_shared<opengl::VertexArrayObject>();
+    std::shared_ptr<opengl::Buffer> vbo = std::make_shared<opengl::Buffer>(GL_ARRAY_BUFFER);
+    std::shared_ptr<opengl::Buffer> ebo = std::make_shared<opengl::Buffer>(GL_ELEMENT_ARRAY_BUFFER);
+
+    vao->Bind();
+
+    vbo->Bind();
+    vbo->SetData(sizeof(vertices), vertices);
+
+    ebo->Bind();
+    ebo->SetData(sizeof(indices), indices);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    return std::make_shared<OpenglModel>(vao, vbo, ebo, 24);
   }
 }

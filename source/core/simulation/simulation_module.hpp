@@ -7,6 +7,7 @@
 #include "game_context.hpp"
 #include "player_control_module.hpp"
 #include "physics_module.hpp"
+#include "entity_spawn_module.hpp"
 
 
 namespace blocks
@@ -23,5 +24,6 @@ namespace blocks
   private:
     PlayerControlModule playerControlModule_;
     PhysicsModule physicsModule_;
+    EntitySpawnModule entitySpawnModule_;
   };
 }

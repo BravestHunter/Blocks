@@ -2,6 +2,8 @@
 
 #include "geometry/collisions_api.hpp"
 #include "simulation/player_position_changed_event.hpp"
+#include "entity_transform_changed_event.hpp"
+#include "entity_physics_body_changed_event.hpp"
 
 
 namespace blocks
@@ -16,13 +18,36 @@ namespace blocks
   {
     std::shared_ptr<World> world = gameContext.scene->GetWorld();
     entt::registry& ecsRegistry = world->GetEcsRegistry();
+    entt::entity playerEntity = world->GetPlayerEntity();
     auto view = ecsRegistry.view<Transform, PhysicsBody>();
 
     for (auto [entity, transform, physicsBody] : view.each())
     {
       glm::vec3 velocity = physicsBody.velocity;
 
-      if (gameContext.controlMode == ControlMode::Default)
+      bool isPlayer = playerEntity == entity;
+
+      if (isPlayer && gameContext.controlMode == ControlMode::Fly)
+      {
+        if (velocity == zeroVector)
+        {
+          return;
+        }
+
+        glm::vec3 newPosition = transform.position + velocity * delta;
+        transform.position = newPosition;
+       
+        if (isPlayer)
+        {
+          gameContext.camera->SetPosition(newPosition);
+          gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(transform.position));
+        }
+        else
+        {
+          gameContext.modelUpdateEventsQueue.Push(std::make_shared<EntityPhysicsBodyChangedEvent>(entity, physicsBody, transform));
+        }
+      }
+      else
       {
         // Add gravity force
         velocity += glm::vec3(0.0f, 0.0f, -1.0f) * gravityConstant * delta;
@@ -55,21 +80,16 @@ namespace blocks
 
         if (horizontalMoved || verticalMoved)
         {
-          gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(transform.position));
+          if (isPlayer)
+          {
+            gameContext.camera->SetPosition(transform.position);
+            gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(transform.position));
+          }
+          else
+          {
+            gameContext.modelUpdateEventsQueue.Push(std::make_shared<EntityPhysicsBodyChangedEvent>(entity, physicsBody, transform));
+          }
         }
-      }
-      else if (gameContext.controlMode == ControlMode::Fly)
-      {
-        if (velocity == zeroVector)
-        {
-          return;
-        }
-
-        glm::vec3 newPosition = transform.position + velocity * delta;
-        transform.position = newPosition;
-        gameContext.camera->SetPosition(newPosition);
-
-        gameContext.modelUpdateEventsQueue.Push(std::make_shared<PlayerPositionChangedEvent>(transform.position));
       }
     }
   }
@@ -89,7 +109,6 @@ namespace blocks
     }
 
     transform.position = newPosition;
-    gameContext.camera->SetPosition(newPosition);
 
     return true;
   }

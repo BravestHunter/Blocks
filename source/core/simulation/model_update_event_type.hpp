@@ -5,7 +5,8 @@ namespace blocks
 {
   enum class ModelUpdateEventType
   {
+    ChunkUpdated,
     PlayerPositionChanged,
-    ChunkUpdated
+    EntityPhysicsBodyChanged
   };
 }

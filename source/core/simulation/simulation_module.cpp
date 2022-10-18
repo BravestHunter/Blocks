@@ -18,6 +18,7 @@ namespace blocks
 
     playerControlModule_.Update(delta, inputState, gameContext);
     physicsModule_.Update(delta, gameContext);
+    entitySpawnModule_.Update(delta, inputState, gameContext);
   }
 
 

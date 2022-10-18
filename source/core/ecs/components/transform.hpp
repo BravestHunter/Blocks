@@ -1,4 +1,4 @@
-#pragma ocne
+#pragma once
 
 #include <glm/glm.hpp>
 

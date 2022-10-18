@@ -6,6 +6,7 @@
 #include "platform/glfw_window.hpp"
 #include "shader_program.hpp"
 #include "opengl_sprite.hpp"
+#include "opengl_model.hpp"
 #include "render/opengl_context.hpp"
 #include "opengl_scene.hpp"
 #include "simulation/camera.hpp"
@@ -33,14 +34,20 @@ namespace blocks
     void FreeResources(PresentationContext& presentationContext);
 
   private:
-    bool IsCorrectThread();
-    void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    void RenderChunks(std::shared_ptr<OpenglMap> map, std::shared_ptr<Camera> camera, float ratio);
-    void RenderHUD();
-
     std::unique_ptr<OpenglContext> context_;
     std::shared_ptr<opengl::ShaderProgram> chunkProgram_;
+    std::shared_ptr<opengl::ShaderProgram> primitiveProgram_;
     std::shared_ptr<opengl::ShaderProgram> spriteProgram_;
     std::unique_ptr<OpenglSprite> crosshairSprite_;
+
+    std::shared_ptr<OpenglModel> aabbModel_;
+
+    bool IsCorrectThread();
+    void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    void RenderChunks(std::shared_ptr<OpenglMap> map, glm::mat4 viewProjection);
+    void RenderHUD();
+    void RenderPhysicsBounds(std::unordered_map<entt::entity, AABB>& bounds, glm::mat4 viewProjection);
+
+    static std::shared_ptr<OpenglModel> CreateAABBPresentationModel();
   };
 }
