@@ -28,7 +28,11 @@ namespace blocks
         EntityPhysicsBodyChangedEvent* physicsBodyChangedEvent = static_cast<EntityPhysicsBodyChangedEvent*>(e);
 
         std::unordered_map<entt::entity, AABB>& bounds = presentationContext_.openglScene->GetBounds();
+        std::mutex& boundsMutex = presentationContext_.openglScene->GetBoundsMutex();
+
+        boundsMutex.lock();
         bounds[physicsBodyChangedEvent->GetEntity()] = physicsBodyChangedEvent->GetBounds();
+        boundsMutex.unlock();
 
         break;
       }

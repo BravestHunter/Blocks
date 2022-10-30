@@ -2,7 +2,6 @@
 
 #include "geometry/collisions_api.hpp"
 #include "simulation/player_position_changed_event.hpp"
-#include "entity_transform_changed_event.hpp"
 #include "entity_physics_body_changed_event.hpp"
 
 

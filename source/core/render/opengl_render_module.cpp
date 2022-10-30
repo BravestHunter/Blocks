@@ -52,7 +52,10 @@ namespace blocks
 
       RenderChunks(presentationContext.openglScene->GetMap(), viewProjection);
 
+      std::mutex& boundsMutex = presentationContext.openglScene->GetBoundsMutex();
+      boundsMutex.lock();
       RenderPhysicsBounds(presentationContext.openglScene->GetBounds(), viewProjection);
+      boundsMutex.unlock();
 
       RenderHUD();
     }

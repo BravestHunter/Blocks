@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <utility>
+#include <mutex>
 #include <unordered_map>
 
 #include "entt/entity/entity.hpp"
@@ -26,10 +27,12 @@ namespace blocks
 
     inline std::shared_ptr<OpenglMap> GetMap();
     inline std::unordered_map<entt::entity, AABB>& GetBounds();
+    inline std::mutex& GetBoundsMutex();
 
   private:
     std::shared_ptr<OpenglMap> map_;
     std::unordered_map<entt::entity, AABB> bounds_;
+    std::mutex boundsMutex_;
   };
 
 
@@ -41,5 +44,10 @@ namespace blocks
   std::unordered_map<entt::entity, AABB>& OpenglScene::GetBounds()
   {
     return bounds_;
+  }
+
+  std::mutex& OpenglScene::GetBoundsMutex()
+  {
+    return boundsMutex_;
   }
 }
