@@ -213,6 +213,14 @@ namespace blocks
     );
     infoWindow->AddElement(fpsText);
 
+    std::shared_ptr<ImguiText> timeText = std::make_shared<ImguiText>(
+      [game]()
+      {
+        return std::format("Scene time: {0:.3f} seconds", game->GetTimeState().GetSceneTime());
+      }
+    );
+    infoWindow->AddElement(timeText);
+
     std::shared_ptr<ImguiText> cameraPositionText = std::make_shared<ImguiText>(
       [game]()
       {

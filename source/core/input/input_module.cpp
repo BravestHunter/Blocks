@@ -74,9 +74,4 @@ namespace blocks
 
     Environment::GetPlatform().ProcessEvents();
   }
-
-  InputState& InputModule::GetState()
-  {
-    return state_;
-  }
 }

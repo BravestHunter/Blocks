@@ -15,9 +15,15 @@ namespace blocks
     void SetupWindow(GlfwWindow& window);
 
     void Update();
-    InputState& GetState();
+    inline const InputState& GetState() const;
 
   private:
     InputState state_;
   };
+
+
+  const InputState& InputModule::GetState() const
+  {
+    return state_;
+  }
 }

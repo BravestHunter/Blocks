@@ -6,6 +6,7 @@
 #include "export.h"
 #include "environment.hpp"
 #include "game_context.hpp"
+#include "time/time_module.hpp"
 #include "input/input_module.hpp"
 #include "simulation/simulation_module.hpp"
 #include "presentation/presentation_module.hpp"
@@ -30,6 +31,7 @@ namespace blocks
     void SetMenuMode(bool isMenuMode);
 
     GameContext& GetContext();
+    inline const TimeState& GetTimeState() const;
 
   private:
     void RunSimulationCycle();
@@ -47,8 +49,15 @@ namespace blocks
     GameContext context_;
 
     // Game modules
+    TimeModule timeModule_;
     InputModule inputModule_;
     SimulationModule simulationModule_;
     PresentationModule presentationModule_;
   };
+
+
+  const TimeState& Game::GetTimeState() const
+  {
+    return timeModule_.GetState();
+  }
 }

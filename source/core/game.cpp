@@ -119,8 +119,11 @@ namespace blocks
           SetRequestedScene();
         }
 
+        timeModule_.Update();
+        const TimeState& timeState = timeModule_.GetState();
+
         inputModule_.Update();
-        InputState& inputState = inputModule_.GetState();
+        const InputState& inputState = inputModule_.GetState();
 
         if (inputState.IsKeyJustPressed(GLFW_KEY_ESCAPE))
         {
@@ -209,6 +212,8 @@ namespace blocks
 
     simulationModule_.OnSceneChanged(context_);
     presentationModule_.OnSceneChanged(context_);
+
+    timeModule_.OnSceneChanged();
 
     sceneMutex_.unlock();
   }
