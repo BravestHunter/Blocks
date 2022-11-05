@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game_context.hpp"
+#include "time/time_state.hpp"
 #include "input/input_state.hpp"
 
 
@@ -16,6 +17,6 @@ namespace blocks
     EntitySpawnModule& operator=(EntitySpawnModule&& other) = delete;
     ~EntitySpawnModule();
 
-    void Update(const float delta, const InputState& inputState, GameContext& gameContext);
+    void Update(const float delta, const TimeState& timeState, const InputState& inputState, GameContext& gameContext);
   };
 }

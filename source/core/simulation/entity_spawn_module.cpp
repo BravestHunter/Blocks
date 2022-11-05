@@ -2,6 +2,7 @@
 
 #include "ecs/components/transform.hpp"
 #include "ecs/components/physics_body.hpp"
+#include "ecs/components/ai_component.hpp"
 #include "entity_physics_body_changed_event.hpp"
 
 
@@ -16,7 +17,7 @@ namespace blocks
   }
 
 
-  void EntitySpawnModule::Update(const float delta, const InputState& inputState, GameContext& gameContext)
+  void EntitySpawnModule::Update(const float delta, const TimeState& timeState, const InputState& inputState, GameContext& gameContext)
   {
     if (inputState.IsKeyJustPressed(GLFW_KEY_B))
     {
@@ -37,6 +38,13 @@ namespace blocks
         .bounds = AABB(glm::vec3(0.0f), glm::vec3(0.5f, 0.5f, 1.0f))
       };
       ecsRegistry.emplace<PhysicsBody>(entity, physicsBody);
+
+      AiComponent aiComponent
+      {
+        .behavior = EntityAIBehavior::Idle,
+        .behaviorChangedTime = static_cast<float>(timeState.GetSceneTime())
+      };
+      ecsRegistry.emplace<AiComponent>(entity, aiComponent);
 
       gameContext.modelUpdateEventsQueue.Push(std::make_shared<EntityPhysicsBodyChangedEvent>(entity, physicsBody, transform));
     }

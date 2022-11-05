@@ -9,7 +9,7 @@ namespace blocks
   }
 
 
-  void SimulationModule::Update(float delta, const InputState& inputState, GameContext& gameContext)
+  void SimulationModule::Update(float delta, const TimeState& timeState, const InputState& inputState, GameContext& gameContext)
   {
     if (gameContext.scene->ContainsWorld() == false)
     {
@@ -17,8 +17,9 @@ namespace blocks
     }
 
     playerControlModule_.Update(delta, inputState, gameContext);
+    entitySpawnModule_.Update(delta, timeState, inputState, gameContext);
+    entityAiModule_.Update(delta, timeState, inputState, gameContext);
     physicsModule_.Update(delta, gameContext);
-    entitySpawnModule_.Update(delta, inputState, gameContext);
   }
 
 

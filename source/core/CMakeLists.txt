@@ -14,6 +14,7 @@ set(CORE_SOURCE_FILES
 
 	ecs/components/transform.hpp
 	ecs/components/physics_body.hpp
+	ecs/components/ai_component.hpp
 
 	simulation/model_update_event_type.hpp
 	simulation/base_model_update_event.hpp
@@ -25,6 +26,8 @@ set(CORE_SOURCE_FILES
 	simulation/control_mode.hpp
 	simulation/entity_spawn_module.hpp
 	simulation/entity_spawn_module.cpp
+	simulation/entity_ai_module.hpp
+	simulation/entity_ai_module.cpp
 	simulation/player_control_module.hpp
 	simulation/player_control_module.cpp
 	simulation/physics_module.hpp

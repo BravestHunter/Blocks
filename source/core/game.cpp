@@ -132,7 +132,7 @@ namespace blocks
 
         if (context_.isMenuMode == false)
         {
-          simulationModule_.Update(deltaF, inputState, context_);
+          simulationModule_.Update(deltaF, timeState, inputState, context_);
         }
       }
 
