@@ -10,5 +10,6 @@ namespace blocks
     AABB bounds;
     glm::vec3 velocity;
     bool isGrounded;
+    bool horizontalCollision;
   };
 }

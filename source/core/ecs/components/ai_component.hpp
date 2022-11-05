@@ -20,6 +20,6 @@ namespace blocks
   struct WanderAiComponent
   {
     glm::vec2 movingDirection;
-    //glm::ivec3 destionationPosition;
+    glm::vec3 lastPosition;
   };
 }

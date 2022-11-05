@@ -7,6 +7,10 @@
 
 namespace blocks
 {
+  const float idleTime = 4.0f;
+  const float wanderTime = 4.0f;
+  const float jumpVelocity = 5.0f;
+
   EntityAiModule::EntityAiModule()
   {
   }
@@ -24,18 +28,20 @@ namespace blocks
       float currentTime = static_cast<float>(timeState.GetSceneTime());
       float timeSinceBehaviorChanged = currentTime - aiComponent.behaviorChangedTime;
 
+      // Try to switch behavior
       switch (aiComponent.behavior)
       {
         case EntityAIBehavior::Idle:
         {
-          if (timeSinceBehaviorChanged >= 8.0f)
+          if (timeSinceBehaviorChanged >= idleTime)
           {
             aiComponent.behavior = EntityAIBehavior::Wander;
             aiComponent.behaviorChangedTime = currentTime;
 
             WanderAiComponent wanderAiComponent
             {
-              .movingDirection = GetRandomDirection()
+              .movingDirection = GetRandomDirection(),
+              .lastPosition = transform.position
             };
 
             ecsRegistry.emplace<WanderAiComponent>(entity, wanderAiComponent);
@@ -45,7 +51,7 @@ namespace blocks
         }
         case EntityAIBehavior::Wander:
         {
-          if (timeSinceBehaviorChanged >= 4.0f)
+          if (timeSinceBehaviorChanged >= wanderTime)
           {
             aiComponent.behavior = EntityAIBehavior::Idle;
             aiComponent.behaviorChangedTime = currentTime;
@@ -54,13 +60,33 @@ namespace blocks
 
             ecsRegistry.remove<WanderAiComponent>(entity);
           }
-          else
-          {
-            WanderAiComponent wanderAiComponent = ecsRegistry.get<WanderAiComponent>(entity);
 
-            static const float speed = 4.0f;
-            physicsBody.velocity = glm::vec3(wanderAiComponent.movingDirection * speed, physicsBody.velocity.z);
+          break;
+        }
+      }
+
+      switch (aiComponent.behavior)
+      {
+        case EntityAIBehavior::Idle:
+        {
+          // Nothing to do here
+
+          break;
+        }
+        case EntityAIBehavior::Wander:
+        {
+          WanderAiComponent wanderAiComponent = ecsRegistry.get<WanderAiComponent>(entity);
+
+          static const float speed = 4.0f;
+          physicsBody.velocity = glm::vec3(wanderAiComponent.movingDirection * speed, physicsBody.velocity.z);
+
+          // Try to jump
+          if (physicsBody.isGrounded && physicsBody.horizontalCollision && aiComponent.behaviorChangedTime < currentTime)
+          {
+            physicsBody.velocity.z += jumpVelocity;
           }
+
+          wanderAiComponent.lastPosition = transform.position;
 
           break;
         }

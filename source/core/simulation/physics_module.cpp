@@ -65,6 +65,7 @@ namespace blocks
         bool verticalMoved = ProcessVelocity(delta, transform, physicsBody, verticalVelocity, gameContext);
 
         physicsBody.isGrounded = !verticalMoved;
+        physicsBody.horizontalCollision = !horizontalMoved && glm::length(horizontalVelocity) > 0.0f;
 
         if (horizontalMoved == false)
         {
