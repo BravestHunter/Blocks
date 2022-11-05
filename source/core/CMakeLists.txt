@@ -102,6 +102,7 @@ target_link_libraries(BlocksCore
 		
 		FastNoise2::FastNoise
 		EnTT::EnTT
+		tinygltf
 )
 
 

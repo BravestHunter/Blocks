@@ -17,3 +17,7 @@ set(FastNoise2_DIR "${CMAKE_CURRENT_SOURCE_DIR}/fastNoise2/lib/cmake/FastNoise2"
 add_subdirectory(njson)
 
 add_subdirectory(entt)
+
+set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE)
+set(TINYGLTF_INSTALL OFF CACHE INTERNAL "" FORCE)
+add_subdirectory(tinygltf)
