@@ -146,6 +146,13 @@ namespace blocks
     opengl::Shader fragmentShader(fragmentCode, GL_FRAGMENT_SHADER);
     chunkProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
 
+    // Load model shader program
+    vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, MODEL_VERTEX_SHADER));
+    fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, MODEL_FRAGMENT_SHADER));
+    vertexShader = opengl::Shader(vertexCode, GL_VERTEX_SHADER);
+    fragmentShader = opengl::Shader(fragmentCode, GL_FRAGMENT_SHADER);
+    modelProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
+
     // Load primitive shader program
     vertexCode = blocks::readTextFile(PPCAT(SHADERS_DIR, PRIMITIVE_VERTEX_SHADER));
     fragmentCode = blocks::readTextFile(PPCAT(SHADERS_DIR, PRIMITIVE_FRAGMENT_SHADER));
@@ -160,11 +167,14 @@ namespace blocks
     fragmentShader = opengl::Shader(fragmentCode, GL_FRAGMENT_SHADER);
     spriteProgram_ = std::make_shared<opengl::ShaderProgram>(vertexShader, fragmentShader);
 
+    // Load models
+    Model carModel = resourceBase.ReadModel("resources/models/gltf/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf");
+    carModel_ = std::make_shared<OpenglModel>(carModel);
+    aabbModel_ = CreateAABBPresentationModel();
+
     // Load crosshair
     Image crosshairImage = resourceBase.ReadImage("resources/textures/crosshair.png");
     crosshairSprite_ = std::make_unique<OpenglSprite>(crosshairImage);
-
-    aabbModel_ = CreateAABBPresentationModel();
   }
 
   void OpenglRenderModule::FreeResources(PresentationContext& presentationContext)
@@ -247,7 +257,23 @@ namespace blocks
 
       aabbModel_->GetVao()->Bind();
 
-      glDrawElements(GL_LINES, aabbModel_->GetNumber(), GL_UNSIGNED_INT, 0);
+      glDrawElements(GL_LINES, aabbModel_->GetIndicesCount(), GL_UNSIGNED_INT, 0);
+    }
+
+    modelProgram_->Setup();
+    for (const auto boundPair : bounds)
+    {
+      const AABB& aabb = boundPair.second;
+
+      glm::mat4 modelTransform = glm::translate(glm::mat4(1.0f), aabb.center);
+      glm::mat4 mvp = viewProjection * modelTransform;
+      modelProgram_->SetMat4("MVP", mvp);
+
+      carModel_->GetTexture()->Bind(0);
+
+      carModel_->GetVao()->Bind();
+
+      glDrawElements(GL_TRIANGLES, carModel_->GetIndicesCount(), GL_UNSIGNED_INT, 0);
     }
   }
 

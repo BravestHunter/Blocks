@@ -36,11 +36,13 @@ namespace blocks
   private:
     std::unique_ptr<OpenglContext> context_;
     std::shared_ptr<opengl::ShaderProgram> chunkProgram_;
+    std::shared_ptr<opengl::ShaderProgram> modelProgram_;
     std::shared_ptr<opengl::ShaderProgram> primitiveProgram_;
     std::shared_ptr<opengl::ShaderProgram> spriteProgram_;
-    std::unique_ptr<OpenglSprite> crosshairSprite_;
 
+    std::shared_ptr<OpenglModel> carModel_;
     std::shared_ptr<OpenglModel> aabbModel_;
+    std::unique_ptr<OpenglSprite> crosshairSprite_;
 
     bool IsCorrectThread();
     void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));

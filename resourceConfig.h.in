@@ -3,6 +3,9 @@
 #define CHUNK_VERTEX_SHADER "chunk.vert"
 #define CHUNK_FRAGMENT_SHADER "chunk.frag"
 
+#define MODEL_VERTEX_SHADER "model.vert"
+#define MODEL_FRAGMENT_SHADER "model.frag"
+
 #define PRIMITIVE_VERTEX_SHADER "primitive.vert"
 #define PRIMITIVE_FRAGMENT_SHADER "primitive.frag"
 

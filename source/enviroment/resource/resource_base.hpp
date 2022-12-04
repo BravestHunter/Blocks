@@ -7,6 +7,7 @@
 #include "export.h"
 #include "block_set.hpp"
 #include "image.hpp"
+#include "model.hpp"
 
 
 namespace blocks
@@ -27,9 +28,12 @@ namespace blocks
     std::shared_ptr<BlockSet> LoadBlockSet(std::string name);
 
     Image ReadImage(std::string path);
+    Model ReadModel(std::string path);
 
   private:
     std::string rootDirectory_;
     std::shared_ptr<std::vector<std::string>> blockSetPaths_;
+
+    Model ReadGltfModel(std::string path);
   };
 }

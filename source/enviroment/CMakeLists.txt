@@ -17,6 +17,11 @@ set(SOURCE_FILES
 	resource/block_info.hpp
 	resource/block_set.hpp
 	resource/block_set.cpp
+	resource/mesh.hpp
+	resource/mesh.cpp
+	resource/material.hpp
+	resource/model.hpp
+	resource/model.cpp
 	resource/resource_base.hpp
 	resource/resource_base.cpp
 )
@@ -37,6 +42,8 @@ target_link_libraries(BlocksEnviroment
 		Freetype::Freetype
 		imgui
 		nlohmann_json
+		tinygltf
+		
 )
 
 

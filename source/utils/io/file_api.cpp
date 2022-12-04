@@ -42,6 +42,18 @@ namespace blocks
     return paths;
   }
 
+  std::string GetFileExtension(std::string path)
+  {
+    size_t dotIndex = path.find_last_of(".");
+
+    if (dotIndex == std::string::npos)
+    {
+      return "";
+    }
+
+    return path.substr(dotIndex + 1);
+  }
+
 
   void createDirectory(std::string path)
   {
